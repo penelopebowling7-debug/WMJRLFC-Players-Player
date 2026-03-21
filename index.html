@@ -159,7 +159,7 @@
       margin: 10% auto;
       padding: 20px;
       width: 88%;
-      max-width: 480px;
+      max-width: 500px;
       border-radius: 10px;
       border: 2px solid #ff8c00;
       box-sizing: border-box;
@@ -198,7 +198,8 @@
       background-color: #333;
     }
 
-    #coachPanel {
+    #coachPanel,
+    #adminPanel {
       display: none;
       padding: 10px 10px 40px;
       border-top: 2px solid #ff8c00;
@@ -206,7 +207,7 @@
 
     table {
       width: 100%;
-      max-width: 800px;
+      max-width: 820px;
       margin: 10px auto 0;
       border-collapse: collapse;
       color: #fff;
@@ -225,7 +226,7 @@
     }
 
     .section-wrap {
-      max-width: 820px;
+      max-width: 840px;
       margin: 20px auto 0;
     }
 
@@ -262,7 +263,8 @@
     }
 
     .form-wrap input,
-    .form-wrap textarea {
+    .form-wrap textarea,
+    .form-wrap select {
       width: 100%;
       box-sizing: border-box;
       padding: 12px;
@@ -284,7 +286,7 @@
       background: #111;
       padding: 16px;
       margin: 0 auto 20px;
-      max-width: 700px;
+      max-width: 760px;
       text-align: left;
     }
 
@@ -353,11 +355,36 @@
   </header>
 
   <div class="container" id="homeScreen">
+    <div class="instruction-box">
+      <h3>About the Player's Player Award</h3>
+      <p>
+        This award is chosen by the players.
+      </p>
+      <p>
+        It is not just about scoring tries or winning games.
+      </p>
+      <p>
+        It is about:
+      </p>
+      <ul>
+        <li>Being a good team mate</li>
+        <li>Trying your best</li>
+        <li>Helping others</li>
+        <li>Showing sportsmanship</li>
+        <li>Being fair and kind</li>
+        <li>Supporting your team</li>
+      </ul>
+      <p>
+        Choose the player who showed the best team spirit.
+      </p>
+    </div>
+
     <div class="section-title">Select Team</div>
     <div class="sub-round">Choose your team to start voting, or create a new team below.</div>
     <div id="teamList"></div>
 
     <button class="nav-btn" id="openSetupBtn">Create New Team</button>
+    <button class="nav-btn" id="openAdminBtn">Club Admin Access</button>
     <p class="small-note">Each team sets up and manages its own voting separately.</p>
     <p id="homeStatus" class="error-note"></p>
   </div>
@@ -398,6 +425,13 @@
     <div class="sub-round" id="teamRoundText">Current Round: 1</div>
     <div class="sub-round" id="teamVotingStatusText">Voting Locked</div>
 
+    <div class="instruction-box">
+      <h3>Voting Instructions</h3>
+      <p>Each player votes for <strong>ONE</strong> teammate each round.</p>
+      <p>Coaches will open voting after the game.</p>
+      <p>Please vote fairly and choose the teammate who showed the best team spirit.</p>
+    </div>
+
     <div class="section-title">Select Your Name</div>
     <div id="voterList"></div>
 
@@ -410,6 +444,24 @@
   <div class="container hidden" id="voteScreen">
     <div class="section-title" id="voterTitle"></div>
     <div class="sub-round" id="voteRoundText">Round 1</div>
+
+    <div class="instruction-box">
+      <h3>What are you voting for?</h3>
+      <p>
+        Vote for the teammate who showed the best team spirit.
+      </p>
+      <p>
+        Think about who:
+      </p>
+      <ul>
+        <li>Tried their best</li>
+        <li>Was a good team mate</li>
+        <li>Showed sportsmanship</li>
+        <li>Was fair and kind</li>
+        <li>Supported the team</li>
+      </ul>
+    </div>
+
     <p>Select the player you want to vote for:</p>
     <div id="playerList"></div>
 
@@ -517,6 +569,52 @@
     <button class="player-btn back-btn" id="closeCoachPanelBtn">Close Coach Panel</button>
   </div>
 
+  <div id="adminPanel">
+    <div class="section-title">Club Admin Controls</div>
+    <div class="sub-round">Admin PIN protected</div>
+
+    <div class="section-wrap">
+      <div class="section-title">Reset Coach PIN</div>
+      <div class="form-wrap">
+        <label for="adminTeamSelect">Select Team</label>
+        <select id="adminTeamSelect"></select>
+
+        <label for="newCoachPinInput">New Coach PIN</label>
+        <input type="password" id="newCoachPinInput" placeholder="Enter new coach PIN" />
+
+        <button class="nav-btn" id="resetCoachPinBtn">Reset Coach PIN</button>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Add Team</div>
+      <div class="form-wrap">
+        <label for="adminTeamNameInput">Team Name</label>
+        <input type="text" id="adminTeamNameInput" placeholder="Example: U12's Black" />
+
+        <label for="adminCoachPinInput">Coach PIN</label>
+        <input type="password" id="adminCoachPinInput" placeholder="Enter coach PIN" />
+
+        <label for="adminPlayerNamesInput">Player Names</label>
+        <textarea id="adminPlayerNamesInput" placeholder="Enter one player name per line"></textarea>
+
+        <button class="nav-btn" id="adminCreateTeamBtn">Add Team</button>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Remove Team</div>
+      <div class="form-wrap">
+        <label for="removeTeamSelect">Select Team</label>
+        <select id="removeTeamSelect"></select>
+        <button class="nav-btn danger-btn" id="removeTeamBtn">Remove Team</button>
+      </div>
+    </div>
+
+    <p id="adminStatus" class="error-note"></p>
+    <button class="player-btn back-btn" id="closeAdminPanelBtn">Close Admin Panel</button>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import {
@@ -528,7 +626,8 @@
       collection,
       writeBatch,
       serverTimestamp,
-      runTransaction
+      runTransaction,
+      deleteDoc
     } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -541,6 +640,8 @@
       measurementId: "G-XQNWVH76KV"
     };
 
+    const CLUB_ADMIN_PIN = "1379";
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -552,6 +653,7 @@
     let selectedVoteId = "";
     let pendingTeamId = "";
     let currentTallyType = "round";
+    let cachedTeams = [];
 
     const homeScreen = document.getElementById("homeScreen");
     const setupScreen = document.getElementById("setupScreen");
@@ -565,6 +667,7 @@
     const homeStatus = document.getElementById("homeStatus");
     const setupStatus = document.getElementById("setupStatus");
     const teamStatus = document.getElementById("teamStatus");
+    const adminStatus = document.getElementById("adminStatus");
 
     const teamTitle = document.getElementById("teamTitle");
     const teamRoundText = document.getElementById("teamRoundText");
@@ -580,6 +683,14 @@
     const tallyBody = document.getElementById("tallyBody");
     const voterStatusBody = document.getElementById("voterStatusBody");
     const playerManageBody = document.getElementById("playerManageBody");
+
+    const adminPanel = document.getElementById("adminPanel");
+    const adminTeamSelect = document.getElementById("adminTeamSelect");
+    const removeTeamSelect = document.getElementById("removeTeamSelect");
+    const newCoachPinInput = document.getElementById("newCoachPinInput");
+    const adminTeamNameInput = document.getElementById("adminTeamNameInput");
+    const adminCoachPinInput = document.getElementById("adminCoachPinInput");
+    const adminPlayerNamesInput = document.getElementById("adminPlayerNamesInput");
 
     const teamNameInput = document.getElementById("teamNameInput");
     const coachPinInput = document.getElementById("coachPinInput");
@@ -601,7 +712,7 @@
 
     document.getElementById("openSetupBtn").onclick = showSetupScreen;
     document.getElementById("cancelSetupBtn").onclick = showHomeScreen;
-    document.getElementById("createTeamBtn").onclick = createTeam;
+    document.getElementById("createTeamBtn").onclick = createTeamFromCoachScreen;
     document.getElementById("backToHomeBtn").onclick = showHomeScreen;
     document.getElementById("backToTeamBtn").onclick = backToTeamScreen;
 
@@ -625,8 +736,17 @@
     document.getElementById("resetSeasonBtn").onclick = resetEntireSeason;
     document.getElementById("addPlayerBtn").onclick = addPlayer;
 
+    document.getElementById("openAdminBtn").onclick = adminLogin;
+    document.getElementById("closeAdminPanelBtn").onclick = () => {
+      adminPanel.style.display = "none";
+      adminStatus.textContent = "";
+    };
+    document.getElementById("resetCoachPinBtn").onclick = resetCoachPin;
+    document.getElementById("adminCreateTeamBtn").onclick = createTeamFromAdminPanel;
+    document.getElementById("removeTeamBtn").onclick = removeTeam;
+
     consentAgreeBtn.onclick = async () => {
-      localStorage.setItem("wmjrlfc_v2_consent", "true");
+      localStorage.setItem("wmjrlfc_v3_consent", "true");
       consentModal.style.display = "none";
       if (pendingTeamId) {
         await enterTeam(pendingTeamId);
@@ -691,6 +811,7 @@
       [homeScreen, setupScreen, teamScreen, voteScreen].forEach((el) => el.classList.add("hidden"));
       screenEl.classList.remove("hidden");
       coachPanel.style.display = "none";
+      adminPanel.style.display = "none";
     }
 
     function showHomeScreen() {
@@ -716,6 +837,7 @@
       homeStatus.textContent = "";
       setupStatus.textContent = "";
       teamStatus.textContent = "";
+      adminStatus.textContent = "";
     }
 
     function setStatus(el, message, isError = true) {
@@ -783,6 +905,8 @@
         });
 
         teams.sort((a, b) => a.teamName.localeCompare(b.teamName));
+        cachedTeams = teams;
+        populateAdminTeamSelects();
 
         if (teams.length === 0) {
           const note = document.createElement("p");
@@ -805,8 +929,17 @@
       }
     }
 
+    function populateAdminTeamSelects() {
+      const optionsHtml = cachedTeams.length
+        ? cachedTeams.map(team => `<option value="${team.id}">${team.teamName}</option>`).join("")
+        : `<option value="">No teams available</option>`;
+
+      adminTeamSelect.innerHTML = optionsHtml;
+      removeTeamSelect.innerHTML = optionsHtml;
+    }
+
     function requestEnterTeam(teamId) {
-      const consentGiven = localStorage.getItem("wmjrlfc_v2_consent") === "true";
+      const consentGiven = localStorage.getItem("wmjrlfc_v3_consent") === "true";
       if (!consentGiven) {
         pendingTeamId = teamId;
         consentModal.style.display = "block";
@@ -916,7 +1049,43 @@
       });
     }
 
-    async function createTeam() {
+    async function createTeamGeneric(teamName, coachPin, enteredNames) {
+      const teamId = normaliseTeamId(teamName);
+      const teamRef = doc(db, "teams", teamId);
+
+      const existing = await getDoc(teamRef);
+      if (existing.exists()) {
+        throw new Error("That team already exists. Use a unique team name, including colour if needed.");
+      }
+
+      await setDoc(teamRef, {
+        teamName,
+        coachPin,
+        currentRound: 1,
+        votingOpen: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      const batch = writeBatch(db);
+
+      enteredNames.forEach((name) => {
+        const playerId = makePlayerId(name);
+        batch.set(getPlayerDocRef(teamId, playerId), {
+          name,
+          active: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        batch.set(getSeasonVoteDocRef(teamId, playerId), { count: 0 }, { merge: true });
+        batch.set(getRoundVoteDocRef(teamId, 1, playerId), { count: 0 }, { merge: true });
+      });
+
+      await batch.commit();
+    }
+
+    async function createTeamFromCoachScreen() {
       clearStatus();
 
       const teamName = teamNameInput.value.trim();
@@ -947,46 +1116,8 @@
         return;
       }
 
-      const teamId = normaliseTeamId(teamName);
-      const teamRef = doc(db, "teams", teamId);
-
       try {
-        const existing = await getDoc(teamRef);
-        if (existing.exists()) {
-          setStatus(setupStatus, "That team already exists. Use a unique team name, including colour if needed.");
-          return;
-        }
-
-        await setDoc(teamRef, {
-          teamName,
-          coachPin,
-          currentRound: 1,
-          votingOpen: false,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        const batch = writeBatch(db);
-
-        enteredNames.forEach((name) => {
-          const playerId = makePlayerId(name);
-          const playerRef = getPlayerDocRef(teamId, playerId);
-          const seasonRef = getSeasonVoteDocRef(teamId, playerId);
-
-          batch.set(playerRef, {
-            name,
-            active: true,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-
-          batch.set(seasonRef, { count: 0 }, { merge: true });
-
-          const round1Ref = getRoundVoteDocRef(teamId, 1, playerId);
-          batch.set(round1Ref, { count: 0 }, { merge: true });
-        });
-
-        await batch.commit();
+        await createTeamGeneric(teamName, coachPin, enteredNames);
 
         teamNameInput.value = "";
         coachPinInput.value = "";
@@ -999,7 +1130,51 @@
         }, 600);
       } catch (error) {
         console.error(error);
-        setStatus(setupStatus, `Could not create team: ${error.message}`);
+        setStatus(setupStatus, error.message);
+      }
+    }
+
+    async function createTeamFromAdminPanel() {
+      adminStatus.textContent = "";
+
+      const teamName = adminTeamNameInput.value.trim();
+      const coachPin = adminCoachPinInput.value.trim();
+      const enteredNames = adminPlayerNamesInput.value
+        .split("\n")
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0);
+
+      if (!teamName) {
+        setStatus(adminStatus, "Please enter a team name.");
+        return;
+      }
+
+      if (!coachPin) {
+        setStatus(adminStatus, "Please enter a coach PIN.");
+        return;
+      }
+
+      if (enteredNames.length < 2) {
+        setStatus(adminStatus, "Please enter at least 2 player names.");
+        return;
+      }
+
+      const lowerNames = enteredNames.map((n) => n.toLowerCase());
+      if (new Set(lowerNames).size !== lowerNames.length) {
+        setStatus(adminStatus, "Player names must be unique within the team.");
+        return;
+      }
+
+      try {
+        await createTeamGeneric(teamName, coachPin, enteredNames);
+        adminTeamNameInput.value = "";
+        adminCoachPinInput.value = "";
+        adminPlayerNamesInput.value = "";
+        setStatus(adminStatus, "Team added successfully.", false);
+        await loadTeams();
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, error.message);
       }
     }
 
@@ -1115,6 +1290,20 @@
       coachPanel.style.display = "block";
       currentTallyType = "round";
       await refreshCoachPanel();
+    }
+
+    async function adminLogin() {
+      const pin = prompt("Enter Club Admin PIN:");
+      if (pin === null) return;
+
+      if (pin !== CLUB_ADMIN_PIN) {
+        alert("Incorrect Admin PIN.");
+        return;
+      }
+
+      adminPanel.style.display = "block";
+      adminStatus.textContent = "";
+      await loadTeams();
     }
 
     async function refreshCoachPanel() {
@@ -1493,6 +1682,91 @@
       } catch (error) {
         console.error(error);
         alert(`Season reset failed: ${error.message}`);
+      }
+    }
+
+    async function resetCoachPin() {
+      const teamId = adminTeamSelect.value;
+      const newPin = newCoachPinInput.value.trim();
+
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      if (!newPin) {
+        setStatus(adminStatus, "Please enter a new coach PIN.");
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "teams", teamId), {
+          coachPin: newPin,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        newCoachPinInput.value = "";
+        setStatus(adminStatus, "Coach PIN updated successfully.", false);
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset coach PIN: ${error.message}`);
+      }
+    }
+
+    async function removeTeam() {
+      const teamId = removeTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team to remove.");
+        return;
+      }
+
+      const team = cachedTeams.find(t => t.id === teamId);
+      const teamName = team ? team.teamName : teamId;
+
+      const confirmed = confirm(`Remove team ${teamName}? This will delete players, tallies, round data and coach settings for that team.`);
+      if (!confirmed) return;
+
+      try {
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const seasonSnap = await getDocs(collection(db, "teams", teamId, "seasonVotes"));
+        const roundAuditSnap = await getDocs(collection(db, "teams", teamId, "roundAudit"));
+        const roundVotesRoundsSnap = await getDocs(collection(db, "teams", teamId, "roundVotes"));
+
+        for (const docSnap of playersSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "players", docSnap.id));
+        }
+
+        for (const docSnap of seasonSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "seasonVotes", docSnap.id));
+        }
+
+        for (const docSnap of roundAuditSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "roundAudit", docSnap.id));
+        }
+
+        for (const roundDoc of roundVotesRoundsSnap.docs) {
+          const playerVotesSnap = await getDocs(collection(db, "teams", teamId, "roundVotes", roundDoc.id, "playerVotes"));
+          for (const playerVoteDoc of playerVotesSnap.docs) {
+            await deleteDoc(doc(db, "teams", teamId, "roundVotes", roundDoc.id, "playerVotes", playerVoteDoc.id));
+          }
+          await deleteDoc(doc(db, "teams", teamId, "roundVotes", roundDoc.id));
+        }
+
+        await deleteDoc(doc(db, "teams", teamId));
+
+        if (currentTeamId === teamId) {
+          currentTeamId = "";
+          currentTeamData = null;
+          allPlayers = [];
+          activePlayers = [];
+          showHomeScreen();
+        }
+
+        await loadTeams();
+        setStatus(adminStatus, "Team removed successfully.", false);
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not remove team: ${error.message}`);
       }
     }
 
