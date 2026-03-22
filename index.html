@@ -1,312 +1,272 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>U11 Player Votes</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 16px; }
-    h1, h2 { margin-bottom: 8px; }
-    button { padding: 12px 16px; font-size: 16px; }
-    .top-bar { display: flex; justify-content: space-between; align-items: center; }
-    .player-row { margin-bottom: 8px; }
-    .player-button { width: 100%; text-align: left; }
-    .tag { font-size: 12px; margin-left: 8px; }
-    .voted { color: green; }
-    .not-voted { color: red; }
+<meta charset="UTF-8">
+<title>WMJRLFC Voting</title>
 
-    /* Overlays */
-    #voteOverlay, #coachOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      overflow-y: auto;
-      padding: 20px;
-    }
-    #voteBox, #coachBox {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      max-width: 500px;
-      width: 100%;
-    }
-    .vote-option {
-      width: 100%;
-      margin: 4px 0;
-      padding: 10px 14px;
-      font-size: 16px;
-    }
-    #closeOverlayBtn {
-      margin-top: 8px;
-      background: #ccc;
-    }
-    #coachResults { white-space: pre-wrap; font-size: 14px; }
-  </style>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #000;
+    text-align: center;
+    padding: 15px;
+}
+
+header img {
+    height: 80px;
+}
+
+button {
+    background-color: orange;
+    color: black;
+    border: none;
+    padding: 10px 16px;
+    margin: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.container {
+    padding: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: orange;
+    color: black;
+}
+
+.leader {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.team-header {
+    background-color: #222;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="top-bar">
-    <h1>U11 Player Votes</h1>
-    <button onclick="openCoachPIN()">Coach</button>
-  </div>
+<header>
+    <img src="WMJRLFC-logo.jpg" alt="Club Logo">
+    <h2>WMJRLFC Team Voting</h2>
+</header>
 
-  <div>
-    <label>Round:
-      <input type="number" id="roundInput" value="1" min="1">
-    </label>
-    <button onclick="changeRound()">Set Round</button>
-    <button onclick="newRound()">New Round</button>
-  </div>
+<div class="container">
 
-  <h2 id="roundTitle"></h2>
+<h3>Admin Panel</h3>
 
-  <div id="playerList"></div>
+<button onclick="showSelectedTeamTallies()">Show Selected Team Tallies</button>
+<button onclick="showAllTeamTallies()">Show All Team Tallies</button>
+<button onclick="exportCSV()">Export CSV</button>
 
-  <!-- Voting overlay -->
-  <div id="voteOverlay">
-    <div id="voteBox">
-      <h2 id="voteTitle"></h2>
-      <div id="voteOptions"></div>
-      <button id="closeOverlayBtn" onclick="closeVoteOverlay()">Cancel</button>
-    </div>
-  </div>
+<br><br>
 
-  <!-- Coach overlay -->
-  <div id="coachOverlay">
-    <div id="coachBox">
-      <h2>Coach Results</h2>
-      <div id="coachResults"></div>
+<label>
+<input type="radio" name="focus" value="round" checked>
+Round
+</label>
 
-      <button onclick="resetSeason()" style="background:#d9534f; color:white; margin-top:10px;">
-        Reset Season
-      </button>
+<label>
+<input type="radio" name="focus" value="season">
+Season
+</label>
 
-      <button onclick="closeCoachOverlay()" style="margin-top:10px;">
-        Close
-      </button>
-    </div>
-  </div>
+<label>
+<input type="radio" name="focus" value="both">
+Both
+</label>
 
-  <script>
-    const PIN = "2287";
+<br><br>
 
-    const players = [
-      { id: 1, name: 'Aaleyah Thoroughgood' },
-      { id: 2, name: 'Archie Hickson' },
-      { id: 3, name: 'Archie Nean' },
-      { id: 4, name: 'Ari Finlay' },
-      { id: 5, name: 'Axton Thomas' },
-      { id: 6, name: 'Axel Velasquez Williamson' },
-      { id: 7, name: 'Boaz Bowman' },
-      { id: 8, name: 'Cash Walters' },
-      { id: 9, name: 'Chayce Cumpson' },
-      { id: 10, name: 'Don Moodie' },
-      { id: 11, name: 'Ethan Sadowski' },
-      { id: 12, name: 'Max Croak' },
-      { id: 13, name: 'Taj Lennard' },
-      { id: 14, name: 'Tanner Paton' },
-      { id: 15, name: 'William Hand' },
-      { id: 16, name: 'Zayden Clifford' }
-    ];
+<button onclick="expandAll()">Expand All</button>
+<button onclick="collapseAll()">Collapse All</button>
 
-    let currentRound = 1;
-    let votes = [];
-    let currentVoterId = null;
+<table id="tallyTable">
+<thead>
+<tr>
+<th>Team</th>
+<th>Player</th>
+<th>Round Votes</th>
+<th>Season Votes</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
 
-    function init() {
-      loadState();
-      render();
-    }
+</div>
 
-    function loadState() {
-      const saved = localStorage.getItem('u11Votes');
-      if (saved) {
-        const data = JSON.parse(saved);
-        currentRound = data.currentRound || 1;
-        votes = data.votes || [];
-        document.getElementById('roundInput').value = currentRound;
-      }
-    }
+<script>
 
-    function saveState() {
-      localStorage.setItem('u11Votes', JSON.stringify({
-        currentRound,
-        votes
-      }));
-    }
+let exampleData = {
+    "Team A": [
+        { name: "Player 1", round: 3, season: 12 },
+        { name: "Player 2", round: 1, season: 9 },
+        { name: "Player 3", round: 0, season: 5 }
+    ],
+    "Team B": [
+        { name: "Player 4", round: 2, season: 8 },
+        { name: "Player 5", round: 0, season: 6 }
+    ]
+};
 
-    function changeRound() {
-      const val = parseInt(document.getElementById('roundInput').value, 10);
-      if (val >= 1) {
-        currentRound = val;
-        saveState();
-        render();
-      }
-    }
+function getFocus() {
+    return document.querySelector('input[name="focus"]:checked').value;
+}
 
-    function newRound() {
-      const val = parseInt(prompt('Start new round number:', currentRound + 1), 10);
-      if (!isNaN(val) && val >= 1) {
-        currentRound = val;
-        document.getElementById('roundInput').value = currentRound;
-        saveState();
-        render();
-      }
-    }
+function clearTable() {
+    document.querySelector("#tallyTable tbody").innerHTML = "";
+}
 
-    function hasVoted(playerId) {
-      return votes.some(v => v.round === currentRound && v.voterId === playerId);
-    }
+function toggleTeam(team) {
+    let rows = document.querySelectorAll("[data-team='" + team + "']");
+    rows.forEach(r => {
+        r.classList.toggle("hidden");
+    });
+}
 
-    function recordVote(voterId, votedForId) {
-      if (voterId === votedForId) {
-        alert('You cannot vote for yourself.');
-        return;
-      }
-      if (hasVoted(voterId)) {
-        alert('This player has already voted this round.');
-        return;
-      }
-      votes.push({
-        round: currentRound,
-        voterId,
-        votedForId,
-        timestamp: Date.now()
-      });
-      saveState();
-      closeVoteOverlay();
-      render();
-    }
+function expandAll() {
+    document.querySelectorAll("tbody tr").forEach(r => {
+        r.classList.remove("hidden");
+    });
+}
 
-    function openVoteOverlay(voterId) {
-      if (hasVoted(voterId)) {
-        alert('This player has already voted this round.');
-        return;
-      }
-      currentVoterId = voterId;
-      const voter = players.find(p => p.id === voterId);
-      document.getElementById('voteTitle').textContent =
-        `Who is ${voter.name} voting for?`;
+function collapseAll() {
+    document.querySelectorAll("tbody tr.player-row").forEach(r => {
+        r.classList.add("hidden");
+    });
+}
 
-      const optionsDiv = document.getElementById('voteOptions');
-      optionsDiv.innerHTML = '';
+function highlightLeaders(players, focus) {
 
-      players
-        .filter(p => p.id !== voterId)
-        .forEach(p => {
-          const btn = document.createElement('button');
-          btn.className = 'vote-option';
-          btn.textContent = p.name;
-          btn.onclick = () => recordVote(voterId, p.id);
-          optionsDiv.appendChild(btn);
+    let max = 0;
+
+    players.forEach(p => {
+        let value =
+            focus === "round" ? p.round :
+            focus === "season" ? p.season :
+            p.season;
+
+        if (value > max) max = value;
+    });
+
+    return max;
+}
+
+function renderTeams(data) {
+
+    clearTable();
+
+    let tbody = document.querySelector("#tallyTable tbody");
+    let focus = getFocus();
+
+    Object.keys(data).forEach(team => {
+
+        let header = document.createElement("tr");
+        header.className = "team-header";
+        header.innerHTML =
+            "<td colspan='4'>" + team + "</td>";
+
+        header.onclick = () => toggleTeam(team);
+
+        tbody.appendChild(header);
+
+        let leader = highlightLeaders(data[team], focus);
+
+        data[team].forEach(player => {
+
+            let tr = document.createElement("tr");
+            tr.className = "player-row";
+            tr.setAttribute("data-team", team);
+
+            let highlight =
+                (focus === "round" && player.round === leader) ||
+                (focus !== "round" && player.season === leader);
+
+            if (highlight) tr.classList.add("leader");
+
+            tr.innerHTML =
+                "<td>" + team + "</td>" +
+                "<td>" + player.name + "</td>" +
+                "<td>" + player.round + "</td>" +
+                "<td>" + player.season + "</td>";
+
+            tbody.appendChild(tr);
         });
 
-      document.getElementById('voteOverlay').style.display = 'flex';
-    }
+    });
+}
 
-    function closeVoteOverlay() {
-      document.getElementById('voteOverlay').style.display = 'none';
-      currentVoterId = null;
-    }
+function showSelectedTeamTallies() {
 
-    function openCoachPIN() {
-      const entered = prompt("Enter PIN:");
-      if (entered === PIN) {
-        openCoachOverlay();
-      } else if (entered !== null) {
-        alert("Incorrect PIN");
-      }
-    }
+    let selected = {
+        "Team A": exampleData["Team A"]
+    };
 
-    function openCoachOverlay() {
-      const resultsDiv = document.getElementById('coachResults');
-      resultsDiv.textContent = generateCoachReport();
-      document.getElementById('coachOverlay').style.display = 'flex';
-    }
+    renderTeams(selected);
+}
 
-    function closeCoachOverlay() {
-      document.getElementById('coachOverlay').style.display = 'none';
-    }
+function showAllTeamTallies() {
+    renderTeams(exampleData);
+}
 
-    function resetSeason() {
-      if (!confirm("Are you sure you want to reset ALL rounds and votes?")) return;
+function exportCSV() {
 
-      votes = [];
-      currentRound = 1;
-      document.getElementById('roundInput').value = 1;
+    let rows = document.querySelectorAll("#tallyTable tr");
+    let csv = [];
 
-      saveState();
-      render();
-      closeCoachOverlay();
+    rows.forEach(row => {
+        let cols = row.querySelectorAll("td, th");
+        let data = [];
 
-      alert("Season has been reset.");
-    }
-
-    function generateCoachReport() {
-      let text = "";
-
-      text += `=== CURRENT ROUND (${currentRound}) TALLY ===\n`;
-      const roundVotes = votes.filter(v => v.round === currentRound);
-      const counts = {};
-      roundVotes.forEach(v => {
-        counts[v.votedForId] = (counts[v.votedForId] || 0) + 1;
-      });
-
-      players.forEach(p => {
-        text += `${p.name}: ${counts[p.id] || 0}\n`;
-      });
-
-      text += `\n=== FULL VOTE LIST (ROUND ${currentRound}) ===\n`;
-      roundVotes.forEach(v => {
-        const voter = players.find(p => p.id === v.voterId).name;
-        const votedFor = players.find(p => p.id === v.votedForId).name;
-        text += `${voter} → ${votedFor}\n`;
-      });
-
-      text += `\n=== ROUND HISTORY ===\n`;
-      const rounds = [...new Set(votes.map(v => v.round))].sort((a,b)=>a-b);
-      rounds.forEach(r => {
-        text += `\nRound ${r}:\n`;
-        const rv = votes.filter(v => v.round === r);
-        const c = {};
-        rv.forEach(v => c[v.votedForId] = (c[v.votedForId] || 0) + 1);
-        players.forEach(p => {
-          text += `  ${p.name}: ${c[p.id] || 0}\n`;
+        cols.forEach(col => {
+            data.push(col.innerText);
         });
-      });
 
-      return text;
-    }
+        csv.push(data.join(","));
+    });
 
-    function render() {
-      document.getElementById('roundTitle').textContent = `Round ${currentRound}`;
+    let blob = new Blob([csv.join("\n")]);
+    let url = window.URL.createObjectURL(blob);
 
-      const listDiv = document.getElementById('playerList');
-      listDiv.innerHTML = '';
-      players.forEach(p => {
-        const row = document.createElement('div');
-        row.className = 'player-row';
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "team_tallies.csv";
+    a.click();
+}
 
-        const btn = document.createElement('button');
-        btn.className = 'player-button';
-        btn.textContent = p.name;
-        btn.onclick = () => openVoteOverlay(p.id);
-
-        const tag = document.createElement('span');
-        tag.className = 'tag ' + (hasVoted(p.id) ? 'voted' : 'not-voted');
-        tag.textContent = hasVoted(p.id) ? 'Voted' : 'Not voted';
-
-        row.appendChild(btn);
-        row.appendChild(tag);
-        listDiv.appendChild(row);
-      });
-    }
-
-    init();
-  </script>
+</script>
 
 </body>
 </html>
