@@ -368,6 +368,24 @@
       background: #28a745;
       color: #000;
     }
+
+    .admin-tally-summary-row {
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .admin-tally-summary-row:hover {
+      background: #262626;
+    }
+
+    .admin-tally-leader {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .admin-tally-collapsed {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -586,6 +604,40 @@
       </div>
     </div>
 
+
+    <div class="section-wrap">
+      <div class="section-title">Admin Team Tallies</div>
+
+      <div class="inline-actions" style="margin:14px 0 10px;">
+        <button class="nav-btn" id="adminShowSelectedTalliesBtn">Show Selected Team Tallies</button>
+        <button class="nav-btn" id="adminShowAllTalliesBtn">Show All Team Tallies</button>
+        <button class="nav-btn" id="adminShowRoundTalliesBtn">Round Focus</button>
+        <button class="nav-btn" id="adminShowSeasonTalliesBtn">Season Focus</button>
+        <button class="nav-btn" id="adminShowBothTalliesBtn">Show Both</button>
+        <button class="nav-btn" id="adminExpandTalliesBtn">Expand All</button>
+        <button class="nav-btn" id="adminCollapseTalliesBtn">Collapse All</button>
+        <button class="nav-btn" id="adminExportTalliesBtn">Export Tallies CSV</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Round</th>
+            <th>Player</th>
+            <th>Status</th>
+            <th>Round Votes</th>
+            <th>Season Votes</th>
+          </tr>
+        </thead>
+        <tbody id="adminTalliesBody">
+          <tr>
+            <td colspan="6">No tally view loaded yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <button class="nav-btn" id="openAuditTrailBtn">Open Admin Audit Trail</button>
     <p id="adminStatus" class="error-note"></p>
     <button class="player-btn back-btn" id="closeAdminPanelBtn">Close Admin Panel</button>
@@ -682,6 +734,11 @@
     let cachedTeams = [];
     let modalResolver = null;
 
+    let adminTallyMode = "round";
+    let adminTallyScope = "selected";
+    let adminCollapsedTeams = {};
+    let lastAdminTallies = [];
+
     const homeScreen = document.getElementById("homeScreen");
     const setupScreen = document.getElementById("setupScreen");
     const teamScreen = document.getElementById("teamScreen");
@@ -722,6 +779,7 @@
     const adminCoachNameInput = document.getElementById("adminCoachNameInput");
     const adminCoachPinInput = document.getElementById("adminCoachPinInput");
     const adminPlayerNamesInput = document.getElementById("adminPlayerNamesInput");
+    const adminTalliesBody = document.getElementById("adminTalliesBody");
 
     const teamNameInput = document.getElementById("teamNameInput");
     const coachNameInput = document.getElementById("coachNameInput");
@@ -775,6 +833,54 @@
     document.getElementById("resetRoundByAdminBtn").onclick = resetRoundByAdmin;
     document.getElementById("resetSeasonByAdminBtn").onclick = resetSeasonByAdmin;
     document.getElementById("openAuditTrailBtn").onclick = openAuditTrail;
+
+    document.getElementById("adminShowSelectedTalliesBtn").onclick = async () => {
+      adminTallyScope = "selected";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowAllTalliesBtn").onclick = async () => {
+      adminTallyScope = "all";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowRoundTalliesBtn").onclick = async () => {
+      adminTallyMode = "round";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowSeasonTalliesBtn").onclick = async () => {
+      adminTallyMode = "season";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowBothTalliesBtn").onclick = async () => {
+      adminTallyMode = "both";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminExpandTalliesBtn").onclick = () => {
+      adminCollapsedTeams = {};
+      renderAdminTallies(lastAdminTallies);
+    };
+
+    document.getElementById("adminCollapseTalliesBtn").onclick = () => {
+      const collapsed = {};
+      lastAdminTallies.forEach(team => {
+        collapsed[team.teamId] = true;
+      });
+      adminCollapsedTeams = collapsed;
+      renderAdminTallies(lastAdminTallies);
+    };
+
+    document.getElementById("adminExportTalliesBtn").onclick = exportAdminTalliesCsv;
+
+    adminTeamSelect.onchange = async () => {
+      if (adminTallyScope === "selected") {
+        await loadAdminTallies();
+      }
+    };
+
     document.getElementById("closeAuditTrailBtn").onclick = () => {
       auditScreen.classList.add("hidden");
       adminPanel.style.display = "block";
@@ -1491,6 +1597,10 @@
       adminPanel.style.display = "block";
       adminStatus.textContent = "";
       await loadTeams();
+      adminTallyScope = "selected";
+      adminTallyMode = "round";
+      adminCollapsedTeams = {};
+      await loadAdminTallies();
     }
 
     async function openAuditTrail() {
@@ -2098,6 +2208,183 @@
         setStatus(adminStatus, `Could not remove team: ${error.message}`);
       }
     }
+
+
+    function getAdminLeaderValue(player) {
+      if (adminTallyMode === "round") return player.roundVotes || 0;
+      return player.seasonVotes || 0;
+    }
+
+    function toggleAdminTeamCollapse(teamId) {
+      adminCollapsedTeams[teamId] = !adminCollapsedTeams[teamId];
+      renderAdminTallies(lastAdminTallies);
+    }
+
+    function renderAdminTallies(teamTallies) {
+      lastAdminTallies = teamTallies || [];
+      adminTalliesBody.innerHTML = "";
+
+      if (!teamTallies || teamTallies.length === 0) {
+        adminTalliesBody.innerHTML = `<tr><td colspan="6">No tally data available.</td></tr>`;
+        return;
+      }
+
+      teamTallies.forEach((team) => {
+        const leaderValue = Math.max(...team.players.map(p => getAdminLeaderValue(p)), 0);
+        const collapsed = !!adminCollapsedTeams[team.teamId];
+
+        const summaryRow = document.createElement("tr");
+        summaryRow.className = "admin-tally-summary-row";
+        summaryRow.innerHTML = `
+          <td colspan="6">
+            <strong>${escapeHtml(team.teamName)}</strong>
+            &nbsp;—&nbsp; Round ${team.currentRound}
+            &nbsp;—&nbsp; ${collapsed ? "Click to expand" : "Click to collapse"}
+          </td>
+        `;
+        summaryRow.onclick = () => toggleAdminTeamCollapse(team.teamId);
+        adminTalliesBody.appendChild(summaryRow);
+
+        team.players.forEach((player) => {
+          const tr = document.createElement("tr");
+          if (collapsed) tr.classList.add("admin-tally-collapsed");
+
+          const isLeader = leaderValue > 0 && getAdminLeaderValue(player) === leaderValue;
+
+          let roundVotesText = String(player.roundVotes || 0);
+          let seasonVotesText = String(player.seasonVotes || 0);
+
+          if (adminTallyMode === "round" && isLeader) {
+            roundVotesText = `<span class="admin-tally-leader">${roundVotesText}</span>`;
+          }
+
+          if ((adminTallyMode === "season" || adminTallyMode === "both") && isLeader) {
+            seasonVotesText = `<span class="admin-tally-leader">${seasonVotesText}</span>`;
+          }
+
+          tr.innerHTML = `
+            <td>${escapeHtml(team.teamName)}</td>
+            <td>${team.currentRound}</td>
+            <td>${escapeHtml(player.name)}</td>
+            <td class="${player.active === false ? "red-text" : "green-text"}">${player.active === false ? "Removed" : "Active"}</td>
+            <td>${adminTallyMode === "season" ? "-" : roundVotesText}</td>
+            <td>${adminTallyMode === "round" ? "-" : seasonVotesText}</td>
+          `;
+          adminTalliesBody.appendChild(tr);
+        });
+      });
+    }
+
+    async function loadAdminTallies() {
+      adminStatus.textContent = "";
+
+      try {
+        let teamsToLoad = [];
+
+        if (adminTallyScope === "selected") {
+          const selectedTeamId = adminTeamSelect.value;
+          if (!selectedTeamId) {
+            adminTalliesBody.innerHTML = `<tr><td colspan="6">Please select a team first.</td></tr>`;
+            return;
+          }
+          teamsToLoad = cachedTeams.filter(t => t.id === selectedTeamId);
+        } else {
+          teamsToLoad = [...cachedTeams];
+        }
+
+        const compiled = [];
+
+        for (const team of teamsToLoad) {
+          const teamRef = doc(db, "teams", team.id);
+          const teamSnap = await getDoc(teamRef);
+          if (!teamSnap.exists()) continue;
+
+          const teamData = teamSnap.data();
+          const currentRound = teamData.currentRound || 1;
+
+          const playersSnap = await getDocs(collection(db, "teams", team.id, "players"));
+          const seasonSnap = await getDocs(collection(db, "teams", team.id, "seasonVotes"));
+          const roundSnap = await getDocs(collection(db, "teams", team.id, "roundVotes", `round_${currentRound}`, "playerVotes"));
+
+          const seasonMap = {};
+          const roundMap = {};
+
+          seasonSnap.forEach((d) => {
+            seasonMap[d.id] = d.data().count || 0;
+          });
+
+          roundSnap.forEach((d) => {
+            roundMap[d.id] = d.data().count || 0;
+          });
+
+          const players = [];
+          playersSnap.forEach((p) => {
+            const data = p.data();
+            players.push({
+              id: p.id,
+              name: data.name || "Unnamed Player",
+              active: data.active !== false,
+              roundVotes: roundMap[p.id] || 0,
+              seasonVotes: seasonMap[p.id] || 0
+            });
+          });
+
+          players.sort((a, b) => {
+            const aValue = adminTallyMode === "round" ? a.roundVotes : a.seasonVotes;
+            const bValue = adminTallyMode === "round" ? b.roundVotes : b.seasonVotes;
+            if (bValue !== aValue) return bValue - aValue;
+            return a.name.localeCompare(b.name);
+          });
+
+          compiled.push({
+            teamId: team.id,
+            teamName: teamData.teamName || team.id,
+            currentRound,
+            players
+          });
+        }
+
+        compiled.sort((a, b) => a.teamName.localeCompare(b.teamName));
+        renderAdminTallies(compiled);
+      } catch (error) {
+        console.error(error);
+        adminTalliesBody.innerHTML = `<tr><td colspan="6">Could not load tallies: ${escapeHtml(error.message)}</td></tr>`;
+      }
+    }
+
+    function exportAdminTalliesCsv() {
+      if (!lastAdminTallies || lastAdminTallies.length === 0) {
+        appAlert("No Data", "Load team tallies before exporting.");
+        return;
+      }
+
+      const lines = [];
+      lines.push(["Team", "Round", "Player", "Status", "Round Votes", "Season Votes"].join(","));
+
+      lastAdminTallies.forEach((team) => {
+        team.players.forEach((player) => {
+          lines.push([
+            `"${String(team.teamName).replace(/"/g, '""')}"`,
+            `"${team.currentRound}"`,
+            `"${String(player.name).replace(/"/g, '""')}"`,
+            `"${player.active === false ? "Removed" : "Active"}"`,
+            `"${player.roundVotes || 0}"`,
+            `"${player.seasonVotes || 0}"`
+          ].join(","));
+        });
+      });
+
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wmjrlfc-admin-tallies.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
 
     async function init() {
       try {
