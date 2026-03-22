@@ -61,7 +61,7 @@
     .nav-btn {
       display: block;
       width: 90%;
-      max-width: 450px;
+      max-width: 460px;
       margin: 8px auto;
       padding: 14px;
       background-color: #000;
@@ -146,7 +146,7 @@
     .modal {
       display: none;
       position: fixed;
-      z-index: 30;
+      z-index: 50;
       left: 0;
       top: 0;
       width: 100%;
@@ -159,7 +159,7 @@
       margin: 10% auto;
       padding: 20px;
       width: 88%;
-      max-width: 500px;
+      max-width: 520px;
       border-radius: 10px;
       border: 2px solid #ff8c00;
       box-sizing: border-box;
@@ -168,6 +168,29 @@
     .modal h3 {
       margin-top: 0;
       color: #ff8c00;
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #444;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+      margin-top: 12px;
+    }
+
+    .modal textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .modal-buttons {
+      margin-top: 14px;
     }
 
     .modal button {
@@ -207,7 +230,7 @@
 
     table {
       width: 100%;
-      max-width: 820px;
+      max-width: 900px;
       margin: 10px auto 0;
       border-collapse: collapse;
       color: #fff;
@@ -226,7 +249,7 @@
     }
 
     .section-wrap {
-      max-width: 840px;
+      max-width: 920px;
       margin: 20px auto 0;
     }
 
@@ -250,7 +273,7 @@
     }
 
     .form-wrap {
-      max-width: 700px;
+      max-width: 760px;
       margin: 0 auto;
       text-align: left;
     }
@@ -286,7 +309,7 @@
       background: #111;
       padding: 16px;
       margin: 0 auto 20px;
-      max-width: 760px;
+      max-width: 780px;
       text-align: left;
     }
 
@@ -357,15 +380,9 @@
   <div class="container" id="homeScreen">
     <div class="instruction-box">
       <h3>About the Player's Player Award</h3>
-      <p>
-        This award is chosen by the players.
-      </p>
-      <p>
-        It is not just about scoring tries or winning games.
-      </p>
-      <p>
-        It is about:
-      </p>
+      <p>This award is chosen by the players.</p>
+      <p>It is not just about scoring tries or winning games.</p>
+      <p>It is about:</p>
       <ul>
         <li>Being a good team mate</li>
         <li>Trying your best</li>
@@ -374,9 +391,7 @@
         <li>Being fair and kind</li>
         <li>Supporting your team</li>
       </ul>
-      <p>
-        Choose the player who showed the best team spirit.
-      </p>
+      <p>Choose the player who showed the best team spirit.</p>
     </div>
 
     <div class="section-title">Select Team</div>
@@ -396,8 +411,9 @@
       <h3>Instructions for Coaches</h3>
       <ul>
         <li>Create your team once only.</li>
-        <li>Enter the team name exactly as you want it shown.</li>
+        <li>Enter your team name exactly as you want it shown.</li>
         <li>If there is more than one team in the same age group, include the team colour in the name. Example: <strong>U12's Black</strong>.</li>
+        <li>Enter your own coach name.</li>
         <li>Choose a coach PIN you will remember.</li>
         <li>Enter one player name per line.</li>
         <li>You can add, edit, remove or restore players later in Coach Access.</li>
@@ -407,6 +423,9 @@
     <div class="form-wrap">
       <label for="teamNameInput">Team Name</label>
       <input type="text" id="teamNameInput" placeholder="Example: U12's Black" />
+
+      <label for="coachNameInput">Coach Name</label>
+      <input type="text" id="coachNameInput" placeholder="Enter coach name" />
 
       <label for="coachPinInput">Coach PIN</label>
       <input type="password" id="coachPinInput" placeholder="Enter a coach PIN" />
@@ -422,6 +441,7 @@
 
   <div class="container hidden" id="teamScreen">
     <div class="section-title" id="teamTitle">Team</div>
+    <div class="sub-round" id="coachNameDisplay">Coach:</div>
     <div class="sub-round" id="teamRoundText">Current Round: 1</div>
     <div class="sub-round" id="teamVotingStatusText">Voting Locked</div>
 
@@ -447,12 +467,8 @@
 
     <div class="instruction-box">
       <h3>What are you voting for?</h3>
-      <p>
-        Vote for the teammate who showed the best team spirit.
-      </p>
-      <p>
-        Think about who:
-      </p>
+      <p>Vote for the teammate who showed the best team spirit.</p>
+      <p>Think about who:</p>
       <ul>
         <li>Tried their best</li>
         <li>Was a good team mate</li>
@@ -468,42 +484,10 @@
     <button class="player-btn back-btn" id="backToTeamBtn">Back</button>
   </div>
 
-  <div id="consentModal" class="modal">
-    <div class="modal-content">
-      <h3>Parent / Guardian Notice</h3>
-      <p style="text-align:left;">
-        This app is used for team Player's Player voting.<br><br>
-        The information stored includes player names and votes only.<br><br>
-        No sensitive personal information or contact details are collected.<br><br>
-        By continuing to use this app, you agree to the use of player names for team voting and awards purposes.<br><br>
-        If you do not agree, please contact your team manager.
-      </p>
-      <button class="confirm-btn" id="consentAgreeBtn">I Agree</button>
-      <button class="cancel-btn" id="consentCancelBtn">Cancel</button>
-    </div>
-  </div>
-
-  <div id="confirmVoterModal" class="modal">
-    <div class="modal-content">
-      <h3>Confirm Voter</h3>
-      <p id="confirmVoterText"></p>
-      <button class="confirm-btn" id="confirmVoterBtn">Confirm</button>
-      <button class="cancel-btn" id="cancelVoterBtn">Cancel</button>
-    </div>
-  </div>
-
-  <div id="confirmVoteModal" class="modal">
-    <div class="modal-content">
-      <h3>Confirm Vote</h3>
-      <p id="confirmVoteText"></p>
-      <button class="confirm-btn" id="confirmVoteBtn">Confirm</button>
-      <button class="cancel-btn" id="cancelVoteBtn">Cancel</button>
-    </div>
-  </div>
-
   <div id="coachPanel">
     <div class="section-title">Coach Controls</div>
     <div class="sub-round" id="coachTeamText">Team</div>
+    <div class="sub-round" id="coachPanelCoachNameText">Coach</div>
     <div class="sub-round" id="coachRoundText">Round: 1</div>
     <div class="coach-status" id="coachStatusText">
       Status: <span class="status-locked">Locked</span>
@@ -560,12 +544,6 @@
       </table>
     </div>
 
-    <button class="player-btn danger-btn" id="resetRoundBtn">Reset Current Round</button>
-    <p class="small-note">This resets only the current round tally and current round voter status for this team.</p>
-
-    <button class="player-btn pink-btn" id="resetSeasonBtn">Reset Entire Season</button>
-    <p class="small-note">This resets all rounds, all season votes, all voter tracking, returns to Round 1, and locks voting for this team only.</p>
-
     <button class="player-btn back-btn" id="closeCoachPanelBtn">Close Coach Panel</button>
   </div>
 
@@ -574,15 +552,18 @@
     <div class="sub-round">Admin PIN protected</div>
 
     <div class="section-wrap">
-      <div class="section-title">Reset Coach PIN</div>
+      <div class="section-title">Team Admin Actions</div>
       <div class="form-wrap">
         <label for="adminTeamSelect">Select Team</label>
         <select id="adminTeamSelect"></select>
 
         <label for="newCoachPinInput">New Coach PIN</label>
         <input type="password" id="newCoachPinInput" placeholder="Enter new coach PIN" />
-
         <button class="nav-btn" id="resetCoachPinBtn">Reset Coach PIN</button>
+
+        <button class="nav-btn danger-btn" id="resetRoundByAdminBtn">Reset Current Round</button>
+        <button class="nav-btn pink-btn" id="resetSeasonByAdminBtn">Reset Entire Season</button>
+        <button class="nav-btn danger-btn" id="removeTeamBtn">Remove Team</button>
       </div>
     </div>
 
@@ -591,6 +572,9 @@
       <div class="form-wrap">
         <label for="adminTeamNameInput">Team Name</label>
         <input type="text" id="adminTeamNameInput" placeholder="Example: U12's Black" />
+
+        <label for="adminCoachNameInput">Coach Name</label>
+        <input type="text" id="adminCoachNameInput" placeholder="Enter coach name" />
 
         <label for="adminCoachPinInput">Coach PIN</label>
         <input type="password" id="adminCoachPinInput" placeholder="Enter coach PIN" />
@@ -602,17 +586,59 @@
       </div>
     </div>
 
-    <div class="section-wrap">
-      <div class="section-title">Remove Team</div>
-      <div class="form-wrap">
-        <label for="removeTeamSelect">Select Team</label>
-        <select id="removeTeamSelect"></select>
-        <button class="nav-btn danger-btn" id="removeTeamBtn">Remove Team</button>
-      </div>
-    </div>
-
+    <button class="nav-btn" id="openAuditTrailBtn">Open Admin Audit Trail</button>
     <p id="adminStatus" class="error-note"></p>
     <button class="player-btn back-btn" id="closeAdminPanelBtn">Close Admin Panel</button>
+  </div>
+
+  <div class="container hidden" id="auditScreen">
+    <div class="section-title">Club Admin Audit Trail</div>
+    <div class="sub-round">Admin actions only</div>
+
+    <div class="section-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Action</th>
+            <th>Team</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="auditBody"></tbody>
+      </table>
+    </div>
+
+    <button class="nav-btn back-btn" id="closeAuditTrailBtn">Back to Admin Panel</button>
+  </div>
+
+  <div id="consentModal" class="modal">
+    <div class="modal-content">
+      <h3>Parent / Guardian Notice</h3>
+      <p style="text-align:left;">
+        This app is used for team Player's Player voting.<br><br>
+        The information stored includes player names and votes only.<br><br>
+        No sensitive personal information or contact details are collected.<br><br>
+        By continuing to use this app, you agree to the use of player names for team voting and awards purposes.<br><br>
+        If you do not agree, please contact your team manager.
+      </p>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="consentAgreeBtn">I Agree</button>
+        <button class="cancel-btn" id="consentCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appModal" class="modal">
+    <div class="modal-content">
+      <h3 id="appModalTitle">Message</h3>
+      <div id="appModalMessage" style="text-align:left;"></div>
+      <input id="appModalInput" class="hidden" />
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="appModalConfirmBtn">OK</button>
+        <button class="cancel-btn" id="appModalCancelBtn">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script type="module">
@@ -654,15 +680,18 @@
     let pendingTeamId = "";
     let currentTallyType = "round";
     let cachedTeams = [];
+    let modalResolver = null;
 
     const homeScreen = document.getElementById("homeScreen");
     const setupScreen = document.getElementById("setupScreen");
     const teamScreen = document.getElementById("teamScreen");
     const voteScreen = document.getElementById("voteScreen");
+    const auditScreen = document.getElementById("auditScreen");
 
     const teamList = document.getElementById("teamList");
     const voterList = document.getElementById("voterList");
     const playerList = document.getElementById("playerList");
+    const auditBody = document.getElementById("auditBody");
 
     const homeStatus = document.getElementById("homeStatus");
     const setupStatus = document.getElementById("setupStatus");
@@ -670,6 +699,7 @@
     const adminStatus = document.getElementById("adminStatus");
 
     const teamTitle = document.getElementById("teamTitle");
+    const coachNameDisplay = document.getElementById("coachNameDisplay");
     const teamRoundText = document.getElementById("teamRoundText");
     const teamVotingStatusText = document.getElementById("teamVotingStatusText");
     const voterTitle = document.getElementById("voterTitle");
@@ -677,6 +707,7 @@
 
     const coachPanel = document.getElementById("coachPanel");
     const coachTeamText = document.getElementById("coachTeamText");
+    const coachPanelCoachNameText = document.getElementById("coachPanelCoachNameText");
     const coachRoundText = document.getElementById("coachRoundText");
     const coachStatusText = document.getElementById("coachStatusText");
     const tallyTypeHeader = document.getElementById("tallyTypeHeader");
@@ -686,13 +717,14 @@
 
     const adminPanel = document.getElementById("adminPanel");
     const adminTeamSelect = document.getElementById("adminTeamSelect");
-    const removeTeamSelect = document.getElementById("removeTeamSelect");
     const newCoachPinInput = document.getElementById("newCoachPinInput");
     const adminTeamNameInput = document.getElementById("adminTeamNameInput");
+    const adminCoachNameInput = document.getElementById("adminCoachNameInput");
     const adminCoachPinInput = document.getElementById("adminCoachPinInput");
     const adminPlayerNamesInput = document.getElementById("adminPlayerNamesInput");
 
     const teamNameInput = document.getElementById("teamNameInput");
+    const coachNameInput = document.getElementById("coachNameInput");
     const coachPinInput = document.getElementById("coachPinInput");
     const playerNamesInput = document.getElementById("playerNamesInput");
 
@@ -700,15 +732,12 @@
     const consentAgreeBtn = document.getElementById("consentAgreeBtn");
     const consentCancelBtn = document.getElementById("consentCancelBtn");
 
-    const confirmVoterModal = document.getElementById("confirmVoterModal");
-    const confirmVoterText = document.getElementById("confirmVoterText");
-    const confirmVoterBtn = document.getElementById("confirmVoterBtn");
-    const cancelVoterBtn = document.getElementById("cancelVoterBtn");
-
-    const confirmVoteModal = document.getElementById("confirmVoteModal");
-    const confirmVoteText = document.getElementById("confirmVoteText");
-    const confirmVoteBtn = document.getElementById("confirmVoteBtn");
-    const cancelVoteBtn = document.getElementById("cancelVoteBtn");
+    const appModal = document.getElementById("appModal");
+    const appModalTitle = document.getElementById("appModalTitle");
+    const appModalMessage = document.getElementById("appModalMessage");
+    const appModalInput = document.getElementById("appModalInput");
+    const appModalConfirmBtn = document.getElementById("appModalConfirmBtn");
+    const appModalCancelBtn = document.getElementById("appModalCancelBtn");
 
     document.getElementById("openSetupBtn").onclick = showSetupScreen;
     document.getElementById("cancelSetupBtn").onclick = showHomeScreen;
@@ -732,8 +761,6 @@
       await loadTally("season");
       await loadVoterStatus();
     };
-    document.getElementById("resetRoundBtn").onclick = resetCurrentRound;
-    document.getElementById("resetSeasonBtn").onclick = resetEntireSeason;
     document.getElementById("addPlayerBtn").onclick = addPlayer;
 
     document.getElementById("openAdminBtn").onclick = adminLogin;
@@ -744,9 +771,16 @@
     document.getElementById("resetCoachPinBtn").onclick = resetCoachPin;
     document.getElementById("adminCreateTeamBtn").onclick = createTeamFromAdminPanel;
     document.getElementById("removeTeamBtn").onclick = removeTeam;
+    document.getElementById("resetRoundByAdminBtn").onclick = resetRoundByAdmin;
+    document.getElementById("resetSeasonByAdminBtn").onclick = resetSeasonByAdmin;
+    document.getElementById("openAuditTrailBtn").onclick = openAuditTrail;
+    document.getElementById("closeAuditTrailBtn").onclick = () => {
+      auditScreen.classList.add("hidden");
+      adminPanel.style.display = "block";
+    };
 
     consentAgreeBtn.onclick = async () => {
-      localStorage.setItem("wmjrlfc_v3_consent", "true");
+      localStorage.setItem("wmjrlfc_v4_consent", "true");
       consentModal.style.display = "none";
       if (pendingTeamId) {
         await enterTeam(pendingTeamId);
@@ -759,56 +793,38 @@
       pendingTeamId = "";
     };
 
-    cancelVoterBtn.onclick = () => {
-      confirmVoterModal.style.display = "none";
-      selectedVoterId = "";
+    appModalConfirmBtn.onclick = () => {
+      if (!modalResolver) return;
+      const value = appModalInput.classList.contains("hidden") ? "" : appModalInput.value;
+      appModal.style.display = "none";
+      const resolver = modalResolver;
+      modalResolver = null;
+      resolver({ confirmed: true, value });
     };
 
-    confirmVoterBtn.onclick = async () => {
-      confirmVoterModal.style.display = "none";
-      try {
-        const roundAuditRef = getRoundAuditDocRef(currentTeamId, currentTeamData.currentRound);
-        const auditSnap = await getDoc(roundAuditRef);
-        const votedBy = auditSnap.exists() ? (auditSnap.data().votedBy || {}) : {};
-
-        if (votedBy[selectedVoterId]) {
-          alert(`${getPlayerNameById(selectedVoterId)} has already voted in Round ${currentTeamData.currentRound}.`);
-          selectedVoterId = "";
-          return;
-        }
-
-        openVoteScreen();
-      } catch (error) {
-        console.error(error);
-        alert("Could not check voting status.");
-        selectedVoterId = "";
-      }
+    appModalCancelBtn.onclick = () => {
+      if (!modalResolver) return;
+      appModal.style.display = "none";
+      const resolver = modalResolver;
+      modalResolver = null;
+      resolver({ confirmed: false, value: "" });
     };
-
-    cancelVoteBtn.onclick = () => {
-      confirmVoteModal.style.display = "none";
-      selectedVoteId = "";
-    };
-
-    confirmVoteBtn.onclick = submitVote;
 
     window.onclick = (event) => {
       if (event.target === consentModal) {
         consentModal.style.display = "none";
         pendingTeamId = "";
       }
-      if (event.target === confirmVoterModal) {
-        confirmVoterModal.style.display = "none";
-        selectedVoterId = "";
-      }
-      if (event.target === confirmVoteModal) {
-        confirmVoteModal.style.display = "none";
-        selectedVoteId = "";
+      if (event.target === appModal && modalResolver) {
+        appModal.style.display = "none";
+        const resolver = modalResolver;
+        modalResolver = null;
+        resolver({ confirmed: false, value: "" });
       }
     };
 
     function showOnlyScreen(screenEl) {
-      [homeScreen, setupScreen, teamScreen, voteScreen].forEach((el) => el.classList.add("hidden"));
+      [homeScreen, setupScreen, teamScreen, voteScreen, auditScreen].forEach((el) => el.classList.add("hidden"));
       screenEl.classList.remove("hidden");
       coachPanel.style.display = "none";
       adminPanel.style.display = "none";
@@ -830,7 +846,6 @@
       teamScreen.classList.remove("hidden");
       selectedVoterId = "";
       selectedVoteId = "";
-      confirmVoteModal.style.display = "none";
     }
 
     function clearStatus() {
@@ -888,6 +903,104 @@
       return player ? player.name : "Unknown Player";
     }
 
+    function formatAuditDate(value) {
+      try {
+        if (value?.toDate) return value.toDate().toLocaleString();
+        return value ? new Date(value).toLocaleString() : "-";
+      } catch {
+        return "-";
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showAppModal({
+      title = "Message",
+      message = "",
+      confirmText = "OK",
+      cancelText = "Cancel",
+      showCancel = false,
+      input = false,
+      inputType = "text",
+      inputValue = "",
+      inputPlaceholder = ""
+    }) {
+      appModalTitle.textContent = title;
+      appModalMessage.innerHTML = message;
+      appModalConfirmBtn.textContent = confirmText;
+      appModalCancelBtn.textContent = cancelText;
+      appModalCancelBtn.style.display = showCancel ? "inline-block" : "none";
+
+      if (input) {
+        appModalInput.classList.remove("hidden");
+        appModalInput.type = inputType;
+        appModalInput.value = inputValue;
+        appModalInput.placeholder = inputPlaceholder;
+      } else {
+        appModalInput.classList.add("hidden");
+        appModalInput.value = "";
+      }
+
+      appModal.style.display = "block";
+
+      return new Promise((resolve) => {
+        modalResolver = resolve;
+        if (input) {
+          setTimeout(() => appModalInput.focus(), 0);
+        } else {
+          setTimeout(() => appModalConfirmBtn.focus(), 0);
+        }
+      });
+    }
+
+    async function appAlert(title, message) {
+      await showAppModal({ title, message, confirmText: "OK" });
+    }
+
+    async function appConfirm(title, message, confirmText = "Confirm") {
+      const result = await showAppModal({
+        title,
+        message,
+        confirmText,
+        cancelText: "Cancel",
+        showCancel: true
+      });
+      return result.confirmed;
+    }
+
+    async function appPrompt(title, message, inputValue = "", inputPlaceholder = "", inputType = "text") {
+      const result = await showAppModal({
+        title,
+        message,
+        confirmText: "Confirm",
+        cancelText: "Cancel",
+        showCancel: true,
+        input: true,
+        inputType,
+        inputValue,
+        inputPlaceholder
+      });
+      return result;
+    }
+
+    async function logAdminAction(action, teamId, teamName, details) {
+      const auditId = `audit-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+      await setDoc(doc(db, "adminAudit", auditId), {
+        action,
+        teamId,
+        teamName,
+        details,
+        createdAt: serverTimestamp()
+      });
+    }
+
     async function loadTeams() {
       teamList.innerHTML = "";
       clearStatus();
@@ -900,13 +1013,14 @@
           const data = docSnap.data();
           teams.push({
             id: docSnap.id,
-            teamName: data.teamName || docSnap.id
+            teamName: data.teamName || docSnap.id,
+            coachName: data.coachName || ""
           });
         });
 
         teams.sort((a, b) => a.teamName.localeCompare(b.teamName));
         cachedTeams = teams;
-        populateAdminTeamSelects();
+        populateAdminTeamSelect();
 
         if (teams.length === 0) {
           const note = document.createElement("p");
@@ -929,17 +1043,16 @@
       }
     }
 
-    function populateAdminTeamSelects() {
+    function populateAdminTeamSelect() {
       const optionsHtml = cachedTeams.length
-        ? cachedTeams.map(team => `<option value="${team.id}">${team.teamName}</option>`).join("")
+        ? cachedTeams.map(team => `<option value="${team.id}">${escapeHtml(team.teamName)}</option>`).join("")
         : `<option value="">No teams available</option>`;
 
       adminTeamSelect.innerHTML = optionsHtml;
-      removeTeamSelect.innerHTML = optionsHtml;
     }
 
     function requestEnterTeam(teamId) {
-      const consentGiven = localStorage.getItem("wmjrlfc_v3_consent") === "true";
+      const consentGiven = localStorage.getItem("wmjrlfc_v4_consent") === "true";
       if (!consentGiven) {
         pendingTeamId = teamId;
         consentModal.style.display = "block";
@@ -1018,12 +1131,14 @@
 
     function updateTeamUI() {
       teamTitle.textContent = currentTeamData.teamName;
+      coachNameDisplay.textContent = `Coach: ${currentTeamData.coachName || "-"}`;
       teamRoundText.textContent = `Current Round: ${currentTeamData.currentRound}`;
       voteRoundText.textContent = `Round ${currentTeamData.currentRound}`;
       teamVotingStatusText.textContent = currentTeamData.votingOpen ? "Voting Open" : "Voting Locked";
       teamVotingStatusText.className = `sub-round ${currentTeamData.votingOpen ? "green-text" : "red-text"}`;
 
       coachTeamText.textContent = currentTeamData.teamName;
+      coachPanelCoachNameText.textContent = `Coach: ${currentTeamData.coachName || "-"}`;
       coachRoundText.textContent = `Round: ${currentTeamData.currentRound}`;
       coachStatusText.innerHTML = `Status: <span class="${currentTeamData.votingOpen ? "status-open" : "status-locked"}">${currentTeamData.votingOpen ? "Open" : "Locked"}</span>`;
       document.getElementById("toggleLockBtn").textContent = currentTeamData.votingOpen ? "Lock Voting" : "Unlock Voting";
@@ -1049,7 +1164,7 @@
       });
     }
 
-    async function createTeamGeneric(teamName, coachPin, enteredNames) {
+    async function createTeamGeneric(teamName, coachName, coachPin, enteredNames) {
       const teamId = normaliseTeamId(teamName);
       const teamRef = doc(db, "teams", teamId);
 
@@ -1060,6 +1175,7 @@
 
       await setDoc(teamRef, {
         teamName,
+        coachName,
         coachPin,
         currentRound: 1,
         votingOpen: false,
@@ -1083,12 +1199,14 @@
       });
 
       await batch.commit();
+      return teamId;
     }
 
     async function createTeamFromCoachScreen() {
       clearStatus();
 
       const teamName = teamNameInput.value.trim();
+      const coachName = coachNameInput.value.trim();
       const coachPin = coachPinInput.value.trim();
       const enteredNames = playerNamesInput.value
         .split("\n")
@@ -1097,6 +1215,11 @@
 
       if (!teamName) {
         setStatus(setupStatus, "Please enter a team name.");
+        return;
+      }
+
+      if (!coachName) {
+        setStatus(setupStatus, "Please enter the coach name.");
         return;
       }
 
@@ -1117,9 +1240,10 @@
       }
 
       try {
-        await createTeamGeneric(teamName, coachPin, enteredNames);
+        await createTeamGeneric(teamName, coachName, coachPin, enteredNames);
 
         teamNameInput.value = "";
+        coachNameInput.value = "";
         coachPinInput.value = "";
         playerNamesInput.value = "";
         setStatus(setupStatus, "Team created successfully.", false);
@@ -1138,6 +1262,7 @@
       adminStatus.textContent = "";
 
       const teamName = adminTeamNameInput.value.trim();
+      const coachName = adminCoachNameInput.value.trim();
       const coachPin = adminCoachPinInput.value.trim();
       const enteredNames = adminPlayerNamesInput.value
         .split("\n")
@@ -1146,6 +1271,11 @@
 
       if (!teamName) {
         setStatus(adminStatus, "Please enter a team name.");
+        return;
+      }
+
+      if (!coachName) {
+        setStatus(adminStatus, "Please enter the coach name.");
         return;
       }
 
@@ -1166,10 +1296,14 @@
       }
 
       try {
-        await createTeamGeneric(teamName, coachPin, enteredNames);
+        const teamId = await createTeamGeneric(teamName, coachName, coachPin, enteredNames);
+        await logAdminAction("TEAM_CREATED", teamId, teamName, `Team created by club admin. Coach: ${coachName}`);
+
         adminTeamNameInput.value = "";
+        adminCoachNameInput.value = "";
         adminCoachPinInput.value = "";
         adminPlayerNamesInput.value = "";
+
         setStatus(adminStatus, "Team added successfully.", false);
         await loadTeams();
       } catch (error) {
@@ -1180,13 +1314,39 @@
 
     async function handleVoterClick(playerId) {
       if (!currentTeamData.votingOpen) {
-        alert("Voting is not open yet.");
+        await appAlert("Voting Locked", "Voting is not open yet.");
         return;
       }
 
       selectedVoterId = playerId;
-      confirmVoterText.textContent = `Do you want to vote as ${getPlayerNameById(playerId)}?`;
-      confirmVoterModal.style.display = "block";
+      const result = await appConfirm(
+        "Confirm Voter",
+        `Do you want to vote as <strong>${escapeHtml(getPlayerNameById(playerId))}</strong>?`,
+        "Confirm"
+      );
+
+      if (!result) {
+        selectedVoterId = "";
+        return;
+      }
+
+      try {
+        const roundAuditRef = getRoundAuditDocRef(currentTeamId, currentTeamData.currentRound);
+        const auditSnap = await getDoc(roundAuditRef);
+        const votedBy = auditSnap.exists() ? (auditSnap.data().votedBy || {}) : {};
+
+        if (votedBy[selectedVoterId]) {
+          await appAlert("Already Voted", `${escapeHtml(getPlayerNameById(selectedVoterId))} has already voted in Round ${currentTeamData.currentRound}.`);
+          selectedVoterId = "";
+          return;
+        }
+
+        openVoteScreen();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", "Could not check voting status.");
+        selectedVoterId = "";
+      }
     }
 
     function openVoteScreen() {
@@ -1200,10 +1360,19 @@
           const btn = document.createElement("button");
           btn.className = "player-btn";
           btn.textContent = player.name;
-          btn.onclick = () => {
+          btn.onclick = async () => {
             selectedVoteId = player.id;
-            confirmVoteText.textContent = `Are you sure you want to vote for ${player.name}?`;
-            confirmVoteModal.style.display = "block";
+            const confirmed = await appConfirm(
+              "Confirm Vote",
+              `Are you sure you want to vote for <strong>${escapeHtml(player.name)}</strong>?`,
+              "Confirm"
+            );
+
+            if (confirmed) {
+              await submitVote();
+            } else {
+              selectedVoteId = "";
+            }
           };
           playerList.appendChild(btn);
         }
@@ -1267,23 +1436,29 @@
           );
         });
 
-        alert("Vote submitted.");
-        confirmVoteModal.style.display = "none";
+        await appAlert("Vote Submitted", "Your vote has been submitted.");
         selectedVoteId = "";
         selectedVoterId = "";
         await enterTeam(currentTeamId);
       } catch (error) {
         console.error(error);
-        alert(`Vote failed: ${error.message}`);
+        await appAlert("Vote Failed", escapeHtml(error.message));
       }
     }
 
     async function coachLogin() {
-      const pin = prompt("Enter coach PIN:");
-      if (pin === null) return;
+      const result = await appPrompt(
+        "Coach Access",
+        "Enter coach PIN:",
+        "",
+        "Enter coach PIN",
+        "password"
+      );
+      if (!result.confirmed) return;
 
+      const pin = result.value.trim();
       if (!currentTeamData || pin !== currentTeamData.coachPin) {
-        alert("Incorrect PIN.");
+        await appAlert("Incorrect PIN", "The coach PIN is incorrect.");
         return;
       }
 
@@ -1293,17 +1468,67 @@
     }
 
     async function adminLogin() {
-      const pin = prompt("Enter Club Admin PIN:");
-      if (pin === null) return;
+      const result = await appPrompt(
+        "Club Admin Access",
+        "Enter Club Admin PIN:",
+        "",
+        "Enter Club Admin PIN",
+        "password"
+      );
+      if (!result.confirmed) return;
 
-      if (pin !== CLUB_ADMIN_PIN) {
-        alert("Incorrect Admin PIN.");
+      if (result.value.trim() !== CLUB_ADMIN_PIN) {
+        await appAlert("Incorrect PIN", "The Club Admin PIN is incorrect.");
         return;
       }
 
       adminPanel.style.display = "block";
       adminStatus.textContent = "";
       await loadTeams();
+    }
+
+    async function openAuditTrail() {
+      adminPanel.style.display = "none";
+      showOnlyScreen(auditScreen);
+
+      auditBody.innerHTML = "";
+      try {
+        const snap = await getDocs(collection(db, "adminAudit"));
+        const rows = [];
+
+        snap.forEach((docSnap) => {
+          rows.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        rows.sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        });
+
+        if (rows.length === 0) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td colspan="4">No admin audit records yet.</td>`;
+          auditBody.appendChild(tr);
+          return;
+        }
+
+        rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${escapeHtml(formatAuditDate(row.createdAt))}</td>
+            <td>${escapeHtml(row.action || "-")}</td>
+            <td>${escapeHtml(row.teamName || "-")}</td>
+            <td>${escapeHtml(row.details || "-")}</td>
+          `;
+          auditBody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error(error);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="4">Could not load audit trail: ${escapeHtml(error.message)}</td>`;
+        auditBody.appendChild(tr);
+      }
     }
 
     async function refreshCoachPanel() {
@@ -1421,11 +1646,17 @@
         editBtn.className = "mini-btn";
         editBtn.textContent = "Edit";
         editBtn.onclick = async () => {
-          const newName = prompt("Edit player name:", player.name);
-          if (newName === null) return;
-          const trimmed = newName.trim();
+          const result = await appPrompt(
+            "Edit Player",
+            "Edit player name:",
+            player.name,
+            "Enter player name",
+            "text"
+          );
+          if (!result.confirmed) return;
+          const trimmed = result.value.trim();
           if (!trimmed) {
-            alert("Name cannot be blank.");
+            await appAlert("Invalid Name", "Name cannot be blank.");
             return;
           }
           await editPlayer(player.id, trimmed);
@@ -1466,7 +1697,7 @@
           (p) => p.id !== playerId && p.name.trim().toLowerCase() === newName.trim().toLowerCase()
         );
         if (duplicate) {
-          alert("Another player already has that name.");
+          await appAlert("Duplicate Name", "Another player already has that name.");
           return;
         }
 
@@ -1482,12 +1713,16 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not edit player: ${error.message}`);
+        await appAlert("Error", `Could not edit player: ${escapeHtml(error.message)}`);
       }
     }
 
     async function removePlayer(playerId) {
-      const confirmed = confirm(`Remove ${getPlayerNameById(playerId)} from active voting?`);
+      const confirmed = await appConfirm(
+        "Remove Player",
+        `Remove <strong>${escapeHtml(getPlayerNameById(playerId))}</strong> from active voting?`,
+        "Remove"
+      );
       if (!confirmed) return;
 
       try {
@@ -1503,7 +1738,7 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not remove player: ${error.message}`);
+        await appAlert("Error", `Could not remove player: ${escapeHtml(error.message)}`);
       }
     }
 
@@ -1523,23 +1758,29 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not restore player: ${error.message}`);
+        await appAlert("Error", `Could not restore player: ${escapeHtml(error.message)}`);
       }
     }
 
     async function addPlayer() {
-      const name = prompt("Enter the new player's name:");
-      if (name === null) return;
+      const result = await appPrompt(
+        "Add Player",
+        "Enter the new player's name:",
+        "",
+        "Enter player name",
+        "text"
+      );
+      if (!result.confirmed) return;
 
-      const trimmed = name.trim();
+      const trimmed = result.value.trim();
       if (!trimmed) {
-        alert("Player name cannot be blank.");
+        await appAlert("Invalid Name", "Player name cannot be blank.");
         return;
       }
 
       const duplicate = allPlayers.some((p) => p.name.trim().toLowerCase() === trimmed.toLowerCase());
       if (duplicate) {
-        alert("That player name already exists.");
+        await appAlert("Duplicate Name", "That player name already exists.");
         return;
       }
 
@@ -1559,7 +1800,7 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not add player: ${error.message}`);
+        await appAlert("Error", `Could not add player: ${escapeHtml(error.message)}`);
       }
     }
 
@@ -1572,7 +1813,7 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not change round: ${error.message}`);
+        await appAlert("Error", `Could not change round: ${escapeHtml(error.message)}`);
       }
     }
 
@@ -1585,7 +1826,7 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not change round: ${error.message}`);
+        await appAlert("Error", `Could not change round: ${escapeHtml(error.message)}`);
       }
     }
 
@@ -1596,7 +1837,7 @@
         await refreshCoachPanel();
       } catch (error) {
         console.error(error);
-        alert(`Could not update voting lock: ${error.message}`);
+        await appAlert("Error", `Could not update voting lock: ${escapeHtml(error.message)}`);
       }
     }
 
@@ -1610,79 +1851,6 @@
         },
         { merge: true }
       );
-    }
-
-    async function resetCurrentRound() {
-      const confirmed = confirm(`Reset all votes and voter tracking for Round ${currentTeamData.currentRound} in ${currentTeamData.teamName}?`);
-      if (!confirmed) return;
-
-      try {
-        const batch = writeBatch(db);
-
-        allPlayers.forEach((player) => {
-          batch.set(getRoundVoteDocRef(currentTeamId, currentTeamData.currentRound, player.id), { count: 0 }, { merge: true });
-        });
-
-        batch.set(getRoundAuditDocRef(currentTeamId, currentTeamData.currentRound), {
-          votedBy: {},
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        await batch.commit();
-        await refreshCoachPanel();
-        alert(`Round ${currentTeamData.currentRound} has been reset for ${currentTeamData.teamName}.`);
-      } catch (error) {
-        console.error(error);
-        alert(`Reset failed: ${error.message}`);
-      }
-    }
-
-    async function resetEntireSeason() {
-      const confirmed = confirm(
-        `Reset the ENTIRE season for ${currentTeamData.teamName}? This will clear all rounds, all season tallies, all voter tracking, return to Round 1, and lock voting.`
-      );
-      if (!confirmed) return;
-
-      try {
-        for (let round = 1; round <= currentTeamData.currentRound; round++) {
-          const batch = writeBatch(db);
-
-          allPlayers.forEach((player) => {
-            batch.set(getRoundVoteDocRef(currentTeamId, round, player.id), { count: 0 }, { merge: true });
-          });
-
-          batch.set(getRoundAuditDocRef(currentTeamId, round), {
-            votedBy: {},
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-
-          await batch.commit();
-        }
-
-        const seasonBatch = writeBatch(db);
-
-        allPlayers.forEach((player) => {
-          seasonBatch.set(getSeasonVoteDocRef(currentTeamId, player.id), { count: 0 }, { merge: true });
-        });
-
-        currentTeamData.currentRound = 1;
-        currentTeamData.votingOpen = false;
-
-        seasonBatch.set(doc(db, "teams", currentTeamId), {
-          currentRound: 1,
-          votingOpen: false,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        await seasonBatch.commit();
-
-        await ensureRoundDocsForCurrentTeam(1);
-        await refreshCoachPanel();
-        alert(`Entire season has been reset for ${currentTeamData.teamName}.`);
-      } catch (error) {
-        console.error(error);
-        alert(`Season reset failed: ${error.message}`);
-      }
     }
 
     async function resetCoachPin() {
@@ -1700,11 +1868,15 @@
       }
 
       try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        const teamName = teamSnap.exists() ? (teamSnap.data().teamName || teamId) : teamId;
+
         await setDoc(doc(db, "teams", teamId), {
           coachPin: newPin,
           updatedAt: serverTimestamp()
         }, { merge: true });
 
+        await logAdminAction("COACH_PIN_RESET", teamId, teamName, "Coach PIN reset by club admin");
         newCoachPinInput.value = "";
         setStatus(adminStatus, "Coach PIN updated successfully.", false);
       } catch (error) {
@@ -1713,8 +1885,131 @@
       }
     }
 
+    async function resetRoundByAdmin() {
+      const teamId = adminTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        if (!teamSnap.exists()) {
+          setStatus(adminStatus, "Selected team not found.");
+          return;
+        }
+
+        const teamData = teamSnap.data();
+        const confirmed = await appConfirm(
+          "Reset Current Round",
+          `Reset all votes and voter tracking for the current round in <strong>${escapeHtml(teamData.teamName)}</strong>?`,
+          "Reset Round"
+        );
+        if (!confirmed) return;
+
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const batch = writeBatch(db);
+
+        playersSnap.forEach((playerDoc) => {
+          batch.set(
+            doc(db, "teams", teamId, "roundVotes", `round_${teamData.currentRound}`, "playerVotes", playerDoc.id),
+            { count: 0 },
+            { merge: true }
+          );
+        });
+
+        batch.set(
+          doc(db, "teams", teamId, "roundAudit", `round_${teamData.currentRound}`),
+          { votedBy: {}, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+
+        await batch.commit();
+        await logAdminAction("ROUND_RESET", teamId, teamData.teamName, `Round ${teamData.currentRound} reset by club admin`);
+        setStatus(adminStatus, "Current round reset successfully.", false);
+
+        if (currentTeamId === teamId && currentTeamData) {
+          await enterTeam(teamId);
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset round: ${error.message}`);
+      }
+    }
+
+    async function resetSeasonByAdmin() {
+      const teamId = adminTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        if (!teamSnap.exists()) {
+          setStatus(adminStatus, "Selected team not found.");
+          return;
+        }
+
+        const teamData = teamSnap.data();
+        const confirmed = await appConfirm(
+          "Reset Entire Season",
+          `Reset the ENTIRE season for <strong>${escapeHtml(teamData.teamName)}</strong>? This will clear all rounds, all season tallies, all voter tracking, return to Round 1, and lock voting.`,
+          "Reset Season"
+        );
+        if (!confirmed) return;
+
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const players = playersSnap.docs.map(d => d.id);
+
+        for (let round = 1; round <= (teamData.currentRound || 1); round++) {
+          const batch = writeBatch(db);
+
+          players.forEach((playerId) => {
+            batch.set(
+              doc(db, "teams", teamId, "roundVotes", `round_${round}`, "playerVotes", playerId),
+              { count: 0 },
+              { merge: true }
+            );
+          });
+
+          batch.set(
+            doc(db, "teams", teamId, "roundAudit", `round_${round}`),
+            { votedBy: {}, updatedAt: serverTimestamp() },
+            { merge: true }
+          );
+
+          await batch.commit();
+        }
+
+        const seasonBatch = writeBatch(db);
+
+        players.forEach((playerId) => {
+          seasonBatch.set(doc(db, "teams", teamId, "seasonVotes", playerId), { count: 0 }, { merge: true });
+        });
+
+        seasonBatch.set(doc(db, "teams", teamId), {
+          currentRound: 1,
+          votingOpen: false,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        await seasonBatch.commit();
+
+        await logAdminAction("SEASON_RESET", teamId, teamData.teamName, "Entire season reset by club admin");
+        setStatus(adminStatus, "Entire season reset successfully.", false);
+
+        if (currentTeamId === teamId && currentTeamData) {
+          await enterTeam(teamId);
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset season: ${error.message}`);
+      }
+    }
+
     async function removeTeam() {
-      const teamId = removeTeamSelect.value;
+      const teamId = adminTeamSelect.value;
       if (!teamId) {
         setStatus(adminStatus, "Please select a team to remove.");
         return;
@@ -1723,7 +2018,11 @@
       const team = cachedTeams.find(t => t.id === teamId);
       const teamName = team ? team.teamName : teamId;
 
-      const confirmed = confirm(`Remove team ${teamName}? This will delete players, tallies, round data and coach settings for that team.`);
+      const confirmed = await appConfirm(
+        "Remove Team",
+        `Remove team <strong>${escapeHtml(teamName)}</strong>? This will delete players, tallies, round data and coach settings for that team.`,
+        "Remove Team"
+      );
       if (!confirmed) return;
 
       try {
@@ -1753,6 +2052,7 @@
         }
 
         await deleteDoc(doc(db, "teams", teamId));
+        await logAdminAction("TEAM_REMOVED", teamId, teamName, "Team removed by club admin");
 
         if (currentTeamId === teamId) {
           currentTeamId = "";
