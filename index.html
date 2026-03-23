@@ -1022,6 +1022,7 @@
     const BROWSER_ID_KEY = 'wmjrlfc-browser-id';
     const TEAM_COLLECTION = 'teams';
     const ACTIVITY_COLLECTION = 'activity';
+    const VOTE_TOKEN_COLLECTION = 'vote_tokens';
 
     let app = null;
     let db = null;
@@ -1040,6 +1041,8 @@
     let cloudReady = false;
     let dialogConfirmHandler = null;
     let pendingVoterPlayerId = null;
+    let teamsUnsubscribe = null;
+    let activityUnsubscribe = null;
 
     function generateId(prefix) {
       return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
@@ -1086,6 +1089,10 @@
 
     function isAdminPinConfigured() {
       return ADMIN_PIN && ADMIN_PIN !== 'REPLACE_WITH_ADMIN_PIN';
+    }
+
+    function buildVoteTokenId(teamId, roundName, voterPlayerId) {
+      return `${teamId}__${slugify(roundName) || 'round'}__${voterPlayerId}`;
     }
 
     function initials(name) {
@@ -1381,9 +1388,53 @@
       app = firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
       cloudReady = true;
-      setSyncStatus('Connected to Firestore. Loading live team data…', 'success');
-      await refreshFromCloud(false);
+      setSyncStatus('Connected to Firestore. Starting live sync…', 'success');
+      startCloudSubscriptions();
       goHome();
+    }
+
+    function applyCloudState({ teams = state.teams, activity = state.activityLog }) {
+      state.teams = teams;
+      state.activityLog = activity;
+      refreshAllSelectors();
+      refreshCoachArea();
+      refreshAdminArea();
+      setSyncStatus(`Connected to Firestore: ${teams.length} team(s) loaded`, 'success');
+    }
+
+    function stopCloudSubscriptions() {
+      if (teamsUnsubscribe) {
+        teamsUnsubscribe();
+        teamsUnsubscribe = null;
+      }
+      if (activityUnsubscribe) {
+        activityUnsubscribe();
+        activityUnsubscribe = null;
+      }
+    }
+
+    function startCloudSubscriptions() {
+      stopCloudSubscriptions();
+
+      teamsUnsubscribe = db.collection(TEAM_COLLECTION).onSnapshot(snapshot => {
+        const teams = snapshot.docs
+          .map(doc => ensureTeamDefaults({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        applyCloudState({ teams, activity: state.activityLog });
+      }, error => {
+        console.error('Team subscription error:', error);
+        setSyncStatus('Live team sync paused. You can still use manual refresh.', 'error');
+      });
+
+      activityUnsubscribe = db.collection(ACTIVITY_COLLECTION)
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .onSnapshot(snapshot => {
+          const activity = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          applyCloudState({ teams: state.teams, activity });
+        }, error => {
+          console.warn('Activity subscription skipped:', error);
+        });
     }
 
     async function loadTeamsFromCloud() {
@@ -1414,12 +1465,7 @@
       setSyncStatus('Refreshing live Firestore data…', 'info');
       const teams = await loadTeamsFromCloud();
       const activity = await loadActivityFromCloud();
-      state.teams = teams;
-      state.activityLog = activity;
-      refreshAllSelectors();
-      refreshCoachArea();
-      refreshAdminArea();
-      setSyncStatus(`Connected to Firestore: ${teams.length} team(s) loaded`, 'success');
+      applyCloudState({ teams, activity });
       if (showSuccessBanner) {
         showBanner('Live data refreshed from Firestore.', 'success');
       }
@@ -1433,10 +1479,20 @@
           type,
           teamId,
           message,
+          browserId,
           createdAt: timestampNow()
         });
       } catch (error) {
         console.warn('Activity write skipped:', error);
+      }
+    }
+
+    async function deleteTeamVoteTokens(teamId) {
+      try {
+        const snapshot = await db.collection(VOTE_TOKEN_COLLECTION).where('teamId', '==', teamId).get();
+        await deleteQuerySnapshot(snapshot);
+      } catch (error) {
+        console.warn('Vote token cleanup skipped:', error);
       }
     }
 
@@ -1653,8 +1709,14 @@
           const updatedTeam = clone(liveTeam);
           const voter = updatedTeam.players.find(item => item.id === parentFlow.voterPlayerId);
           const player = updatedTeam.players.find(item => item.id === parentFlow.selectedPlayerId);
+          const voteTokenId = buildVoteTokenId(updatedTeam.id, updatedTeam.round.name, parentFlow.voterPlayerId);
+          const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
+          const voteTokenDoc = await transaction.get(voteTokenRef);
           if (!voter) {
             throw new Error('The selected voter no longer exists.');
+          }
+          if (voteTokenDoc.exists) {
+            throw new Error('That player has already voted for this team in the current round.');
           }
           if (updatedTeam.roundVoterIds.includes(voter.id)) {
             throw new Error('That player has already voted for this team in the current round.');
@@ -1672,10 +1734,18 @@
           updatedTeam.updatedAt = timestampNow();
 
           transaction.set(teamRef, updatedTeam, { merge: true });
+          transaction.set(voteTokenRef, {
+            id: voteTokenId,
+            teamId: updatedTeam.id,
+            roundName: updatedTeam.round.name,
+            voterPlayerId: voter.id,
+            selectedPlayerId: player.id,
+            browserId,
+            createdAt: timestampNow()
+          });
         });
 
         await createActivity('vote_submitted', `Vote submitted by ${team.players.find(item => item.id === parentFlow.voterPlayerId)?.name || 'player'} for ${team.name} (${team.round.name})`, team.id);
-        await refreshFromCloud(false);
         document.getElementById('parentStageReview').classList.add('hidden');
         document.getElementById('parentStageDone').classList.remove('hidden');
         setParentStep(5);
@@ -1897,8 +1967,10 @@
       try {
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        if (updatedTeam.round.name !== previousRoundName) {
+          await deleteTeamVoteTokens(updatedTeam.id);
+        }
         await createActivity('round_updated', `Updated round for ${updatedTeam.name} to ${updatedTeam.round.name}`, updatedTeam.id);
-        await refreshFromCloud(false);
         showBanner(`Round settings saved for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to save round settings right now: ${error.message}`, 'error');
@@ -2070,8 +2142,8 @@
         updatedTeam.votesCast = 0;
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await deleteTeamVoteTokens(updatedTeam.id);
         await createActivity('round_reset_by_admin', `Admin reset round votes for ${updatedTeam.name}`, updatedTeam.id);
-        await refreshFromCloud(false);
         showBanner(`Round votes reset for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to reset round right now: ${error.message}`, 'error');
@@ -2095,8 +2167,8 @@
         updatedTeam.votesCast = 0;
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await deleteTeamVoteTokens(updatedTeam.id);
         await createActivity('season_reset_by_admin', `Admin reset season votes for ${updatedTeam.name}`, updatedTeam.id);
-        await refreshFromCloud(false);
         showBanner(`Season votes reset for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to reset season right now: ${error.message}`, 'error');
@@ -2162,11 +2234,12 @@
           console.warn('Activity cleanup skipped:', error);
         }
 
+        await deleteTeamVoteTokens(team.id);
+
         if (coachSessionTeamId === team.id) {
           coachSessionTeamId = null;
         }
 
-        await refreshFromCloud(false);
         showBanner(`${team.name} was deleted.`, 'success');
       } catch (error) {
         showBanner(`Unable to delete team right now: ${error.message}`, 'error');
@@ -2218,6 +2291,7 @@
       try {
         await initializeFirebase();
       } catch (error) {
+        stopCloudSubscriptions();
         const syncStatus = document.getElementById('syncStatus');
         if (syncStatus) syncStatus.classList.add('hidden');
         refreshAllSelectors();
