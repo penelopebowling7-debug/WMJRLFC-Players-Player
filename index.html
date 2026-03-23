@@ -565,8 +565,9 @@
       }
 
       .logo-frame {
-        width: 84px;
-        height: 84px;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
       }
 
       .vote-choices {
@@ -627,7 +628,7 @@
 
       <section id="parentSection" class="panel hidden">
         <div class="button-row" style="justify-content: space-between; align-items: center;">
-          <h2 style="margin-bottom: 0;">Player Voting Flow</h2>
+          <h2 style="margin-bottom: 0;">Player Voting</h2>
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
 
@@ -1515,7 +1516,7 @@
           </div>
           <div class="vote-choices">
             <button class="vote-choice ${isSelected ? 'selected' : ''}" ${isVoter ? 'disabled' : ''} onclick="${isVoter ? '' : `toggleVote('${escapeJsString(player.id)}')`}">
-              ${isVoter ? "You can't vote for yourself" : isSelected ? "Selected as Player's Player" : "Select Player's Player"}
+              ${escapeHtml(player.name)}
             </button>
           </div>
         `;
@@ -1538,7 +1539,7 @@
             </div>
           </div>
           <div class="vote-choices">
-            <button class="vote-choice" onclick="openVoterConfirm('${escapeJsString(player.id)}')">This is me</button>
+            <button class="vote-choice" onclick="openVoterConfirm('${escapeJsString(player.id)}')">${escapeHtml(player.name)}</button>
           </div>
         `;
         grid.appendChild(card);
