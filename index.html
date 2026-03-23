@@ -6,31 +6,48 @@
   <title>WMJRLFC Player's Player Voting</title>
   <style>
     :root {
-      --bg: #111111;
-      --panel: #1a1a1a;
-      --panel-2: #232323;
-      --line: #343434;
-      --text: #f5f5f5;
-      --muted: #b9b9b9;
-      --brand: #ff9800;
-      --brand-dark: #d97d00;
-      --success: #27c26c;
-      --danger: #ff5c5c;
-      --warning: #ffd166;
-      --shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
-      --radius: 18px;
-      --radius-sm: 12px;
+      --bg: #08261d;
+      --bg-deep: #03130e;
+      --panel: #0e3327;
+      --panel-2: #144233;
+      --line: rgba(255, 215, 102, 0.22);
+      --text: #f8f7f1;
+      --muted: #d9decf;
+      --brand: #f4b400;
+      --brand-dark: #d79a00;
+      --accent: #38b673;
+      --accent-dark: #278854;
+      --danger: #ff7a7a;
+      --danger-soft: rgba(255, 122, 122, 0.16);
+      --info: #7ed0ff;
+      --success: #8be0a6;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+      --radius: 22px;
+      --radius-sm: 14px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #101010 0%, #171717 100%);
       color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(244, 180, 0, 0.12), transparent 28%),
+        radial-gradient(circle at top left, rgba(56, 182, 115, 0.16), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+      min-height: 100vh;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
     }
 
     .shell {
@@ -39,65 +56,121 @@
     }
 
     .app {
-      max-width: 1180px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
     .hero {
-      background: radial-gradient(circle at top right, rgba(255, 152, 0, 0.18), transparent 30%), var(--panel);
+      background: linear-gradient(135deg, rgba(244, 180, 0, 0.08), rgba(56, 182, 115, 0.08)), var(--panel);
       border: 1px solid var(--line);
-      border-radius: 26px;
+      border-radius: 30px;
       box-shadow: var(--shadow);
-      padding: 28px;
+      padding: 30px;
       margin-bottom: 24px;
     }
 
     .hero-top {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
       align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
     }
 
-    .club-badge {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--brand), #ffbf66);
-      color: #111;
+    .logo-frame {
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 215, 102, 0.18);
       display: grid;
       place-items: center;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .logo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-fallback {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand), #ffe084);
+      color: #0d1d17;
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: 0.08em;
     }
 
     .hero h1 {
       margin: 0;
-      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-size: clamp(2rem, 3vw, 3rem);
     }
 
     .hero p {
       color: var(--muted);
-      line-height: 1.6;
       margin: 12px 0 0;
+      line-height: 1.65;
       max-width: 760px;
     }
 
     .pill-row {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
+      flex-wrap: wrap;
       margin-top: 18px;
     }
 
     .pill {
-      background: rgba(255, 152, 0, 0.12);
-      border: 1px solid rgba(255, 152, 0, 0.32);
-      color: #ffd9a0;
       padding: 8px 12px;
       border-radius: 999px;
+      border: 1px solid rgba(244, 180, 0, 0.24);
+      background: rgba(244, 180, 0, 0.12);
+      color: #fff1c1;
       font-size: 0.92rem;
+    }
+
+    .status-banner,
+    .notice,
+    .mini-banner {
+      border-radius: 14px;
+      border: 1px solid transparent;
+      padding: 14px 16px;
+      margin: 16px 0;
+      line-height: 1.55;
+    }
+
+    .status-banner.info,
+    .mini-banner.info {
+      background: rgba(126, 208, 255, 0.12);
+      border-color: rgba(126, 208, 255, 0.28);
+      color: #d6efff;
+    }
+
+    .status-banner.success,
+    .mini-banner.success {
+      background: rgba(139, 224, 166, 0.12);
+      border-color: rgba(139, 224, 166, 0.3);
+      color: #d8ffe4;
+    }
+
+    .status-banner.error,
+    .mini-banner.error {
+      background: rgba(255, 122, 122, 0.12);
+      border-color: rgba(255, 122, 122, 0.28);
+      color: #ffe0e0;
+    }
+
+    .notice {
+      background: rgba(244, 180, 0, 0.11);
+      border-color: rgba(244, 180, 0, 0.24);
+      color: #fff1c7;
     }
 
     .grid {
@@ -106,135 +179,15 @@
     }
 
     .landing-grid {
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       margin-bottom: 24px;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
-    }
-
-    .role-card h2,
-    .panel h2,
-    .panel h3,
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .role-card p,
-    .panel p,
-    .card p,
-    .helper-text {
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .button-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-
-    button,
-    .button-link {
-      border: none;
-      border-radius: 12px;
-      padding: 13px 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.98rem;
-    }
-
-    button:hover,
-    .button-link:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: var(--brand);
-      color: #151515;
-    }
-
-    .btn-primary:hover {
-      background: var(--brand-dark);
-    }
-
-    .btn-secondary {
-      background: #2a2a2a;
-      color: var(--text);
-      border: 1px solid #444;
-    }
-
-    .btn-danger {
-      background: rgba(255, 92, 92, 0.14);
-      color: #ffc2c2;
-      border: 1px solid rgba(255, 92, 92, 0.35);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid #444;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .notice,
-    .status-banner {
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin: 16px 0;
-      border: 1px solid transparent;
-    }
-
-    .notice {
-      background: rgba(255, 152, 0, 0.08);
-      border-color: rgba(255, 152, 0, 0.25);
-      color: #ffe2b2;
-    }
-
-    .status-banner.info {
-      background: rgba(80, 180, 255, 0.12);
-      border-color: rgba(80, 180, 255, 0.28);
-    }
-
-    .status-banner.success {
-      background: rgba(39, 194, 108, 0.12);
-      border-color: rgba(39, 194, 108, 0.28);
-      color: #bdf0d0;
-    }
-
-    .status-banner.error {
-      background: rgba(255, 92, 92, 0.12);
-      border-color: rgba(255, 92, 92, 0.28);
-      color: #ffd4d4;
     }
 
     .two-col,
     .three-col,
     .stats-grid,
-    .players-grid {
+    .players-grid,
+    .summary-grid {
       display: grid;
       gap: 16px;
     }
@@ -248,14 +201,178 @@
     }
 
     .stats-grid {
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      margin-top: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .panel,
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)), var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    .panel h2,
+    .panel h3,
+    .card h2,
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    .helper-text,
+    .card p,
+    .panel p,
+    .tiny {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tiny {
+      font-size: 0.87rem;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button,
+    .button-like {
+      border: none;
+      border-radius: 13px;
+      padding: 13px 16px;
+      font-weight: 700;
+      font-size: 0.97rem;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover,
+    .button-like:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #112219;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #07160f;
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: #ffdede;
+      border: 1px solid rgba(255, 122, 122, 0.32);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .input,
+    select,
+    textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(2, 10, 8, 0.44);
+      color: var(--text);
+      padding: 13px 14px;
+      font-size: 0.97rem;
+    }
+
+    .input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(244, 180, 0, 0.24);
+      border-color: var(--brand);
+    }
+
+    .tabs,
+    .steps,
+    .tag-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tabs {
+      margin-bottom: 18px;
+    }
+
+    .steps {
+      margin-bottom: 18px;
+    }
+
+    .step,
+    .tag {
+      border-radius: 999px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .step.active,
+    .tab-btn.active {
+      background: var(--brand);
+      color: #102116;
+      border-color: var(--brand);
+    }
+
+    .tab-btn {
+      min-width: 110px;
     }
 
     .stat {
       background: var(--panel-2);
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 16px;
     }
 
@@ -266,99 +383,42 @@
     }
 
     .stat-value {
-      font-size: 1.6rem;
-      font-weight: 700;
+      font-size: 1.55rem;
+      font-weight: 800;
     }
 
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .input,
-    select,
-    textarea {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid #444;
-      background: #101010;
-      color: var(--text);
-      padding: 13px 14px;
-      font-size: 0.97rem;
-    }
-
-    .input:focus,
-    select:focus,
-    textarea:focus {
-      outline: 2px solid rgba(255, 152, 0, 0.28);
-      border-color: var(--brand);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .tab-btn.active {
-      background: var(--brand);
-      color: #111;
-      border-color: transparent;
-    }
-
-    .steps {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .step {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid #454545;
-      color: var(--muted);
-      font-size: 0.92rem;
-      background: #181818;
-    }
-
-    .step.active {
-      color: #111;
-      background: var(--brand);
-      border-color: var(--brand);
+    .player-card,
+    .list-item {
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 16px;
     }
 
     .player-card {
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 16px;
       display: grid;
       gap: 14px;
     }
 
     .player-head {
       display: flex;
-      gap: 12px;
       align-items: center;
+      gap: 12px;
     }
 
     .avatar {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #ffa726, #ffcc80);
-      color: #151515;
+      background: linear-gradient(135deg, var(--brand), #ffe08b);
+      color: #152418;
+      font-weight: 800;
       display: grid;
       place-items: center;
-      font-weight: 700;
     }
 
     .player-meta strong {
       display: block;
-      font-size: 1rem;
     }
 
     .player-meta span {
@@ -373,19 +433,19 @@
     }
 
     .vote-choice {
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #4c4c4c;
-      background: #161616;
+      background: rgba(0, 0, 0, 0.18);
       color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 11px 10px;
       text-align: center;
       font-weight: 700;
     }
 
     .vote-choice.selected {
-      background: rgba(255, 152, 0, 0.18);
+      background: rgba(244, 180, 0, 0.16);
       border-color: var(--brand);
-      color: #ffd694;
+      color: #fff0c4;
     }
 
     .summary-list,
@@ -400,9 +460,15 @@
     .summary-item,
     .simple-list li {
       background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 13px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 18px 0;
     }
 
     .table-wrap {
@@ -412,64 +478,69 @@
 
     table {
       width: 100%;
+      min-width: 680px;
       border-collapse: collapse;
-      min-width: 640px;
     }
 
     th,
     td {
-      text-align: left;
       padding: 12px;
-      border-bottom: 1px solid #383838;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       vertical-align: top;
     }
 
     th {
-      color: #151515;
+      color: #102116;
       background: var(--brand);
     }
 
-    .tiny {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .divider {
-      height: 1px;
-      background: #333;
-      margin: 18px 0;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid #4b4b4b;
-      color: var(--muted);
-      font-size: 0.86rem;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-
     .leader {
-      color: #8ef0b3;
-      font-weight: 700;
+      color: #c7ffd7;
+      font-weight: 800;
     }
 
     .footer-note {
       margin-top: 24px;
-      color: var(--muted);
-      font-size: 0.9rem;
       text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
     }
 
-    @media (max-width: 720px) {
+    .sync-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(56, 182, 115, 0.12);
+      border: 1px solid rgba(56, 182, 115, 0.3);
+      color: #d8ffea;
+      font-size: 0.92rem;
+      margin-top: 16px;
+    }
+
+    .muted-box {
+      background: rgba(0, 0, 0, 0.14);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @media (max-width: 760px) {
       .hero,
       .panel,
       .card {
         padding: 18px;
+      }
+
+      .hero-top {
+        grid-template-columns: 1fr;
+      }
+
+      .logo-frame {
+        width: 84px;
+        height: 84px;
       }
 
       .vote-choices {
@@ -477,7 +548,7 @@
       }
 
       table {
-        min-width: 540px;
+        min-width: 560px;
       }
     }
   </style>
@@ -487,55 +558,60 @@
     <div class="app">
       <section class="hero">
         <div class="hero-top">
-          <div class="club-badge">WM</div>
+          <div class="logo-frame">
+            <img id="clubLogo" src="WMJRLFC-logo.jpg" alt="WMJRLFC club logo" onerror="this.classList.add('hidden');document.getElementById('logoFallback').classList.remove('hidden');">
+            <div id="logoFallback" class="logo-fallback hidden">WM</div>
+          </div>
           <div>
-            <h1>Player's Player Voting</h1>
+            <h1>WMJRLFC Player's Player Voting</h1>
             <p>
-              A cleaner, more user-friendly app for parents, coaches, and club admins. This version separates each role into its own journey, lets coaches manage their own team and players, and gives club admins better oversight.
+              A club-branded, mobile-friendly voting app that gives parents a simple vote flow, coaches self-service team and player setup, and club admins a clearer overview with live Firestore-backed data.
             </p>
+            <div class="sync-chip" id="syncStatus">Connecting to Firebase…</div>
           </div>
         </div>
         <div class="pill-row">
-          <span class="pill">Mobile-first voting</span>
+          <span class="pill">Club colours and logo</span>
+          <span class="pill">Firestore data sync</span>
           <span class="pill">Coach self-service</span>
-          <span class="pill">Admin dashboard</span>
-          <span class="pill">Local demo data included</span>
+          <span class="pill">Admin reporting</span>
         </div>
       </section>
 
       <section id="globalBanner" class="status-banner info hidden"></section>
 
-      <section id="landingSection" class="grid landing-grid">
-        <article class="role-card card">
+      <section id="landingSection" class="grid landing-grid hidden">
+        <article class="card">
           <h2>Vote Now</h2>
-          <p>Best for parents and guardians. Choose the team, confirm the round, rank your top 3 players, and submit in under a minute.</p>
+          <p>Parents and guardians can choose the team, rank 3 players, and submit a vote in a guided flow with review and confirmation.</p>
           <div class="button-row">
             <button class="btn-primary" onclick="openParentFlow()">Start Voting</button>
           </div>
         </article>
 
-        <article class="role-card card">
+        <article class="card">
           <h2>Coach Portal</h2>
-          <p>Coaches can create their own team, set a PIN, manage players, open the current round, and view team tallies.</p>
+          <p>Coaches can create their own team, manage players, control the round, and view live tallies without needing admin setup.</p>
           <div class="button-row">
-            <button class="btn-primary" onclick="openCoachPortal()">Coach Login</button>
+            <button class="btn-accent" onclick="openCoachPortal()">Coach Login</button>
           </div>
         </article>
 
-        <article class="role-card card">
+        <article class="card">
           <h2>Club Admin</h2>
-          <p>Admins can monitor all teams, review participation, create teams for new coaches if needed, and export season data.</p>
+          <p>Club admins can see participation, monitor all teams, create coaches if needed, and export live data for reporting.</p>
           <div class="button-row">
-            <button class="btn-primary" onclick="openAdminPortal()">Admin Login</button>
+            <button class="btn-secondary" onclick="openAdminPortal()">Admin Login</button>
           </div>
         </article>
       </section>
 
       <section id="parentSection" class="panel hidden">
-        <div class="button-row" style="justify-content: space-between;">
+        <div class="button-row" style="justify-content: space-between; align-items: center;">
           <h2 style="margin-bottom: 0;">Parent Voting Flow</h2>
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
+
         <div class="steps">
           <div class="step" id="parentStep1">1. Team</div>
           <div class="step" id="parentStep2">2. Vote</div>
@@ -543,16 +619,16 @@
           <div class="step" id="parentStep4">4. Done</div>
         </div>
 
-        <div id="parentBanner" class="status-banner info hidden"></div>
+        <div id="parentBanner" class="mini-banner info hidden"></div>
 
         <div id="parentStageTeam" class="grid two-col">
           <div class="card">
             <h3>Choose your team</h3>
-            <p class="helper-text">Select the team you are voting for. The current round opens automatically based on the coach settings.</p>
+            <p class="helper-text">Voting follows the round that the coach has opened for the team.</p>
             <label for="parentTeamSelect">Team</label>
             <select id="parentTeamSelect"></select>
             <div class="notice">
-              By continuing, you confirm parent or guardian consent to use player names inside this app for positive recognition, award tracking, and club reporting.
+              By proceeding, you confirm parent or guardian consent to use player names for Player's Player voting, team recognition, and club reporting.
             </div>
             <div class="button-row">
               <button class="btn-primary" onclick="startVoting()">Continue to Voting</button>
@@ -562,10 +638,10 @@
           <div class="card">
             <h3>How voting works</h3>
             <ul class="simple-list">
-              <li>Select 3 different players.</li>
-              <li>Your choices count as 3 points, 2 points, and 1 point.</li>
-              <li>Each browser can submit once per team per round in this demo.</li>
-              <li>Coaches can open or rename the round from the coach portal.</li>
+              <li>Choose 3 different players.</li>
+              <li>Your selections count as 3 points, 2 points, and 1 point.</li>
+              <li>Only open rounds can receive votes.</li>
+              <li>This version records a unique browser vote per team and round using Firestore.</li>
             </ul>
           </div>
         </div>
@@ -573,9 +649,12 @@
         <div id="parentStageVote" class="hidden">
           <div class="card">
             <h3 id="voteHeading">Cast your votes</h3>
-            <p class="helper-text">Tap one score per player. You must select exactly one 3-point vote, one 2-point vote, and one 1-point vote.</p>
-            <div class="tag" id="voteTeamTag"></div>
-            <div class="tag" id="voteRoundTag"></div>
+            <p class="helper-text">Assign one score to each of your top 3 players. You can tap again to unselect and change your choice.</p>
+            <div class="tag-row">
+              <div class="tag" id="voteTeamTag"></div>
+              <div class="tag" id="voteRoundTag"></div>
+              <div class="tag" id="voteStatusTag"></div>
+            </div>
             <div class="players-grid" id="playerVoteGrid"></div>
             <div class="button-row">
               <button class="btn-secondary" onclick="backToTeamSelection()">Back</button>
@@ -588,20 +667,20 @@
           <div class="card">
             <h3>Review your selections</h3>
             <ul class="summary-list" id="voteSummaryList"></ul>
-            <div class="notice">Please check your choices before submitting. In this demo app, a browser can only vote once per team and round.</div>
+            <div class="notice">Please check your choices before submitting. Once sent, this browser cannot vote again for the same team and round.</div>
             <div class="button-row">
               <button class="btn-secondary" onclick="returnToVoting()">Edit Choices</button>
-              <button class="btn-primary" onclick="submitVotes()">Submit Votes</button>
+              <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Votes</button>
             </div>
           </div>
         </div>
 
         <div id="parentStageDone" class="hidden">
           <div class="card">
-            <h3>Thanks - your vote has been recorded.</h3>
-            <p class="helper-text">The vote has been added to the current round tally. Coaches and admins can view totals from their dashboards.</p>
+            <h3>Thanks — your vote has been recorded.</h3>
+            <p class="helper-text">The team tally has been updated in Firestore. Coaches and admins will see the updated data when they refresh their dashboard.</p>
             <div class="button-row">
-              <button class="btn-primary" onclick="resetParentFlow()">Submit Another Team Vote</button>
+              <button class="btn-primary" onclick="resetParentFlow()">Vote for Another Team</button>
               <button class="btn-secondary" onclick="goHome()">Finish</button>
             </div>
           </div>
@@ -609,14 +688,14 @@
       </section>
 
       <section id="coachSection" class="panel hidden">
-        <div class="button-row" style="justify-content: space-between;">
+        <div class="button-row" style="justify-content: space-between; align-items: center;">
           <h2 style="margin-bottom: 0;">Coach Portal</h2>
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
 
         <div id="coachLoginCard" class="card">
           <h3>Coach login</h3>
-          <p class="helper-text">Coaches can sign in with an existing team and PIN, or create a new team below.</p>
+          <p class="helper-text">Coaches can log into an existing team or create a new team below.</p>
           <div class="two-col">
             <div>
               <label for="coachTeamSelect">My Team</label>
@@ -628,17 +707,17 @@
             </div>
           </div>
           <div class="button-row">
-            <button class="btn-primary" onclick="coachLogin()">Login</button>
+            <button class="btn-accent" onclick="coachLogin()">Login</button>
           </div>
           <div class="notice">
-            Demo starter coach PINs: Under 8 Gold = <strong>2480</strong>, Under 9 Black = <strong>1357</strong>.
+            Demo coach PINs remain available for seeded teams: Under 8 Gold = <strong>2480</strong>, Under 9 Black = <strong>1357</strong>.
           </div>
-          <div id="coachLoginBanner" class="status-banner error hidden"></div>
+          <div id="coachLoginBanner" class="mini-banner error hidden"></div>
         </div>
 
         <div id="coachCreateCard" class="card">
           <h3>Create a new team</h3>
-          <p class="helper-text">This is the self-service setup flow you said was missing. A coach can create a team, set their own PIN, and start adding players immediately.</p>
+          <p class="helper-text">This lets a coach set up their own team, add a PIN, and get started immediately.</p>
           <div class="three-col">
             <div>
               <label for="newCoachName">Coach Name</label>
@@ -668,11 +747,17 @@
 
           <div id="coachOverview" class="coach-tab">
             <div class="stats-grid" id="coachStats"></div>
-            <div class="card" style="margin-top: 18px;">
-              <h3>Team details</h3>
-              <div id="coachTeamDetails"></div>
-              <div class="button-row">
-                <button class="btn-secondary" onclick="logoutCoach()">Log Out</button>
+            <div class="summary-grid" style="margin-top: 18px;">
+              <div class="card">
+                <h3>Team details</h3>
+                <div id="coachTeamDetails"></div>
+              </div>
+              <div class="card">
+                <h3>Coach sharing info</h3>
+                <div id="coachSharingInfo"></div>
+                <div class="button-row">
+                  <button class="btn-secondary" onclick="logoutCoach()">Log Out</button>
+                </div>
               </div>
             </div>
           </div>
@@ -680,7 +765,7 @@
           <div id="coachPlayers" class="coach-tab hidden">
             <div class="card">
               <h3>Manage players</h3>
-              <p class="helper-text">Add players, keep the roster up to date, and remove names that should not appear in voting.</p>
+              <p class="helper-text">Add, remove, and maintain the team roster that appears to parents during voting.</p>
               <div class="two-col">
                 <div>
                   <label for="playerNameInput">Player Name</label>
@@ -705,7 +790,7 @@
               <div class="three-col">
                 <div>
                   <label for="roundNameInput">Round Name</label>
-                  <input id="roundNameInput" class="input" type="text" placeholder="Round 1 vs Tigers">
+                  <input id="roundNameInput" class="input" type="text" placeholder="Round 4 vs Tigers">
                 </div>
                 <div>
                   <label for="roundStatusSelect">Voting Status</label>
@@ -722,6 +807,7 @@
               <div class="button-row">
                 <button class="btn-primary" onclick="saveRoundSettings()">Save Round Settings</button>
               </div>
+              <div class="notice">If you change the round name, round-only tallies reset to 0 for that team so the next round starts clean.</div>
             </div>
           </div>
 
@@ -746,14 +832,14 @@
       </section>
 
       <section id="adminSection" class="panel hidden">
-        <div class="button-row" style="justify-content: space-between;">
+        <div class="button-row" style="justify-content: space-between; align-items: center;">
           <h2 style="margin-bottom: 0;">Club Admin</h2>
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
 
         <div id="adminLoginCard" class="card">
           <h3>Admin login</h3>
-          <p class="helper-text">Use the club admin PIN to view the full club dashboard, exports, and participation metrics.</p>
+          <p class="helper-text">Enter the club admin PIN to access the club-wide dashboard.</p>
           <div class="two-col">
             <div>
               <label for="adminPinInput">Admin PIN</label>
@@ -767,15 +853,16 @@
           <div class="button-row">
             <button class="btn-primary" onclick="adminLogin()">Login</button>
           </div>
-          <div id="adminLoginBanner" class="status-banner error hidden"></div>
+          <div id="adminLoginBanner" class="mini-banner error hidden"></div>
         </div>
 
         <div id="adminDashboard" class="hidden">
           <div class="stats-grid" id="adminStats"></div>
+
           <div class="two-col" style="margin-top: 18px;">
             <div class="card">
               <h3>Create team for a coach</h3>
-              <p class="helper-text">Admins can still create a team when onboarding a new coach, but the primary setup path now lives in the coach portal.</p>
+              <p class="helper-text">Admins can still create teams for onboarding, even though coaches can self-serve in their own portal.</p>
               <div class="three-col">
                 <div>
                   <label for="adminCoachName">Coach Name</label>
@@ -796,18 +883,18 @@
             </div>
 
             <div class="card">
-              <h3>Export</h3>
-              <p class="helper-text">Copy the CSV data below into a spreadsheet, or export the full JSON data block for backup.</p>
+              <h3>Export live data</h3>
+              <p class="helper-text">Copy the current Firestore-backed data into CSV or JSON for reports and backups.</p>
               <div class="button-row">
                 <button class="btn-primary" onclick="copyCsvExport()">Copy CSV Summary</button>
                 <button class="btn-secondary" onclick="copyJsonExport()">Copy JSON Backup</button>
               </div>
-              <textarea id="exportOutput" rows="10" placeholder="Export output appears here"></textarea>
+              <textarea id="exportOutput" rows="11" placeholder="Export output appears here"></textarea>
             </div>
           </div>
 
           <div class="card" style="margin-top: 18px;">
-            <h3>Club-wide team tallies</h3>
+            <h3>Club-wide team overview</h3>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -824,90 +911,144 @@
               </table>
             </div>
             <div class="button-row">
+              <button class="btn-secondary" onclick="refreshFromCloud(true)">Refresh From Firestore</button>
               <button class="btn-secondary" onclick="logoutAdmin()">Log Out</button>
             </div>
           </div>
         </div>
       </section>
 
-      <p class="footer-note">Standalone HTML demo. Data saves in your browser via localStorage, so you can paste this into a GitHub Pages HTML file and test immediately.</p>
+      <p class="footer-note">
+        Paste this file into GitHub Pages as a single HTML page. It uses the club logo file `WMJRLFC-logo.jpg` and stores live team data in Firebase Firestore.
+      </p>
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = 'wmjrlfc-player-voting-demo-v2';
-    const ADMIN_PIN = '9999';
-
-    const defaultState = {
-      teams: [
-        {
-          id: generateId('team'),
-          name: 'Under 8 Gold',
-          coachName: 'Jamie Lee',
-          coachPin: '2480',
-          round: {
-            name: 'Round 1 vs Falcons',
-            status: 'open',
-            note: 'Closes Sunday 6pm'
-          },
-          players: [
-            { id: generateId('player'), name: 'Mason Reed', number: '7', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Noah Ellis', number: '11', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Luca Bennett', number: '3', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Ethan Hart', number: '9', seasonVotes: 0, roundVotes: 0 }
-          ],
-          votesCast: 0
-        },
-        {
-          id: generateId('team'),
-          name: 'Under 9 Black',
-          coachName: 'Tara Collins',
-          coachPin: '1357',
-          round: {
-            name: 'Round 3 vs Tigers',
-            status: 'open',
-            note: 'Open after Saturday match'
-          },
-          players: [
-            { id: generateId('player'), name: 'Harper Stone', number: '4', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Zoe Walsh', number: '15', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Ruby Cook', number: '6', seasonVotes: 0, roundVotes: 0 },
-            { id: generateId('player'), name: 'Evie Clarke', number: '2', seasonVotes: 0, roundVotes: 0 }
-          ],
-          votesCast: 0
-        }
-      ],
-      activityLog: [],
-      voteTokens: []
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzZZr_8JYLcxSmcFKxNT3vlzlKj2Jkt8U",
+      authDomain: "wmjrlfc-players-player.firebaseapp.com",
+      projectId: "wmjrlfc-players-player",
+      storageBucket: "wmjrlfc-players-player.firebasestorage.app",
+      messagingSenderId: "458850703708",
+      appId: "1:458850703708:web:0ba09f75db4f8ed8d70999",
+      measurementId: "G-XQNWVH76KV"
     };
 
-    let state = loadState();
+    const ADMIN_PIN = '9999';
+    const BROWSER_ID_KEY = 'wmjrlfc-browser-id';
+    const TEAM_COLLECTION = 'teams';
+    const ACTIVITY_COLLECTION = 'activity';
+    const VOTE_TOKEN_COLLECTION = 'vote_tokens';
+
+    let app = null;
+    let db = null;
+    let state = {
+      teams: [],
+      activityLog: []
+    };
     let parentFlow = {
       teamId: '',
       votes: { 3: null, 2: null, 1: null }
     };
     let coachSessionTeamId = null;
     let adminLoggedIn = false;
+    let browserId = getBrowserId();
+    let cloudReady = false;
+
+    const defaultTeams = [
+      {
+        id: generateId('team'),
+        name: 'Under 8 Gold',
+        coachName: 'Jamie Lee',
+        coachPin: '2480',
+        round: {
+          name: 'Round 1 vs Falcons',
+          status: 'open',
+          note: 'Closes Sunday 6pm'
+        },
+        players: [
+          { id: generateId('player'), name: 'Mason Reed', number: '7', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Noah Ellis', number: '11', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Luca Bennett', number: '3', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Ethan Hart', number: '9', seasonVotes: 0, roundVotes: 0 }
+        ],
+        votesCast: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: generateId('team'),
+        name: 'Under 9 Black',
+        coachName: 'Tara Collins',
+        coachPin: '1357',
+        round: {
+          name: 'Round 3 vs Tigers',
+          status: 'open',
+          note: 'Open after Saturday match'
+        },
+        players: [
+          { id: generateId('player'), name: 'Harper Stone', number: '4', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Zoe Walsh', number: '15', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Ruby Cook', number: '6', seasonVotes: 0, roundVotes: 0 },
+          { id: generateId('player'), name: 'Evie Clarke', number: '2', seasonVotes: 0, roundVotes: 0 }
+        ],
+        votesCast: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
 
     function generateId(prefix) {
       return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
     }
 
-    function loadState() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-        return JSON.parse(JSON.stringify(defaultState));
+    function getBrowserId() {
+      let id = localStorage.getItem(BROWSER_ID_KEY);
+      if (!id) {
+        id = generateId('browser');
+        localStorage.setItem(BROWSER_ID_KEY, id);
       }
-      try {
-        return JSON.parse(saved);
-      } catch (error) {
-        return JSON.parse(JSON.stringify(defaultState));
-      }
+      return id;
     }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function slugify(value) {
+      return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function initials(name) {
+      return String(name || '')
+        .split(' ')
+        .filter(Boolean)
+        .map(part => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+    }
+
+    function timestampNow() {
+      return new Date().toISOString();
+    }
+
+    function setSyncStatus(message, type) {
+      const chip = document.getElementById('syncStatus');
+      chip.textContent = message;
+      chip.style.background = type === 'error'
+        ? 'rgba(255, 122, 122, 0.12)'
+        : type === 'success'
+          ? 'rgba(56, 182, 115, 0.12)'
+          : 'rgba(244, 180, 0, 0.12)';
+      chip.style.borderColor = type === 'error'
+        ? 'rgba(255, 122, 122, 0.28)'
+        : type === 'success'
+          ? 'rgba(56, 182, 115, 0.28)'
+          : 'rgba(244, 180, 0, 0.26)';
     }
 
     function showBanner(message, type = 'info') {
@@ -922,17 +1063,41 @@
       document.getElementById('globalBanner').classList.add('hidden');
     }
 
+    function showMiniBanner(id, message, type) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = `mini-banner ${type}`;
+      el.classList.remove('hidden');
+    }
+
+    function hideMiniBanner(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
     function getTeam(teamId) {
       return state.teams.find(team => team.id === teamId);
     }
 
-    function initials(name) {
-      return name
-        .split(' ')
-        .map(part => part[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function ensureTeamDefaults(team) {
+      return {
+        id: team.id || generateId('team'),
+        name: team.name || 'Untitled Team',
+        coachName: team.coachName || 'Coach',
+        coachPin: team.coachPin || '0000',
+        round: {
+          name: (team.round && team.round.name) || 'Round 1',
+          status: (team.round && team.round.status) || 'open',
+          note: (team.round && team.round.note) || 'Voting is open'
+        },
+        players: Array.isArray(team.players) ? team.players : [],
+        votesCast: Number(team.votesCast || 0),
+        createdAt: team.createdAt || timestampNow(),
+        updatedAt: team.updatedAt || timestampNow()
+      };
     }
 
     function resetView() {
@@ -945,6 +1110,26 @@
       resetView();
       hideBanner();
       document.getElementById('landingSection').classList.remove('hidden');
+    }
+
+    function setParentStep(step) {
+      [1, 2, 3, 4].forEach(index => {
+        document.getElementById(`parentStep${index}`).classList.toggle('active', index === step);
+      });
+    }
+
+    function resetParentFlow() {
+      parentFlow = {
+        teamId: '',
+        votes: { 3: null, 2: null, 1: null }
+      };
+      document.getElementById('parentTeamSelect').value = '';
+      hideMiniBanner('parentBanner');
+      document.getElementById('parentStageTeam').classList.remove('hidden');
+      document.getElementById('parentStageVote').classList.add('hidden');
+      document.getElementById('parentStageReview').classList.add('hidden');
+      document.getElementById('parentStageDone').classList.add('hidden');
+      setParentStep(1);
     }
 
     function openParentFlow() {
@@ -964,7 +1149,7 @@
       document.getElementById('coachLoginCard').classList.remove('hidden');
       document.getElementById('coachCreateCard').classList.remove('hidden');
       document.getElementById('coachPinInput').value = '';
-      document.getElementById('coachLoginBanner').classList.add('hidden');
+      hideMiniBanner('coachLoginBanner');
     }
 
     function openAdminPortal() {
@@ -974,27 +1159,7 @@
       document.getElementById('adminDashboard').classList.add('hidden');
       document.getElementById('adminLoginCard').classList.remove('hidden');
       document.getElementById('adminPinInput').value = '';
-      document.getElementById('adminLoginBanner').classList.add('hidden');
-    }
-
-    function setParentStep(activeStep) {
-      [1, 2, 3, 4].forEach(step => {
-        document.getElementById(`parentStep${step}`).classList.toggle('active', step === activeStep);
-      });
-    }
-
-    function resetParentFlow() {
-      parentFlow = {
-        teamId: '',
-        votes: { 3: null, 2: null, 1: null }
-      };
-      document.getElementById('parentTeamSelect').value = '';
-      document.getElementById('parentBanner').classList.add('hidden');
-      document.getElementById('parentStageTeam').classList.remove('hidden');
-      document.getElementById('parentStageVote').classList.add('hidden');
-      document.getElementById('parentStageReview').classList.add('hidden');
-      document.getElementById('parentStageDone').classList.add('hidden');
-      setParentStep(1);
+      hideMiniBanner('adminLoginBanner');
     }
 
     function refreshParentTeamSelect() {
@@ -1011,53 +1176,108 @@
         });
     }
 
-    function startVoting() {
-      const teamId = document.getElementById('parentTeamSelect').value;
-      const team = getTeam(teamId);
-      if (!team) {
-        showParentBanner('Please choose a team before continuing.', 'error');
-        return;
-      }
-      if (team.round.status !== 'open') {
-        showParentBanner(`Voting is currently closed for ${team.name}.`, 'error');
-        return;
-      }
-      const voteToken = `${team.id}::${team.round.name}`;
-      if (state.voteTokens.includes(voteToken)) {
-        showParentBanner('This browser has already submitted a vote for this team and round.', 'error');
-        return;
-      }
-      parentFlow.teamId = team.id;
-      parentFlow.votes = { 3: null, 2: null, 1: null };
-      document.getElementById('parentStageTeam').classList.add('hidden');
-      document.getElementById('parentStageVote').classList.remove('hidden');
-      document.getElementById('parentStageReview').classList.add('hidden');
-      document.getElementById('parentStageDone').classList.add('hidden');
-      document.getElementById('voteHeading').textContent = `Cast your votes for ${team.name}`;
-      document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
-      document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
-      renderPlayerVoteGrid(team);
-      setParentStep(2);
-      showParentBanner(`Voting is open for ${team.round.name}. ${team.round.note || ''}`.trim(), 'info');
+    function refreshCoachTeamSelect() {
+      const select = document.getElementById('coachTeamSelect');
+      select.innerHTML = '<option value="">-- Select My Team --</option>';
+      state.teams
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(team => {
+          const option = document.createElement('option');
+          option.value = team.id;
+          option.textContent = `${team.name} — Coach ${team.coachName}`;
+          select.appendChild(option);
+        });
     }
 
-    function showParentBanner(message, type) {
-      const banner = document.getElementById('parentBanner');
-      banner.textContent = message;
-      banner.className = `status-banner ${type}`;
-      banner.classList.remove('hidden');
+    function refreshAllSelectors() {
+      refreshParentTeamSelect();
+      refreshCoachTeamSelect();
+    }
+
+    async function initializeFirebase() {
+      app = firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      cloudReady = true;
+      setSyncStatus('Firebase connected. Loading live team data…', 'success');
+      await seedDemoTeamsIfNeeded();
+      await refreshFromCloud(false);
+      goHome();
+    }
+
+    async function seedDemoTeamsIfNeeded() {
+      const snapshot = await db.collection(TEAM_COLLECTION).limit(1).get();
+      if (!snapshot.empty) return;
+      const batch = db.batch();
+      defaultTeams.forEach(team => {
+        const teamData = ensureTeamDefaults(team);
+        batch.set(db.collection(TEAM_COLLECTION).doc(teamData.id), teamData);
+      });
+      const activityRef = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
+      batch.set(activityRef, {
+        id: activityRef.id,
+        type: 'seed_demo_data',
+        message: 'Created default WMJRLFC demo teams',
+        createdAt: timestampNow()
+      });
+      await batch.commit();
+    }
+
+    async function loadTeamsFromCloud() {
+      const snapshot = await db.collection(TEAM_COLLECTION).get();
+      return snapshot.docs
+        .map(doc => ensureTeamDefaults({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    async function loadActivityFromCloud() {
+      const snapshot = await db.collection(ACTIVITY_COLLECTION)
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async function refreshFromCloud(showSuccessBanner = false) {
+      if (!cloudReady) {
+        showBanner('Firebase is not ready yet. Please wait a moment and try again.', 'info');
+        return;
+      }
+      setSyncStatus('Refreshing live Firestore data…', 'info');
+      const teams = await loadTeamsFromCloud();
+      const activity = await loadActivityFromCloud();
+      state.teams = teams;
+      state.activityLog = activity;
+      refreshAllSelectors();
+      refreshCoachArea();
+      refreshAdminArea();
+      setSyncStatus(`Firestore synced: ${teams.length} team(s) loaded`, 'success');
+      if (showSuccessBanner) {
+        showBanner('Live data refreshed from Firestore.', 'success');
+      }
+    }
+
+    async function createActivity(type, message, teamId = '') {
+      const ref = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
+      await ref.set({
+        id: ref.id,
+        type,
+        teamId,
+        message,
+        createdAt: timestampNow()
+      });
     }
 
     function renderPlayerVoteGrid(team) {
       const grid = document.getElementById('playerVoteGrid');
       grid.innerHTML = '';
       team.players.forEach(player => {
-        const card = document.createElement('div');
-        card.className = 'player-card';
         const selectedPoints = Object.entries(parentFlow.votes)
           .filter(([, playerId]) => playerId === player.id)
           .map(([points]) => Number(points));
 
+        const card = document.createElement('div');
+        card.className = 'player-card';
         card.innerHTML = `
           <div class="player-head">
             <div class="avatar">${initials(player.name)}</div>
@@ -1078,6 +1298,37 @@
       });
     }
 
+    async function startVoting() {
+      await refreshFromCloud(false);
+      const teamId = document.getElementById('parentTeamSelect').value;
+      const team = getTeam(teamId);
+      if (!team) {
+        showMiniBanner('parentBanner', 'Please choose a team before continuing.', 'error');
+        return;
+      }
+      if (team.players.length < 3) {
+        showMiniBanner('parentBanner', 'This team needs at least 3 players in the roster before voting can open.', 'error');
+        return;
+      }
+      if (team.round.status !== 'open') {
+        showMiniBanner('parentBanner', `Voting is currently closed for ${team.name}.`, 'error');
+        return;
+      }
+      parentFlow.teamId = team.id;
+      parentFlow.votes = { 3: null, 2: null, 1: null };
+      document.getElementById('voteHeading').textContent = `Cast your votes for ${team.name}`;
+      document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
+      document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
+      document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is open';
+      renderPlayerVoteGrid(team);
+      document.getElementById('parentStageTeam').classList.add('hidden');
+      document.getElementById('parentStageVote').classList.remove('hidden');
+      document.getElementById('parentStageReview').classList.add('hidden');
+      document.getElementById('parentStageDone').classList.add('hidden');
+      setParentStep(2);
+      showMiniBanner('parentBanner', `Voting is open for ${team.round.name}.`, 'info');
+    }
+
     function toggleVote(playerId, points) {
       const currentHolder = parentFlow.votes[points];
       if (currentHolder === playerId) {
@@ -1090,7 +1341,8 @@
         });
         parentFlow.votes[points] = playerId;
       }
-      renderPlayerVoteGrid(getTeam(parentFlow.teamId));
+      const team = getTeam(parentFlow.teamId);
+      if (team) renderPlayerVoteGrid(team);
     }
 
     function backToTeamSelection() {
@@ -1103,17 +1355,17 @@
     function reviewVotes() {
       const team = getTeam(parentFlow.teamId);
       if (!team) {
-        showParentBanner('Please choose a team first.', 'error');
+        showMiniBanner('parentBanner', 'Please choose a team first.', 'error');
         return;
       }
       const missing = [3, 2, 1].filter(points => !parentFlow.votes[points]);
-      if (missing.length > 0) {
-        showParentBanner(`Please assign ${missing.join(', ')} point selections before reviewing.`, 'error');
+      if (missing.length) {
+        showMiniBanner('parentBanner', `Please assign ${missing.join(', ')} point selections before reviewing.`, 'error');
         return;
       }
       const uniqueSelections = new Set(Object.values(parentFlow.votes));
       if (uniqueSelections.size !== 3) {
-        showParentBanner('Please choose 3 different players.', 'error');
+        showMiniBanner('parentBanner', 'Please choose 3 different players.', 'error');
         return;
       }
       const list = document.getElementById('voteSummaryList');
@@ -1136,46 +1388,80 @@
       setParentStep(2);
     }
 
-    function submitVotes() {
+    async function submitVotes() {
+      if (!cloudReady) {
+        showMiniBanner('parentBanner', 'Firebase is still connecting. Please try again in a moment.', 'error');
+        return;
+      }
       const team = getTeam(parentFlow.teamId);
       if (!team) return;
-      [3, 2, 1].forEach(points => {
-        const player = team.players.find(item => item.id === parentFlow.votes[points]);
-        if (player) {
-          player.roundVotes += points;
-          player.seasonVotes += points;
-        }
-      });
-      team.votesCast += 1;
-      const voteToken = `${team.id}::${team.round.name}`;
-      state.voteTokens.push(voteToken);
-      state.activityLog.unshift({
-        type: 'vote_submitted',
-        teamId: team.id,
-        roundName: team.round.name,
-        timestamp: new Date().toISOString()
-      });
-      saveState();
-      document.getElementById('parentStageReview').classList.add('hidden');
-      document.getElementById('parentStageDone').classList.remove('hidden');
-      setParentStep(4);
-      showParentBanner('Vote submitted successfully.', 'success');
-      refreshCoachArea();
-      refreshAdminArea();
-    }
 
-    function refreshCoachTeamSelect() {
-      const select = document.getElementById('coachTeamSelect');
-      select.innerHTML = '<option value="">-- Select My Team --</option>';
-      state.teams
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .forEach(team => {
-          const option = document.createElement('option');
-          option.value = team.id;
-          option.textContent = `${team.name} — Coach ${team.coachName}`;
-          select.appendChild(option);
+      const button = document.getElementById('submitVoteButton');
+      button.disabled = true;
+      button.textContent = 'Submitting…';
+
+      const roundSlug = slugify(team.round.name);
+      const voteTokenId = `${team.id}__${roundSlug}__${browserId}`;
+      const teamRef = db.collection(TEAM_COLLECTION).doc(team.id);
+      const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
+      const activityRef = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
+
+      try {
+        await db.runTransaction(async transaction => {
+          const voteTokenDoc = await transaction.get(voteTokenRef);
+          if (voteTokenDoc.exists) {
+            throw new Error('This browser has already voted for this team and round.');
+          }
+
+          const teamDoc = await transaction.get(teamRef);
+          if (!teamDoc.exists) {
+            throw new Error('The selected team no longer exists.');
+          }
+
+          const liveTeam = ensureTeamDefaults({ id: teamDoc.id, ...teamDoc.data() });
+          if (liveTeam.round.status !== 'open') {
+            throw new Error('Voting has been closed for this team.');
+          }
+
+          const updatedTeam = clone(liveTeam);
+          [3, 2, 1].forEach(points => {
+            const player = updatedTeam.players.find(item => item.id === parentFlow.votes[points]);
+            if (player) {
+              player.roundVotes += points;
+              player.seasonVotes += points;
+            }
+          });
+          updatedTeam.votesCast += 1;
+          updatedTeam.updatedAt = timestampNow();
+
+          transaction.set(teamRef, updatedTeam, { merge: true });
+          transaction.set(voteTokenRef, {
+            id: voteTokenId,
+            teamId: liveTeam.id,
+            roundName: liveTeam.round.name,
+            browserId,
+            createdAt: timestampNow()
+          });
+          transaction.set(activityRef, {
+            id: activityRef.id,
+            type: 'vote_submitted',
+            teamId: liveTeam.id,
+            message: `Vote submitted for ${liveTeam.name} (${liveTeam.round.name})`,
+            createdAt: timestampNow()
+          });
         });
+
+        await refreshFromCloud(false);
+        document.getElementById('parentStageReview').classList.add('hidden');
+        document.getElementById('parentStageDone').classList.remove('hidden');
+        setParentStep(4);
+        showMiniBanner('parentBanner', 'Vote submitted successfully.', 'success');
+      } catch (error) {
+        showMiniBanner('parentBanner', error.message || 'Unable to submit the vote right now.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Submit Votes';
+      }
     }
 
     function coachLogin() {
@@ -1183,9 +1469,7 @@
       const pin = document.getElementById('coachPinInput').value.trim();
       const team = getTeam(teamId);
       if (!team || !pin || team.coachPin !== pin) {
-        const banner = document.getElementById('coachLoginBanner');
-        banner.textContent = 'Incorrect team or PIN. Please try again.';
-        banner.classList.remove('hidden');
+        showMiniBanner('coachLoginBanner', 'Incorrect team or PIN. Please try again.', 'error');
         return;
       }
       coachSessionTeamId = team.id;
@@ -1197,7 +1481,11 @@
       showBanner(`Logged in as coach for ${team.name}.`, 'success');
     }
 
-    function createCoachTeam() {
+    async function createCoachTeam() {
+      if (!cloudReady) {
+        showBanner('Firebase is still connecting. Please wait before creating a team.', 'info');
+        return;
+      }
       const coachName = document.getElementById('newCoachName').value.trim();
       const teamName = document.getElementById('newTeamName').value.trim();
       const coachPin = document.getElementById('newCoachPin').value.trim();
@@ -1205,7 +1493,7 @@
         showBanner('Please enter a coach name, team name, and a PIN with at least 4 characters.', 'error');
         return;
       }
-      const newTeam = {
+      const newTeam = ensureTeamDefaults({
         id: generateId('team'),
         name: teamName,
         coachName,
@@ -1216,20 +1504,17 @@
           note: 'Voting is now open'
         },
         players: [],
-        votesCast: 0
-      };
-      state.teams.push(newTeam);
-      state.activityLog.unshift({
-        type: 'team_created_by_coach',
-        teamId: newTeam.id,
-        timestamp: new Date().toISOString()
+        votesCast: 0,
+        createdAt: timestampNow(),
+        updatedAt: timestampNow()
       });
-      saveState();
+      await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
+      await createActivity('team_created_by_coach', `Coach ${coachName} created ${teamName}`, newTeam.id);
       document.getElementById('newCoachName').value = '';
       document.getElementById('newTeamName').value = '';
       document.getElementById('newCoachPin').value = '';
-      refreshAllSelectors();
-      showBanner(`Team created successfully: ${teamName}. You can now log in with your new PIN.`, 'success');
+      await refreshFromCloud(false);
+      showBanner(`Team created successfully: ${teamName}.`, 'success');
     }
 
     function showCoachTab(tabId, button) {
@@ -1254,7 +1539,15 @@
       document.getElementById('coachTeamDetails').innerHTML = `
         <p><strong>Coach:</strong> ${team.coachName}</p>
         <p><strong>Current Round:</strong> ${team.round.name}</p>
-        <p><strong>Voting Note:</strong> ${team.round.note || 'No note set'}</p>
+        <p><strong>Round Note:</strong> ${team.round.note || 'No note set'}</p>
+      `;
+
+      document.getElementById('coachSharingInfo').innerHTML = `
+        <div class="muted-box">
+          <p><strong>Parent voting message</strong></p>
+          <p class="tiny">Tell parents to open this page, select <strong>${team.name}</strong>, and vote during <strong>${team.round.name}</strong>.</p>
+          <p class="tiny">Voting status: <strong>${team.round.status}</strong></p>
+        </div>
       `;
 
       document.getElementById('roundNameInput').value = team.round.name;
@@ -1267,24 +1560,22 @@
 
     function renderCoachPlayers(team) {
       const wrap = document.getElementById('coachPlayerList');
-      if (team.players.length === 0) {
-        wrap.innerHTML = '<div class="notice">No players added yet. Add your first player above to start team voting.</div>';
+      if (!team.players.length) {
+        wrap.innerHTML = '<div class="notice">No players added yet. Add your first player above to make the team vote-ready.</div>';
         return;
       }
-      wrap.innerHTML = team.players
-        .map(player => `
-          <div class="summary-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
-            <div>
-              <strong>${player.name}</strong>
-              <div class="tiny">${player.number ? `Jersey ${player.number}` : 'No jersey set'}</div>
-            </div>
-            <button class="btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+      wrap.innerHTML = team.players.map(player => `
+        <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+          <div>
+            <strong>${player.name}</strong>
+            <div class="tiny">${player.number ? `Jersey ${player.number}` : 'No jersey set'}</div>
           </div>
-        `)
-        .join('');
+          <button class="btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+        </div>
+      `).join('');
     }
 
-    function addPlayer() {
+    async function addPlayer() {
       const team = getTeam(coachSessionTeamId);
       if (!team) return;
       const name = document.getElementById('playerNameInput').value.trim();
@@ -1293,64 +1584,65 @@
         showBanner('Please enter a player name.', 'error');
         return;
       }
-      team.players.push({
+      const updatedTeam = clone(team);
+      updatedTeam.players.push({
         id: generateId('player'),
         name,
         number,
         seasonVotes: 0,
         roundVotes: 0
       });
-      saveState();
+      updatedTeam.updatedAt = timestampNow();
+      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+      await createActivity('player_added', `Added ${name} to ${updatedTeam.name}`, updatedTeam.id);
       document.getElementById('playerNameInput').value = '';
       document.getElementById('playerNumberInput').value = '';
-      refreshAllSelectors();
-      refreshCoachArea();
-      refreshAdminArea();
-      showBanner(`${name} was added to ${team.name}.`, 'success');
+      await refreshFromCloud(false);
+      showBanner(`${name} was added to ${updatedTeam.name}.`, 'success');
     }
 
-    function removePlayer(playerId) {
+    async function removePlayer(playerId) {
       const team = getTeam(coachSessionTeamId);
       if (!team) return;
-      team.players = team.players.filter(player => player.id !== playerId);
-      saveState();
-      refreshAllSelectors();
-      refreshCoachArea();
-      refreshAdminArea();
+      const updatedTeam = clone(team);
+      updatedTeam.players = updatedTeam.players.filter(player => player.id !== playerId);
+      updatedTeam.updatedAt = timestampNow();
+      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+      await createActivity('player_removed', `Removed a player from ${updatedTeam.name}`, updatedTeam.id);
+      await refreshFromCloud(false);
       showBanner('Player removed from the team roster.', 'success');
     }
 
-    function saveRoundSettings() {
+    async function saveRoundSettings() {
       const team = getTeam(coachSessionTeamId);
       if (!team) return;
-      const previousRoundName = team.round.name;
-      team.round.name = document.getElementById('roundNameInput').value.trim() || 'Current Round';
-      team.round.status = document.getElementById('roundStatusSelect').value;
-      team.round.note = document.getElementById('roundCloseNote').value.trim();
-
-      if (team.round.name !== previousRoundName) {
-        team.players.forEach(player => {
-          player.roundVotes = 0;
-        });
-        const voteTokenPrefix = `${team.id}::${previousRoundName}`;
-        state.voteTokens = state.voteTokens.filter(token => token !== voteTokenPrefix);
-        team.votesCast = 0;
+      const updatedTeam = clone(team);
+      const previousRoundName = updatedTeam.round.name;
+      updatedTeam.round.name = document.getElementById('roundNameInput').value.trim() || 'Current Round';
+      updatedTeam.round.status = document.getElementById('roundStatusSelect').value;
+      updatedTeam.round.note = document.getElementById('roundCloseNote').value.trim();
+      if (updatedTeam.round.name !== previousRoundName) {
+        updatedTeam.players = updatedTeam.players.map(player => ({
+          ...player,
+          roundVotes: 0
+        }));
+        updatedTeam.votesCast = 0;
       }
-      saveState();
-      refreshAllSelectors();
-      refreshCoachArea();
-      refreshAdminArea();
-      showBanner(`Round settings saved for ${team.name}.`, 'success');
+      updatedTeam.updatedAt = timestampNow();
+      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+      await createActivity('round_updated', `Updated round for ${updatedTeam.name} to ${updatedTeam.round.name}`, updatedTeam.id);
+      await refreshFromCloud(false);
+      showBanner(`Round settings saved for ${updatedTeam.name}.`, 'success');
     }
 
     function renderCoachResults(team) {
       const body = document.getElementById('coachResultsBody');
-      if (team.players.length === 0) {
+      if (!team.players.length) {
         body.innerHTML = '<tr><td colspan="3">No players added yet.</td></tr>';
         return;
       }
       const sorted = team.players.slice().sort((a, b) => b.seasonVotes - a.seasonVotes);
-      const leaderVotes = sorted[0]?.seasonVotes ?? 0;
+      const leaderVotes = sorted[0] ? sorted[0].seasonVotes : 0;
       body.innerHTML = sorted.map(player => `
         <tr>
           <td class="${player.seasonVotes === leaderVotes && leaderVotes > 0 ? 'leader' : ''}">${player.name}</td>
@@ -1369,9 +1661,7 @@
     function adminLogin() {
       const pin = document.getElementById('adminPinInput').value.trim();
       if (pin !== ADMIN_PIN) {
-        const banner = document.getElementById('adminLoginBanner');
-        banner.textContent = 'Incorrect admin PIN. Please try again.';
-        banner.classList.remove('hidden');
+        showMiniBanner('adminLoginBanner', 'Incorrect admin PIN. Please try again.', 'error');
         return;
       }
       adminLoggedIn = true;
@@ -1389,7 +1679,7 @@
         <div class="stat"><div class="stat-label">Teams</div><div class="stat-value">${state.teams.length}</div></div>
         <div class="stat"><div class="stat-label">Players</div><div class="stat-value">${totalPlayers}</div></div>
         <div class="stat"><div class="stat-label">Votes Cast</div><div class="stat-value">${totalVotes}</div></div>
-        <div class="stat"><div class="stat-label">Activity Items</div><div class="stat-value">${state.activityLog.length}</div></div>
+        <div class="stat"><div class="stat-label">Recent Activity</div><div class="stat-value">${state.activityLog.length}</div></div>
       `;
 
       const body = document.getElementById('adminTableBody');
@@ -1397,22 +1687,26 @@
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(team => {
-          const leader = team.players.slice().sort((a, b) => b.seasonVotes - a.seasonVotes)[0];
+          const sortedPlayers = team.players.slice().sort((a, b) => b.seasonVotes - a.seasonVotes);
+          const leader = sortedPlayers[0];
           return `
             <tr>
               <td>${team.name}</td>
               <td>${team.coachName}</td>
-              <td>${team.round.name}<div class="tiny">${team.round.status} • ${team.round.note || 'No note'}</div></td>
+              <td>${team.round.name}<div class="tiny">${team.round.status} • ${team.round.note || 'No note set'}</div></td>
               <td>${team.players.length}</td>
               <td>${team.votesCast}</td>
               <td>${leader ? `${leader.name} (${leader.seasonVotes})` : 'No votes yet'}</td>
             </tr>
           `;
-        })
-        .join('');
+        }).join('');
     }
 
-    function adminCreateTeam() {
+    async function adminCreateTeam() {
+      if (!cloudReady) {
+        showBanner('Firebase is still connecting. Please wait before creating a team.', 'info');
+        return;
+      }
       const coachName = document.getElementById('adminCoachName').value.trim();
       const teamName = document.getElementById('adminTeamName').value.trim();
       const coachPin = document.getElementById('adminCoachPin').value.trim();
@@ -1420,7 +1714,7 @@
         showBanner('Please enter a coach name, team name, and coach PIN.', 'error');
         return;
       }
-      state.teams.push({
+      const newTeam = ensureTeamDefaults({
         id: generateId('team'),
         name: teamName,
         coachName,
@@ -1431,21 +1725,23 @@
           note: 'Voting is now open'
         },
         players: [],
-        votesCast: 0
+        votesCast: 0,
+        createdAt: timestampNow(),
+        updatedAt: timestampNow()
       });
-      saveState();
+      await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
+      await createActivity('team_created_by_admin', `Admin created ${teamName} for ${coachName}`, newTeam.id);
       document.getElementById('adminCoachName').value = '';
       document.getElementById('adminTeamName').value = '';
       document.getElementById('adminCoachPin').value = '';
-      refreshAllSelectors();
-      refreshAdminArea();
+      await refreshFromCloud(false);
       showBanner(`Admin created ${teamName}.`, 'success');
     }
 
     function createCsvSummary() {
       const rows = [['Team', 'Coach', 'Current Round', 'Player', 'Round Votes', 'Season Votes']];
       state.teams.forEach(team => {
-        if (team.players.length === 0) {
+        if (!team.players.length) {
           rows.push([team.name, team.coachName, team.round.name, '', '', '']);
         } else {
           team.players.forEach(player => {
@@ -1454,6 +1750,15 @@
         }
       });
       return rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
+    }
+
+    async function tryClipboardWrite(text, successMessage) {
+      if (!navigator.clipboard) {
+        showBanner('Clipboard access is unavailable here. Use the export box to copy manually.', 'info');
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      showBanner(successMessage, 'success');
     }
 
     async function copyCsvExport() {
@@ -1468,28 +1773,26 @@
       await tryClipboardWrite(json, 'JSON backup copied to clipboard.');
     }
 
-    async function tryClipboardWrite(text, successMessage) {
-      try {
-        await navigator.clipboard.writeText(text);
-        showBanner(successMessage, 'success');
-      } catch (error) {
-        showBanner('Clipboard access was blocked. Use the export box to copy manually.', 'info');
-      }
-    }
-
     function logoutAdmin() {
       adminLoggedIn = false;
       openAdminPortal();
       showBanner('Admin logged out.', 'info');
     }
 
-    function refreshAllSelectors() {
-      refreshParentTeamSelect();
-      refreshCoachTeamSelect();
+    async function boot() {
+      try {
+        await initializeFirebase();
+      } catch (error) {
+        setSyncStatus('Firebase connection failed. Check Firestore rules or network access.', 'error');
+        showBanner(`Unable to connect to Firebase: ${error.message}`, 'error');
+        state.teams = clone(defaultTeams).map(ensureTeamDefaults);
+        state.activityLog = [];
+        refreshAllSelectors();
+        goHome();
+      }
     }
 
-    refreshAllSelectors();
-    goHome();
+    boot();
   </script>
 </body>
 </html>
