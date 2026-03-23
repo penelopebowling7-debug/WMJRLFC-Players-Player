@@ -1453,8 +1453,7 @@
             return;
           }
         } catch (error) {
-          showMiniBanner('parentBanner', 'Unable to check voting status right now. Please try again.', 'error');
-          return;
+          console.warn('Vote status check skipped:', error);
         }
       }
 
