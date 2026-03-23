@@ -567,7 +567,7 @@
             <p>
               A club-branded, mobile-friendly voting app that gives parents a simple vote flow, coaches self-service team and player setup, and club admins a clearer overview with live Firestore-backed data.
             </p>
-            <div class="sync-chip" id="syncStatus">Connecting to Firebase…</div>
+            <div class="sync-chip" id="syncStatus">Connecting to Firestore…</div>
           </div>
         </div>
         <div class="pill-row">
@@ -709,9 +709,6 @@
           <div class="button-row">
             <button class="btn-accent" onclick="coachLogin()">Login</button>
           </div>
-          <div class="notice">
-            Demo coach PINs remain available for seeded teams: Under 8 Gold = <strong>2480</strong>, Under 9 Black = <strong>1357</strong>.
-          </div>
           <div id="coachLoginBanner" class="mini-banner error hidden"></div>
         </div>
 
@@ -840,15 +837,9 @@
         <div id="adminLoginCard" class="card">
           <h3>Admin login</h3>
           <p class="helper-text">Enter the club admin PIN to access the club-wide dashboard.</p>
-          <div class="two-col">
-            <div>
-              <label for="adminPinInput">Admin PIN</label>
-              <input id="adminPinInput" class="input" type="password" placeholder="Enter club admin PIN">
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <div class="notice" style="margin: 0;">Demo admin PIN: <strong>9999</strong></div>
-            </div>
+          <div>
+            <label for="adminPinInput">Admin PIN</label>
+            <input id="adminPinInput" class="input" type="password" placeholder="Enter club admin PIN">
           </div>
           <div class="button-row">
             <button class="btn-primary" onclick="adminLogin()">Login</button>
@@ -937,7 +928,7 @@
       measurementId: "G-XQNWVH76KV"
     };
 
-    const ADMIN_PIN = '9999';
+    const ADMIN_PIN = '1379';
     const BROWSER_ID_KEY = 'wmjrlfc-browser-id';
     const TEAM_COLLECTION = 'teams';
     const ACTIVITY_COLLECTION = 'activity';
@@ -957,49 +948,6 @@
     let adminLoggedIn = false;
     let browserId = getBrowserId();
     let cloudReady = false;
-
-    const defaultTeams = [
-      {
-        id: generateId('team'),
-        name: 'Under 8 Gold',
-        coachName: 'Jamie Lee',
-        coachPin: '2480',
-        round: {
-          name: 'Round 1 vs Falcons',
-          status: 'open',
-          note: 'Closes Sunday 6pm'
-        },
-        players: [
-          { id: generateId('player'), name: 'Mason Reed', number: '7', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Noah Ellis', number: '11', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Luca Bennett', number: '3', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Ethan Hart', number: '9', seasonVotes: 0, roundVotes: 0 }
-        ],
-        votesCast: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: generateId('team'),
-        name: 'Under 9 Black',
-        coachName: 'Tara Collins',
-        coachPin: '1357',
-        round: {
-          name: 'Round 3 vs Tigers',
-          status: 'open',
-          note: 'Open after Saturday match'
-        },
-        players: [
-          { id: generateId('player'), name: 'Harper Stone', number: '4', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Zoe Walsh', number: '15', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Ruby Cook', number: '6', seasonVotes: 0, roundVotes: 0 },
-          { id: generateId('player'), name: 'Evie Clarke', number: '2', seasonVotes: 0, roundVotes: 0 }
-        ],
-        votesCast: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
 
     function generateId(prefix) {
       return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
@@ -1165,6 +1113,10 @@
     function refreshParentTeamSelect() {
       const select = document.getElementById('parentTeamSelect');
       select.innerHTML = '<option value="">-- Select Team --</option>';
+      if (!state.teams.length) {
+        select.innerHTML = '<option value="">-- No teams available yet --</option>';
+        return;
+      }
       state.teams
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -1179,6 +1131,10 @@
     function refreshCoachTeamSelect() {
       const select = document.getElementById('coachTeamSelect');
       select.innerHTML = '<option value="">-- Select My Team --</option>';
+      if (!state.teams.length) {
+        select.innerHTML = '<option value="">-- No teams created yet --</option>';
+        return;
+      }
       state.teams
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -1199,28 +1155,9 @@
       app = firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
       cloudReady = true;
-      setSyncStatus('Firebase connected. Loading live team data…', 'success');
-      await seedDemoTeamsIfNeeded();
+      setSyncStatus('Connected to Firestore. Loading live team data…', 'success');
       await refreshFromCloud(false);
       goHome();
-    }
-
-    async function seedDemoTeamsIfNeeded() {
-      const snapshot = await db.collection(TEAM_COLLECTION).limit(1).get();
-      if (!snapshot.empty) return;
-      const batch = db.batch();
-      defaultTeams.forEach(team => {
-        const teamData = ensureTeamDefaults(team);
-        batch.set(db.collection(TEAM_COLLECTION).doc(teamData.id), teamData);
-      });
-      const activityRef = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
-      batch.set(activityRef, {
-        id: activityRef.id,
-        type: 'seed_demo_data',
-        message: 'Created default WMJRLFC demo teams',
-        createdAt: timestampNow()
-      });
-      await batch.commit();
     }
 
     async function loadTeamsFromCloud() {
@@ -1251,7 +1188,7 @@
       refreshAllSelectors();
       refreshCoachArea();
       refreshAdminArea();
-      setSyncStatus(`Firestore synced: ${teams.length} team(s) loaded`, 'success');
+      setSyncStatus(`Connected to Firestore: ${teams.length} team(s) loaded`, 'success');
       if (showSuccessBanner) {
         showBanner('Live data refreshed from Firestore.', 'success');
       }
@@ -1390,7 +1327,7 @@
 
     async function submitVotes() {
       if (!cloudReady) {
-        showMiniBanner('parentBanner', 'Firebase is still connecting. Please try again in a moment.', 'error');
+        showMiniBanner('parentBanner', 'Firestore is still connecting. Please try again in a moment.', 'error');
         return;
       }
       const team = getTeam(parentFlow.teamId);
@@ -1483,7 +1420,7 @@
 
     async function createCoachTeam() {
       if (!cloudReady) {
-        showBanner('Firebase is still connecting. Please wait before creating a team.', 'info');
+        showBanner('Firestore is still connecting. Please wait before creating a team.', 'info');
         return;
       }
       const coachName = document.getElementById('newCoachName').value.trim();
@@ -1704,7 +1641,7 @@
 
     async function adminCreateTeam() {
       if (!cloudReady) {
-        showBanner('Firebase is still connecting. Please wait before creating a team.', 'info');
+        showBanner('Firestore is still connecting. Please wait before creating a team.', 'info');
         return;
       }
       const coachName = document.getElementById('adminCoachName').value.trim();
@@ -1783,10 +1720,8 @@
       try {
         await initializeFirebase();
       } catch (error) {
-        setSyncStatus('Firebase connection failed. Check Firestore rules or network access.', 'error');
-        showBanner(`Unable to connect to Firebase: ${error.message}`, 'error');
-        state.teams = clone(defaultTeams).map(ensureTeamDefaults);
-        state.activityLog = [];
+        setSyncStatus('Unable to connect to Firestore', 'error');
+        showBanner(`Unable to connect to Firestore: ${error.message}`, 'error');
         refreshAllSelectors();
         goHome();
       }
