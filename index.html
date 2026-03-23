@@ -1,334 +1,2419 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>WMJRLFC Player's Player Voting</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallsend Maryland Junior Rugby League Football Club - Player's Player Voting</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
 
-<style>
+    header {
+      background: #000;
+      border-bottom: 4px solid #ff8c00;
+      padding: 15px 10px 20px;
+    }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #000;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-}
+    header img {
+      height: 70px;
+      max-width: 90%;
+      object-fit: contain;
+    }
 
-header {
-  text-align: center;
-  padding: 16px 0;
-}
+    h1 {
+      margin: 8px 0 0 0;
+      font-size: 24px;
+      color: #ff8c00;
+    }
 
-header img {
-  height: 90px;
-}
+    h2 {
+      margin: 4px 0 0 0;
+      font-weight: normal;
+      font-size: 16px;
+      color: #fff;
+    }
 
-.container {
-  max-width: 920px;
-  margin: auto;
-  padding: 20px;
-}
+    .container {
+      padding: 20px 10px 40px;
+    }
 
-h1, h2, h3 {
-  text-align: center;
-}
+    .section-title {
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #ff8c00;
+    }
 
-.nav-btn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  background-color: orange;
-  color: black;
-  border: none;
-  font-weight: bold;
-  border-radius: 6px;
-  cursor: pointer;
-}
+    .sub-round {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
 
-.nav-btn:hover {
-  opacity: 0.9;
-}
+    .team-card,
+    .player-btn,
+    .coach-btn,
+    .nav-btn {
+      display: block;
+      width: 90%;
+      max-width: 460px;
+      margin: 8px auto;
+      padding: 14px;
+      background-color: #000;
+      color: #fff;
+      border: 2px solid #ff8c00;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
 
-.notice-box {
-  background: rgba(255,140,0,0.08);
-  border-left: 4px solid orange;
-  padding: 12px;
-  margin: 14px 0;
-  border-radius: 8px;
-  line-height: 1.45;
-}
+    .team-card:hover,
+    .player-btn:hover,
+    .coach-btn:hover,
+    .nav-btn:hover {
+      background-color: #ff8c00;
+      color: #000;
+    }
 
-.hidden {
-  display: none;
-}
+    .back-btn {
+      margin-top: 20px;
+      background-color: #333;
+      border-color: #666;
+    }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-}
+    .back-btn:hover {
+      background-color: #666;
+      color: #000;
+    }
 
-th, td {
-  border: 1px solid #333;
-  padding: 8px;
-  text-align: left;
-}
+    .danger-btn {
+      border-color: #ff0000;
+      color: #ff4d4d;
+    }
 
-th {
-  background: orange;
-  color: black;
-}
+    .danger-btn:hover {
+      background-color: #ff0000;
+      color: #000;
+    }
 
-.admin-tally-leader {
-  color: #28a745;
-  font-weight: bold;
-}
+    .pink-btn {
+      border-color: #ff66cc;
+      color: #ff66cc;
+    }
 
-</style>
+    .pink-btn:hover {
+      background-color: #ff66cc;
+      color: #000;
+    }
+
+    .small-note {
+      font-size: 12px;
+      color: #ccc;
+      margin-top: 6px;
+    }
+
+    .error-note {
+      color: #ff8080;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .success-note {
+      color: #90ee90;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .coach-status {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .status-open {
+      color: #28a745;
+    }
+
+    .status-locked {
+      color: #ff4d4d;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .modal-content {
+      background: #111;
+      margin: 10% auto;
+      padding: 20px;
+      width: 88%;
+      max-width: 520px;
+      border-radius: 10px;
+      border: 2px solid #ff8c00;
+      box-sizing: border-box;
+    }
+
+    .modal h3 {
+      margin-top: 0;
+      color: #ff8c00;
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #444;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+      margin-top: 12px;
+    }
+
+    .modal textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .modal-buttons {
+      margin-top: 14px;
+    }
+
+    .modal button {
+      width: 45%;
+      padding: 10px;
+      margin: 5px;
+      border: 2px solid #ff8c00;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .confirm-btn {
+      background-color: #ff8c00;
+      color: #000;
+    }
+
+    .cancel-btn {
+      background-color: #000;
+      color: #fff;
+    }
+
+    .confirm-btn:hover {
+      background-color: #ffa733;
+    }
+
+    .cancel-btn:hover {
+      background-color: #333;
+    }
+
+    #coachPanel,
+    #adminPanel {
+      display: none;
+      padding: 10px 10px 40px;
+      border-top: 2px solid #ff8c00;
+    }
+
+    table {
+      width: 100%;
+      max-width: 900px;
+      margin: 10px auto 0;
+      border-collapse: collapse;
+      color: #fff;
+    }
+
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #111;
+      color: #ff8c00;
+    }
+
+    .section-wrap {
+      max-width: 920px;
+      margin: 20px auto 0;
+    }
+
+    .green-text {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .red-text {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    .orange-text {
+      color: #ff8c00;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .form-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .form-wrap label {
+      display: block;
+      margin: 14px 0 6px;
+      color: #ff8c00;
+      font-weight: bold;
+    }
+
+    .form-wrap input,
+    .form-wrap textarea,
+    .form-wrap select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #444;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .form-wrap textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+
+    .instruction-box {
+      border: 2px solid #ff8c00;
+      border-radius: 10px;
+      background: #111;
+      padding: 16px;
+      margin: 0 auto 20px;
+      max-width: 780px;
+      text-align: left;
+    }
+
+    .instruction-box h3 {
+      margin-top: 0;
+      color: #ff8c00;
+    }
+
+    .instruction-box ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    .instruction-box li {
+      margin: 8px 0;
+    }
+
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .mini-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ff8c00;
+      background: #000;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .mini-btn:hover {
+      background: #ff8c00;
+      color: #000;
+    }
+
+    .mini-danger {
+      border-color: #ff4d4d;
+      color: #ff4d4d;
+    }
+
+    .mini-danger:hover {
+      background: #ff4d4d;
+      color: #000;
+    }
+
+    .mini-green {
+      border-color: #28a745;
+      color: #28a745;
+    }
+
+    .mini-green:hover {
+      background: #28a745;
+      color: #000;
+    }
+
+    .consent-note {
+      max-width: 900px;
+      margin: 14px auto 0;
+      background: rgba(255, 140, 0, 0.08);
+      border: 1px solid rgba(255, 140, 0, 0.35);
+      border-left: 4px solid #ff8c00;
+      color: #f5f5f5;
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.45;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .admin-tally-summary-row {
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .admin-tally-summary-row:hover {
+      background: #262626;
+    }
+
+    .admin-tally-leader {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .admin-tally-collapsed {
+      display: none;
+    }
+
+  </style>
 </head>
-
 <body>
-
-<header>
-<img src="WMJRLFC-logo.jpg" alt="Club Logo">
-<h1>Player's Player Voting</h1>
-</header>
-
-<div class="container" id="homeScreen">
-
-<h2>Welcome</h2>
-
-<div class="notice-box">
-
-This app supports our team Player’s Player awards by recording votes across the season.  
-It is used only for recognising player effort, teamwork and sportsmanship in a positive team environment.
-
-</div>
-
-<button class="nav-btn" onclick="showTeamScreen()">
-Select Team
-</button>
-
-<button class="nav-btn" onclick="showCoachLogin()">
-Coach Access
-</button>
-
-<button class="nav-btn" onclick="showAdminLogin()">
-Club Admin Access
-</button>
-
-</div>
-
-<div class="container hidden" id="teamScreen">
-
-<h2>Select Team</h2>
-
-<select id="teamSelect" class="nav-btn">
-<option value="">-- Select Team --</option>
-</select>
-
-<div class="notice-box">
-
-By proceeding, you confirm parent or guardian consent to the use of your child's name in this app for Player’s Player voting and season award tracking.  
-If you would prefer your child's name not be included, please contact your Team Manager or Coach.
-
-</div>
-
-<button class="nav-btn" onclick="proceedToVoting()">
-Proceed to Voting
-</button>
-
-<button class="nav-btn" onclick="goHome()">
-Back
-</button>
-
-</div>
-
-<div class="container hidden" id="voteScreen">
-
-<h2>Cast Votes</h2>
-
-<div id="playerList"></div>
-
-<button class="nav-btn" onclick="submitVotes()">
-Submit Votes
-</button>
-
-<button class="nav-btn" onclick="goHome()">
-Back
-</button>
-
-</div>
-
-<div class="container hidden" id="coachLoginScreen">
-
-<h2>Coach Access</h2>
-
-<input type="password" id="coachPin" placeholder="Enter Coach PIN" class="nav-btn">
-
-<button class="nav-btn" onclick="coachLogin()">
-Login
-</button>
-
-<button class="nav-btn" onclick="goHome()">
-Back
-</button>
-
-</div>
-
-<div class="container hidden" id="adminLoginScreen">
-
-<h2>Club Admin Access</h2>
-
-<input type="password" id="adminPin" placeholder="Enter Admin PIN" class="nav-btn">
-
-<button class="nav-btn" onclick="adminLogin()">
-Login
-</button>
-
-<button class="nav-btn" onclick="goHome()">
-Back
-</button>
-
-</div>
-
-<div class="container hidden" id="adminPanel">
-
-<h2>Admin Panel</h2>
-
-<h3>Create New Team</h3>
-
-<input id="newTeamName" placeholder="Team Name" class="nav-btn">
-<input id="coachName" placeholder="Coach Name" class="nav-btn">
-<input id="coachPinCreate" placeholder="Coach PIN" class="nav-btn">
-
-<button class="nav-btn" onclick="createTeam()">
-Create Team
-</button>
-
-<h3>Admin Team Tallies</h3>
-
-<button class="nav-btn" onclick="loadTalliesSelected()">
-Show Selected Team Tallies
-</button>
-
-<button class="nav-btn" onclick="loadTalliesAll()">
-Show All Team Tallies
-</button>
-
-<button class="nav-btn" onclick="exportTallies()">
-Export Tallies CSV
-</button>
-
-<table>
-<thead>
-<tr>
-<th>Team</th>
-<th>Player</th>
-<th>Round Votes</th>
-<th>Season Votes</th>
-</tr>
-</thead>
-
-<tbody id="tallyTableBody">
-<tr>
-<td colspan="4">No data loaded</td>
-</tr>
-</tbody>
-
-</table>
-
-<button class="nav-btn" onclick="goHome()">
-Close Admin
-</button>
-
-</div>
-
-<script>
-
-function showTeamScreen() {
-hideAll();
-document.getElementById("teamScreen").style.display = "block";
-}
-
-function showCoachLogin() {
-hideAll();
-document.getElementById("coachLoginScreen").style.display = "block";
-}
-
-function showAdminLogin() {
-hideAll();
-document.getElementById("adminLoginScreen").style.display = "block";
-}
-
-function goHome() {
-hideAll();
-document.getElementById("homeScreen").style.display = "block";
-}
-
-function hideAll() {
-
-document.getElementById("homeScreen").style.display = "none";
-document.getElementById("teamScreen").style.display = "none";
-document.getElementById("voteScreen").style.display = "none";
-document.getElementById("coachLoginScreen").style.display = "none";
-document.getElementById("adminLoginScreen").style.display = "none";
-document.getElementById("adminPanel").style.display = "none";
-
-}
-
-function proceedToVoting() {
-
-hideAll();
-document.getElementById("voteScreen").style.display = "block";
-
-}
-
-function coachLogin() {
-
-alert("Coach login placeholder");
-
-}
-
-function adminLogin() {
-
-hideAll();
-document.getElementById("adminPanel").style.display = "block";
-
-}
-
-function createTeam() {
-
-alert("Team created");
-
-}
-
-function submitVotes() {
-
-alert("Votes submitted");
-
-}
-
-function loadTalliesSelected() {
-
-alert("Load selected team tallies");
-
-}
-
-function loadTalliesAll() {
-
-alert("Load all team tallies");
-
-}
-
-function exportTallies() {
-
-alert("CSV export");
-
-}
-
-</script>
-
+  <header>
+    <img src="WMJRLFC-logo.jpg" alt="Club Logo" />
+    <h1>Wallsend Maryland Junior Rugby League Football Club</h1>
+    <h2>Player's Player Voting</h2>
+  </header>
+
+  <div class="container" id="homeScreen">
+    <div class="instruction-box">
+      <h3>About the Player's Player Award</h3>
+      <p>This award is chosen by the players.</p>
+      <p>It is not just about scoring tries or winning games.</p>
+      <p>It is about:</p>
+      <ul>
+        <li>Being a good team mate</li>
+        <li>Trying your best</li>
+        <li>Helping others</li>
+        <li>Showing sportsmanship</li>
+        <li>Being fair and kind</li>
+        <li>Supporting your team</li>
+      </ul>
+      <p>Choose the player who showed the best team spirit.</p>
+    </div>
+
+    <div class="section-title">Select Team</div>
+    <div class="sub-round">Choose your team to start voting, or create a new team below.</div>
+    <div id="teamList"></div>
+
+    <button class="nav-btn" id="openSetupBtn">Create New Team</button>
+    <button class="nav-btn" id="openAdminBtn">Club Admin Access</button>
+    <p class="small-note">Each team sets up and manages its own voting separately.</p>
+    <p id="homeStatus" class="error-note"></p>
+  </div>
+
+  <div class="container hidden" id="setupScreen">
+    <div class="section-title">Coach Team Setup</div>
+
+    <div class="instruction-box">
+      <h3>Instructions for Coaches</h3>
+      <ul>
+        <li>Create your team once only.</li>
+        <li>Enter your team name exactly as you want it shown.</li>
+        <li>If there is more than one team in the same age group, include the team colour in the name. Example: <strong>U12's Black</strong>.</li>
+        <li>Enter your own coach name.</li>
+        <li>Choose a coach PIN you will remember.</li>
+        <li>Enter one player name per line.</li>
+        <li>You can add, edit, remove or restore players later in Coach Access.</li>
+      </ul>
+    </div>
+
+    <div class="form-wrap">
+      <label for="teamNameInput">Team Name</label>
+      <input type="text" id="teamNameInput" placeholder="Example: U12's Black" />
+
+      <label for="coachNameInput">Coach Name</label>
+      <input type="text" id="coachNameInput" placeholder="Enter coach name" />
+
+      <label for="coachPinInput">Coach PIN</label>
+      <input type="password" id="coachPinInput" placeholder="Enter a coach PIN" />
+
+      <label for="playerNamesInput">Player Names</label>
+      <textarea id="playerNamesInput" placeholder="Enter one player name per line"></textarea>
+
+      <button class="nav-btn" id="createTeamBtn">Create Team</button>
+      <button class="nav-btn back-btn" id="cancelSetupBtn">Back</button>
+      <p id="setupStatus" class="error-note"></p>
+    </div>
+  </div>
+
+  <div class="container hidden" id="teamScreen">
+    <div class="section-title" id="teamTitle">Team</div>
+    <div class="sub-round" id="coachNameDisplay">Coach:</div>
+    <div class="sub-round" id="teamRoundText">Current Round: 1</div>
+    <div class="sub-round" id="teamVotingStatusText">Voting Locked</div>
+
+    <div class="instruction-box">
+      <h3>Voting Instructions</h3>
+      <p>Each player votes for <strong>ONE</strong> teammate each round.</p>
+      <p>Coaches will open voting after the game.</p>
+      <p>Please vote fairly and choose the teammate who showed the best team spirit.</p>
+    </div>
+
+    <div class="consent-note">
+      By proceeding, you confirm parent or guardian consent to the use of your child's name in this app for Player's Player voting and season award tracking. If you would prefer your child's name not be included, please contact your Team Manager or Coach.
+    </div>
+
+    <div class="section-title">Select Your Name</div>
+    <div id="voterList"></div>
+
+    <button class="coach-btn" id="coachLoginBtn">Coach Access</button>
+    <button class="nav-btn back-btn" id="backToHomeBtn">Back to Team List</button>
+    <p class="small-note">Coach access is PIN protected per team.</p>
+    <p id="teamStatus" class="error-note"></p>
+  </div>
+
+  <div class="container hidden" id="voteScreen">
+    <div class="section-title" id="voterTitle"></div>
+    <div class="sub-round" id="voteRoundText">Round 1</div>
+
+    <div class="instruction-box">
+      <h3>What are you voting for?</h3>
+      <p>Vote for the teammate who showed the best team spirit.</p>
+      <p>Think about who:</p>
+      <ul>
+        <li>Tried their best</li>
+        <li>Was a good team mate</li>
+        <li>Showed sportsmanship</li>
+        <li>Was fair and kind</li>
+        <li>Supported the team</li>
+      </ul>
+    </div>
+
+    <p>Select the player you want to vote for:</p>
+    <div id="playerList"></div>
+
+    <button class="player-btn back-btn" id="backToTeamBtn">Back</button>
+  </div>
+
+  <div id="coachPanel">
+    <div class="section-title">Coach Controls</div>
+    <div class="sub-round" id="coachTeamText">Team</div>
+    <div class="sub-round" id="coachPanelCoachNameText">Coach</div>
+    <div class="sub-round" id="coachRoundText">Round: 1</div>
+    <div class="coach-status" id="coachStatusText">
+      Status: <span class="status-locked">Locked</span>
+    </div>
+
+    <div class="inline-actions" style="margin:14px 0 6px;">
+      <button class="coach-btn" id="prevRoundBtn">Previous Round</button>
+      <button class="coach-btn" id="nextRoundBtn">Next Round</button>
+      <button class="coach-btn" id="toggleLockBtn">Unlock Voting</button>
+      <button class="coach-btn" id="showRoundBtn">Show Round Tally</button>
+      <button class="coach-btn" id="showSeasonBtn">Show Season Tally</button>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Tally</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Status</th>
+            <th id="tallyTypeHeader">Round Votes</th>
+          </tr>
+        </thead>
+        <tbody id="tallyBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Voting Status</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Status</th>
+            <th>Voted For</th>
+          </tr>
+        </thead>
+        <tbody id="voterStatusBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Manage Players</div>
+      <button class="nav-btn" id="addPlayerBtn">Add Player</button>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="playerManageBody"></tbody>
+      </table>
+    </div>
+
+    <button class="player-btn back-btn" id="closeCoachPanelBtn">Close Coach Panel</button>
+  </div>
+
+  <div id="adminPanel">
+    <div class="section-title">Club Admin Controls</div>
+    <div class="sub-round">Admin PIN protected</div>
+
+    <div class="section-wrap">
+      <div class="section-title">Team Admin Actions</div>
+      <div class="form-wrap">
+        <label for="adminTeamSelect">Select Team</label>
+        <select id="adminTeamSelect"></select>
+
+        <label for="newCoachPinInput">New Coach PIN</label>
+        <input type="password" id="newCoachPinInput" placeholder="Enter new coach PIN" />
+        <button class="nav-btn" id="resetCoachPinBtn">Reset Coach PIN</button>
+
+        <button class="nav-btn danger-btn" id="resetRoundByAdminBtn">Reset Current Round</button>
+        <button class="nav-btn pink-btn" id="resetSeasonByAdminBtn">Reset Entire Season</button>
+        <button class="nav-btn danger-btn" id="removeTeamBtn">Remove Team</button>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Add Team</div>
+      <div class="form-wrap">
+        <label for="adminTeamNameInput">Team Name</label>
+        <input type="text" id="adminTeamNameInput" placeholder="Example: U12's Black" />
+
+        <label for="adminCoachNameInput">Coach Name</label>
+        <input type="text" id="adminCoachNameInput" placeholder="Enter coach name" />
+
+        <label for="adminCoachPinInput">Coach PIN</label>
+        <input type="password" id="adminCoachPinInput" placeholder="Enter coach PIN" />
+
+        <label for="adminPlayerNamesInput">Player Names</label>
+        <textarea id="adminPlayerNamesInput" placeholder="Enter one player name per line"></textarea>
+
+        <button class="nav-btn" id="adminCreateTeamBtn">Add Team</button>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <div class="section-title">Admin Team Tallies</div>
+
+      <div class="inline-actions" style="margin:14px 0 10px;">
+        <button class="nav-btn" id="adminShowSelectedTalliesBtn">Show Selected Team Tallies</button>
+        <button class="nav-btn" id="adminShowAllTalliesBtn">Show All Team Tallies</button>
+        <button class="nav-btn" id="adminShowRoundTalliesBtn">Round Focus</button>
+        <button class="nav-btn" id="adminShowSeasonTalliesBtn">Season Focus</button>
+        <button class="nav-btn" id="adminShowBothTalliesBtn">Show Both</button>
+        <button class="nav-btn" id="adminExpandTalliesBtn">Expand All</button>
+        <button class="nav-btn" id="adminCollapseTalliesBtn">Collapse All</button>
+        <button class="nav-btn" id="adminExportTalliesBtn">Export Tallies CSV</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Round</th>
+            <th>Player</th>
+            <th>Status</th>
+            <th>Round Votes</th>
+            <th>Season Votes</th>
+          </tr>
+        </thead>
+        <tbody id="adminTalliesBody">
+          <tr>
+            <td colspan="6">No tally view loaded yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="nav-btn" id="openAuditTrailBtn">Open Admin Audit Trail</button>
+    <p id="adminStatus" class="error-note"></p>
+    <button class="player-btn back-btn" id="closeAdminPanelBtn">Close Admin Panel</button>
+  </div>
+
+  <div class="container hidden" id="auditScreen">
+    <div class="section-title">Club Admin Audit Trail</div>
+    <div class="sub-round">Admin actions only</div>
+
+    <div class="section-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Action</th>
+            <th>Team</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="auditBody"></tbody>
+      </table>
+    </div>
+
+    <button class="nav-btn back-btn" id="closeAuditTrailBtn">Back to Admin Panel</button>
+  </div>
+
+  <div id="consentModal" class="modal">
+    <div class="modal-content">
+      <h3>Parent / Guardian Notice</h3>
+      <p style="text-align:left;">
+        This app is used only for Player's Player voting and season award tracking.<br><br>
+        The information stored includes player names and votes only.<br><br>
+        No sensitive personal information or contact details are collected.<br><br>
+        By proceeding, you confirm parent or guardian consent to the use of your child's name in this app for Player's Player voting and season award tracking.<br><br>
+        If you would prefer your child's name not be included, please contact your Team Manager or Coach.
+      </p>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="consentAgreeBtn">I Agree</button>
+        <button class="cancel-btn" id="consentCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appModal" class="modal">
+    <div class="modal-content">
+      <h3 id="appModalTitle">Message</h3>
+      <div id="appModalMessage" style="text-align:left;"></div>
+      <input id="appModalInput" class="hidden" />
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="appModalConfirmBtn">OK</button>
+        <button class="cancel-btn" id="appModalCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      getDocs,
+      collection,
+      writeBatch,
+      serverTimestamp,
+      runTransaction,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzZZr_8JYLcxSmcFKxNT3vlzlKj2Jkt8U",
+      authDomain: "wmjrlfc-players-player.firebaseapp.com",
+      projectId: "wmjrlfc-players-player",
+      storageBucket: "wmjrlfc-players-player.firebasestorage.app",
+      messagingSenderId: "458850703708",
+      appId: "1:458850703708:web:0ba09f75db4f8ed8d70999",
+      measurementId: "G-XQNWVH76KV"
+    };
+
+    const CLUB_ADMIN_PIN = "1379";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentTeamId = "";
+    let currentTeamData = null;
+    let allPlayers = [];
+    let activePlayers = [];
+    let selectedVoterId = "";
+    let selectedVoteId = "";
+    let pendingTeamId = "";
+    let currentTallyType = "round";
+    let cachedTeams = [];
+    let modalResolver = null;
+
+    let adminTallyMode = "round";
+    let adminTallyScope = "selected";
+    let adminCollapsedTeams = {};
+    let lastAdminTallies = [];
+
+    const homeScreen = document.getElementById("homeScreen");
+    const setupScreen = document.getElementById("setupScreen");
+    const teamScreen = document.getElementById("teamScreen");
+    const voteScreen = document.getElementById("voteScreen");
+    const auditScreen = document.getElementById("auditScreen");
+
+    const teamList = document.getElementById("teamList");
+    const voterList = document.getElementById("voterList");
+    const playerList = document.getElementById("playerList");
+    const auditBody = document.getElementById("auditBody");
+
+    const homeStatus = document.getElementById("homeStatus");
+    const setupStatus = document.getElementById("setupStatus");
+    const teamStatus = document.getElementById("teamStatus");
+    const adminStatus = document.getElementById("adminStatus");
+
+    const teamTitle = document.getElementById("teamTitle");
+    const coachNameDisplay = document.getElementById("coachNameDisplay");
+    const teamRoundText = document.getElementById("teamRoundText");
+    const teamVotingStatusText = document.getElementById("teamVotingStatusText");
+    const voterTitle = document.getElementById("voterTitle");
+    const voteRoundText = document.getElementById("voteRoundText");
+
+    const coachPanel = document.getElementById("coachPanel");
+    const coachTeamText = document.getElementById("coachTeamText");
+    const coachPanelCoachNameText = document.getElementById("coachPanelCoachNameText");
+    const coachRoundText = document.getElementById("coachRoundText");
+    const coachStatusText = document.getElementById("coachStatusText");
+    const tallyTypeHeader = document.getElementById("tallyTypeHeader");
+    const tallyBody = document.getElementById("tallyBody");
+    const voterStatusBody = document.getElementById("voterStatusBody");
+    const playerManageBody = document.getElementById("playerManageBody");
+
+    const adminPanel = document.getElementById("adminPanel");
+    const adminTeamSelect = document.getElementById("adminTeamSelect");
+    const newCoachPinInput = document.getElementById("newCoachPinInput");
+    const adminTeamNameInput = document.getElementById("adminTeamNameInput");
+    const adminCoachNameInput = document.getElementById("adminCoachNameInput");
+    const adminCoachPinInput = document.getElementById("adminCoachPinInput");
+    const adminPlayerNamesInput = document.getElementById("adminPlayerNamesInput");
+    const adminTalliesBody = document.getElementById("adminTalliesBody");
+
+    const teamNameInput = document.getElementById("teamNameInput");
+    const coachNameInput = document.getElementById("coachNameInput");
+    const coachPinInput = document.getElementById("coachPinInput");
+    const playerNamesInput = document.getElementById("playerNamesInput");
+
+    const consentModal = document.getElementById("consentModal");
+    const consentAgreeBtn = document.getElementById("consentAgreeBtn");
+    const consentCancelBtn = document.getElementById("consentCancelBtn");
+
+    const appModal = document.getElementById("appModal");
+    const appModalTitle = document.getElementById("appModalTitle");
+    const appModalMessage = document.getElementById("appModalMessage");
+    const appModalInput = document.getElementById("appModalInput");
+    const appModalConfirmBtn = document.getElementById("appModalConfirmBtn");
+    const appModalCancelBtn = document.getElementById("appModalCancelBtn");
+
+    document.getElementById("openSetupBtn").onclick = showSetupScreen;
+    document.getElementById("cancelSetupBtn").onclick = showHomeScreen;
+    document.getElementById("createTeamBtn").onclick = createTeamFromCoachScreen;
+    document.getElementById("backToHomeBtn").onclick = showHomeScreen;
+    document.getElementById("backToTeamBtn").onclick = backToTeamScreen;
+
+    document.getElementById("coachLoginBtn").onclick = coachLogin;
+    document.getElementById("closeCoachPanelBtn").onclick = () => {
+      coachPanel.style.display = "none";
+    };
+
+    document.getElementById("prevRoundBtn").onclick = previousRound;
+    document.getElementById("nextRoundBtn").onclick = nextRound;
+    document.getElementById("toggleLockBtn").onclick = toggleVotingLock;
+    document.getElementById("showRoundBtn").onclick = async () => {
+      await loadTally("round");
+      await loadVoterStatus();
+    };
+    document.getElementById("showSeasonBtn").onclick = async () => {
+      await loadTally("season");
+      await loadVoterStatus();
+    };
+    document.getElementById("addPlayerBtn").onclick = addPlayer;
+
+    document.getElementById("openAdminBtn").onclick = adminLogin;
+    document.getElementById("closeAdminPanelBtn").onclick = () => {
+      adminPanel.style.display = "none";
+      adminStatus.textContent = "";
+      showHomeScreen();
+    };
+    document.getElementById("resetCoachPinBtn").onclick = resetCoachPin;
+    document.getElementById("adminCreateTeamBtn").onclick = createTeamFromAdminPanel;
+    document.getElementById("removeTeamBtn").onclick = removeTeam;
+    document.getElementById("resetRoundByAdminBtn").onclick = resetRoundByAdmin;
+    document.getElementById("resetSeasonByAdminBtn").onclick = resetSeasonByAdmin;
+    document.getElementById("openAuditTrailBtn").onclick = openAuditTrail;
+    document.getElementById("closeAuditTrailBtn").onclick = () => {
+      auditScreen.classList.add("hidden");
+      adminPanel.style.display = "block";
+    };
+
+    document.getElementById("adminShowSelectedTalliesBtn").onclick = async () => {
+      adminTallyScope = "selected";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowAllTalliesBtn").onclick = async () => {
+      adminTallyScope = "all";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowRoundTalliesBtn").onclick = async () => {
+      adminTallyMode = "round";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowSeasonTalliesBtn").onclick = async () => {
+      adminTallyMode = "season";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminShowBothTalliesBtn").onclick = async () => {
+      adminTallyMode = "both";
+      await loadAdminTallies();
+    };
+
+    document.getElementById("adminExpandTalliesBtn").onclick = () => {
+      adminCollapsedTeams = {};
+      renderAdminTallies(lastAdminTallies);
+    };
+
+    document.getElementById("adminCollapseTalliesBtn").onclick = () => {
+      const collapsed = {};
+      lastAdminTallies.forEach(team => {
+        collapsed[team.teamId] = true;
+      });
+      adminCollapsedTeams = collapsed;
+      renderAdminTallies(lastAdminTallies);
+    };
+
+    document.getElementById("adminExportTalliesBtn").onclick = exportAdminTalliesCsv;
+
+    adminTeamSelect.onchange = async () => {
+      if (adminTallyScope === "selected") {
+        await loadAdminTallies();
+      }
+    };
+
+    consentAgreeBtn.onclick = async () => {
+      localStorage.setItem("wmjrlfc_v4_consent", "true");
+      consentModal.style.display = "none";
+      if (pendingTeamId) {
+        await enterTeam(pendingTeamId);
+        pendingTeamId = "";
+      }
+    };
+
+    consentCancelBtn.onclick = () => {
+      consentModal.style.display = "none";
+      pendingTeamId = "";
+    };
+
+    appModalConfirmBtn.onclick = () => {
+      if (!modalResolver) return;
+      const value = appModalInput.classList.contains("hidden") ? "" : appModalInput.value;
+      appModal.style.display = "none";
+      const resolver = modalResolver;
+      modalResolver = null;
+      resolver({ confirmed: true, value });
+    };
+
+    appModalCancelBtn.onclick = () => {
+      if (!modalResolver) return;
+      appModal.style.display = "none";
+      const resolver = modalResolver;
+      modalResolver = null;
+      resolver({ confirmed: false, value: "" });
+    };
+
+    window.onclick = (event) => {
+      if (event.target === consentModal) {
+        consentModal.style.display = "none";
+        pendingTeamId = "";
+      }
+      if (event.target === appModal && modalResolver) {
+        appModal.style.display = "none";
+        const resolver = modalResolver;
+        modalResolver = null;
+        resolver({ confirmed: false, value: "" });
+      }
+    };
+
+    function showOnlyScreen(screenEl) {
+      [homeScreen, setupScreen, teamScreen, voteScreen, auditScreen].forEach((el) => el.classList.add("hidden"));
+      screenEl.classList.remove("hidden");
+      coachPanel.style.display = "none";
+      adminPanel.style.display = "none";
+    }
+
+    function showHomeScreen() {
+      clearStatus();
+      showOnlyScreen(homeScreen);
+      loadTeams();
+    }
+
+    function showSetupScreen() {
+      clearStatus();
+      showOnlyScreen(setupScreen);
+    }
+
+    function backToTeamScreen() {
+      voteScreen.classList.add("hidden");
+      teamScreen.classList.remove("hidden");
+      selectedVoterId = "";
+      selectedVoteId = "";
+    }
+
+    function clearStatus() {
+      homeStatus.textContent = "";
+      setupStatus.textContent = "";
+      teamStatus.textContent = "";
+      adminStatus.textContent = "";
+    }
+
+    function setStatus(el, message, isError = true) {
+      el.textContent = message;
+      el.className = isError ? "error-note" : "success-note";
+    }
+
+    function normaliseTeamId(name) {
+      return name
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function makePlayerId(name) {
+      const base = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "player";
+      return `${base}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    }
+
+    function getPlayersCollection(teamId) {
+      return collection(db, "teams", teamId, "players");
+    }
+
+    function getPlayerDocRef(teamId, playerId) {
+      return doc(db, "teams", teamId, "players", playerId);
+    }
+
+    function getSeasonVoteDocRef(teamId, playerId) {
+      return doc(db, "teams", teamId, "seasonVotes", playerId);
+    }
+
+    function getRoundVoteDocRef(teamId, round, playerId) {
+      return doc(db, "teams", teamId, "roundVotes", `round_${round}`, "playerVotes", playerId);
+    }
+
+    function getRoundAuditDocRef(teamId, round) {
+      return doc(db, "teams", teamId, "roundAudit", `round_${round}`);
+    }
+
+    function getPlayerNameById(playerId) {
+      const player = allPlayers.find((p) => p.id === playerId);
+      return player ? player.name : "Unknown Player";
+    }
+
+    function formatAuditDate(value) {
+      try {
+        if (value?.toDate) return value.toDate().toLocaleString();
+        return value ? new Date(value).toLocaleString() : "-";
+      } catch {
+        return "-";
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showAppModal({
+      title = "Message",
+      message = "",
+      confirmText = "OK",
+      cancelText = "Cancel",
+      showCancel = false,
+      input = false,
+      inputType = "text",
+      inputValue = "",
+      inputPlaceholder = ""
+    }) {
+      appModalTitle.textContent = title;
+      appModalMessage.innerHTML = message;
+      appModalConfirmBtn.textContent = confirmText;
+      appModalCancelBtn.textContent = cancelText;
+      appModalCancelBtn.style.display = showCancel ? "inline-block" : "none";
+
+      if (input) {
+        appModalInput.classList.remove("hidden");
+        appModalInput.type = inputType;
+        appModalInput.value = inputValue;
+        appModalInput.placeholder = inputPlaceholder;
+      } else {
+        appModalInput.classList.add("hidden");
+        appModalInput.value = "";
+      }
+
+      appModal.style.display = "block";
+
+      return new Promise((resolve) => {
+        modalResolver = resolve;
+        if (input) {
+          setTimeout(() => appModalInput.focus(), 0);
+        } else {
+          setTimeout(() => appModalConfirmBtn.focus(), 0);
+        }
+      });
+    }
+
+    async function appAlert(title, message) {
+      await showAppModal({ title, message, confirmText: "OK" });
+    }
+
+    async function appConfirm(title, message, confirmText = "Confirm") {
+      const result = await showAppModal({
+        title,
+        message,
+        confirmText,
+        cancelText: "Cancel",
+        showCancel: true
+      });
+      return result.confirmed;
+    }
+
+    async function appPrompt(title, message, inputValue = "", inputPlaceholder = "", inputType = "text") {
+      const result = await showAppModal({
+        title,
+        message,
+        confirmText: "Confirm",
+        cancelText: "Cancel",
+        showCancel: true,
+        input: true,
+        inputType,
+        inputValue,
+        inputPlaceholder
+      });
+      return result;
+    }
+
+    async function logAdminAction(action, teamId, teamName, details) {
+      const auditId = `audit-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+      await setDoc(doc(db, "adminAudit", auditId), {
+        action,
+        teamId,
+        teamName,
+        details,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    async function loadTeams() {
+      teamList.innerHTML = "";
+      clearStatus();
+
+      try {
+        const snap = await getDocs(collection(db, "teams"));
+        const teams = [];
+
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          teams.push({
+            id: docSnap.id,
+            teamName: data.teamName || docSnap.id,
+            coachName: data.coachName || ""
+          });
+        });
+
+        teams.sort((a, b) => a.teamName.localeCompare(b.teamName));
+        cachedTeams = teams;
+        populateAdminTeamSelect();
+
+        if (teams.length === 0) {
+          const note = document.createElement("p");
+          note.className = "small-note";
+          note.textContent = "No teams created yet. Use 'Create New Team' to set up the first team.";
+          teamList.appendChild(note);
+          return;
+        }
+
+        teams.forEach((team) => {
+          const btn = document.createElement("button");
+          btn.className = "team-card";
+          btn.textContent = team.teamName;
+          btn.onclick = () => requestEnterTeam(team.id);
+          teamList.appendChild(btn);
+        });
+      } catch (error) {
+        console.error(error);
+        setStatus(homeStatus, `Could not load teams: ${error.message}`);
+      }
+    }
+
+    function populateAdminTeamSelect() {
+      const optionsHtml = cachedTeams.length
+        ? cachedTeams.map(team => `<option value="${team.id}">${escapeHtml(team.teamName)}</option>`).join("")
+        : `<option value="">No teams available</option>`;
+
+      adminTeamSelect.innerHTML = optionsHtml;
+    }
+
+    function requestEnterTeam(teamId) {
+      const consentGiven = localStorage.getItem("wmjrlfc_v4_consent") === "true";
+      if (!consentGiven) {
+        pendingTeamId = teamId;
+        consentModal.style.display = "block";
+        return;
+      }
+      enterTeam(teamId);
+    }
+
+    async function enterTeam(teamId) {
+      clearStatus();
+      currentTeamId = teamId;
+
+      try {
+        const teamRef = doc(db, "teams", teamId);
+        const teamSnap = await getDoc(teamRef);
+
+        if (!teamSnap.exists()) {
+          setStatus(homeStatus, "That team could not be found.");
+          showHomeScreen();
+          return;
+        }
+
+        currentTeamData = {
+          id: teamId,
+          ...teamSnap.data()
+        };
+
+        await loadPlayersForCurrentTeam();
+        await ensureSeasonDocsForCurrentTeam();
+        await ensureRoundDocsForCurrentTeam(currentTeamData.currentRound);
+
+        updateTeamUI();
+        buildVoterButtons();
+        showOnlyScreen(teamScreen);
+      } catch (error) {
+        console.error(error);
+        setStatus(homeStatus, `Could not open team: ${error.message}`);
+      }
+    }
+
+    async function loadPlayersForCurrentTeam() {
+      const snap = await getDocs(getPlayersCollection(currentTeamId));
+      const players = [];
+
+      snap.forEach((docSnap) => {
+        players.push({
+          id: docSnap.id,
+          ...docSnap.data()
+        });
+      });
+
+      players.sort((a, b) => a.name.localeCompare(b.name));
+      allPlayers = players;
+      activePlayers = players.filter((p) => p.active !== false);
+    }
+
+    async function ensureSeasonDocsForCurrentTeam() {
+      for (const player of allPlayers) {
+        const ref = getSeasonVoteDocRef(currentTeamId, player.id);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, { count: 0 }, { merge: true });
+        }
+      }
+    }
+
+    async function ensureRoundDocsForCurrentTeam(round) {
+      for (const player of allPlayers) {
+        const ref = getRoundVoteDocRef(currentTeamId, round, player.id);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, { count: 0 }, { merge: true });
+        }
+      }
+    }
+
+    function updateTeamUI() {
+      teamTitle.textContent = currentTeamData.teamName;
+      coachNameDisplay.textContent = `Coach: ${currentTeamData.coachName || "-"}`;
+      teamRoundText.textContent = `Current Round: ${currentTeamData.currentRound}`;
+      voteRoundText.textContent = `Round ${currentTeamData.currentRound}`;
+      teamVotingStatusText.textContent = currentTeamData.votingOpen ? "Voting Open" : "Voting Locked";
+      teamVotingStatusText.className = `sub-round ${currentTeamData.votingOpen ? "green-text" : "red-text"}`;
+
+      coachTeamText.textContent = currentTeamData.teamName;
+      coachPanelCoachNameText.textContent = `Coach: ${currentTeamData.coachName || "-"}`;
+      coachRoundText.textContent = `Round: ${currentTeamData.currentRound}`;
+      coachStatusText.innerHTML = `Status: <span class="${currentTeamData.votingOpen ? "status-open" : "status-locked"}">${currentTeamData.votingOpen ? "Open" : "Locked"}</span>`;
+      document.getElementById("toggleLockBtn").textContent = currentTeamData.votingOpen ? "Lock Voting" : "Unlock Voting";
+    }
+
+    function buildVoterButtons() {
+      voterList.innerHTML = "";
+
+      if (activePlayers.length === 0) {
+        const note = document.createElement("p");
+        note.className = "small-note";
+        note.textContent = "No active players found for this team.";
+        voterList.appendChild(note);
+        return;
+      }
+
+      activePlayers.forEach((player) => {
+        const btn = document.createElement("button");
+        btn.className = "player-btn";
+        btn.textContent = player.name;
+        btn.onclick = () => handleVoterClick(player.id);
+        voterList.appendChild(btn);
+      });
+    }
+
+    async function createTeamGeneric(teamName, coachName, coachPin, enteredNames) {
+      const teamId = normaliseTeamId(teamName);
+      const teamRef = doc(db, "teams", teamId);
+
+      const existing = await getDoc(teamRef);
+      if (existing.exists()) {
+        throw new Error("That team already exists. Use a unique team name, including colour if needed.");
+      }
+
+      await setDoc(teamRef, {
+        teamName,
+        coachName,
+        coachPin,
+        currentRound: 1,
+        votingOpen: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      const batch = writeBatch(db);
+
+      enteredNames.forEach((name) => {
+        const playerId = makePlayerId(name);
+        batch.set(getPlayerDocRef(teamId, playerId), {
+          name,
+          active: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        batch.set(getSeasonVoteDocRef(teamId, playerId), { count: 0 }, { merge: true });
+        batch.set(getRoundVoteDocRef(teamId, 1, playerId), { count: 0 }, { merge: true });
+      });
+
+      await batch.commit();
+      return teamId;
+    }
+
+    async function createTeamFromCoachScreen() {
+      clearStatus();
+
+      const teamName = teamNameInput.value.trim();
+      const coachName = coachNameInput.value.trim();
+      const coachPin = coachPinInput.value.trim();
+      const enteredNames = playerNamesInput.value
+        .split("\n")
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0);
+
+      if (!teamName) {
+        setStatus(setupStatus, "Please enter a team name.");
+        return;
+      }
+
+      if (!coachName) {
+        setStatus(setupStatus, "Please enter the coach name.");
+        return;
+      }
+
+      if (!coachPin) {
+        setStatus(setupStatus, "Please enter a coach PIN.");
+        return;
+      }
+
+      if (enteredNames.length < 2) {
+        setStatus(setupStatus, "Please enter at least 2 player names.");
+        return;
+      }
+
+      const lowerNames = enteredNames.map((n) => n.toLowerCase());
+      if (new Set(lowerNames).size !== lowerNames.length) {
+        setStatus(setupStatus, "Player names must be unique within the team.");
+        return;
+      }
+
+      try {
+        await createTeamGeneric(teamName, coachName, coachPin, enteredNames);
+
+        teamNameInput.value = "";
+        coachNameInput.value = "";
+        coachPinInput.value = "";
+        playerNamesInput.value = "";
+        setStatus(setupStatus, "Team created successfully.", false);
+
+        await loadTeams();
+        setTimeout(() => {
+          showHomeScreen();
+        }, 600);
+      } catch (error) {
+        console.error(error);
+        setStatus(setupStatus, error.message);
+      }
+    }
+
+    async function createTeamFromAdminPanel() {
+      adminStatus.textContent = "";
+
+      const teamName = adminTeamNameInput.value.trim();
+      const coachName = adminCoachNameInput.value.trim();
+      const coachPin = adminCoachPinInput.value.trim();
+      const enteredNames = adminPlayerNamesInput.value
+        .split("\n")
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0);
+
+      if (!teamName) {
+        setStatus(adminStatus, "Please enter a team name.");
+        return;
+      }
+
+      if (!coachName) {
+        setStatus(adminStatus, "Please enter the coach name.");
+        return;
+      }
+
+      if (!coachPin) {
+        setStatus(adminStatus, "Please enter a coach PIN.");
+        return;
+      }
+
+      if (enteredNames.length < 2) {
+        setStatus(adminStatus, "Please enter at least 2 player names.");
+        return;
+      }
+
+      const lowerNames = enteredNames.map((n) => n.toLowerCase());
+      if (new Set(lowerNames).size !== lowerNames.length) {
+        setStatus(adminStatus, "Player names must be unique within the team.");
+        return;
+      }
+
+      try {
+        const teamId = await createTeamGeneric(teamName, coachName, coachPin, enteredNames);
+
+        try {
+          await logAdminAction("TEAM_CREATED", teamId, teamName, `Team created by club admin. Coach: ${coachName}`);
+        } catch (auditError) {
+          console.error("Audit log failed:", auditError);
+        }
+
+        adminTeamNameInput.value = "";
+        adminCoachNameInput.value = "";
+        adminCoachPinInput.value = "";
+        adminPlayerNamesInput.value = "";
+
+        setStatus(adminStatus, "Team added successfully.", false);
+        await loadTeams();
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, error.message);
+      }
+    }
+
+    async function handleVoterClick(playerId) {
+      if (!currentTeamData.votingOpen) {
+        await appAlert("Voting Locked", "Voting is not open yet.");
+        return;
+      }
+
+      selectedVoterId = playerId;
+      const result = await appConfirm(
+        "Confirm Voter",
+        `Do you want to vote as <strong>${escapeHtml(getPlayerNameById(playerId))}</strong>?`,
+        "Confirm"
+      );
+
+      if (!result) {
+        selectedVoterId = "";
+        return;
+      }
+
+      try {
+        const roundAuditRef = getRoundAuditDocRef(currentTeamId, currentTeamData.currentRound);
+        const auditSnap = await getDoc(roundAuditRef);
+        const votedBy = auditSnap.exists() ? (auditSnap.data().votedBy || {}) : {};
+
+        if (votedBy[selectedVoterId]) {
+          await appAlert("Already Voted", `${escapeHtml(getPlayerNameById(selectedVoterId))} has already voted in Round ${currentTeamData.currentRound}.`);
+          selectedVoterId = "";
+          return;
+        }
+
+        openVoteScreen();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", "Could not check voting status.");
+        selectedVoterId = "";
+      }
+    }
+
+    function openVoteScreen() {
+      const voterName = getPlayerNameById(selectedVoterId);
+      voterTitle.textContent = `Voting as: ${voterName}`;
+      voteRoundText.textContent = `Round ${currentTeamData.currentRound}`;
+      playerList.innerHTML = "";
+
+      activePlayers.forEach((player) => {
+        if (player.id !== selectedVoterId) {
+          const btn = document.createElement("button");
+          btn.className = "player-btn";
+          btn.textContent = player.name;
+          btn.onclick = async () => {
+            selectedVoteId = player.id;
+            const confirmed = await appConfirm(
+              "Confirm Vote",
+              `Are you sure you want to vote for <strong>${escapeHtml(player.name)}</strong>?`,
+              "Confirm"
+            );
+
+            if (confirmed) {
+              await submitVote();
+            } else {
+              selectedVoteId = "";
+            }
+          };
+          playerList.appendChild(btn);
+        }
+      });
+
+      teamScreen.classList.add("hidden");
+      voteScreen.classList.remove("hidden");
+    }
+
+    async function submitVote() {
+      if (!selectedVoterId || !selectedVoteId) return;
+
+      const round = currentTeamData.currentRound;
+      const voteAuditRef = getRoundAuditDocRef(currentTeamId, round);
+      const roundVoteRef = getRoundVoteDocRef(currentTeamId, round, selectedVoteId);
+      const seasonVoteRef = getSeasonVoteDocRef(currentTeamId, selectedVoteId);
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const teamRef = doc(db, "teams", currentTeamId);
+          const teamSnap = await transaction.get(teamRef);
+
+          if (!teamSnap.exists()) {
+            throw new Error("Team not found.");
+          }
+
+          const liveTeam = teamSnap.data();
+          if (!liveTeam.votingOpen) {
+            throw new Error("Voting is locked.");
+          }
+
+          const auditSnap = await transaction.get(voteAuditRef);
+          const votedBy = auditSnap.exists() ? (auditSnap.data().votedBy || {}) : {};
+
+          if (votedBy[selectedVoterId]) {
+            throw new Error(`${getPlayerNameById(selectedVoterId)} has already voted in Round ${round}.`);
+          }
+
+          const roundSnap = await transaction.get(roundVoteRef);
+          const seasonSnap = await transaction.get(seasonVoteRef);
+
+          const roundCount = roundSnap.exists() ? (roundSnap.data().count || 0) : 0;
+          const seasonCount = seasonSnap.exists() ? (seasonSnap.data().count || 0) : 0;
+
+          transaction.set(roundVoteRef, { count: roundCount + 1 }, { merge: true });
+          transaction.set(seasonVoteRef, { count: seasonCount + 1 }, { merge: true });
+          transaction.set(
+            voteAuditRef,
+            {
+              votedBy: {
+                [selectedVoterId]: {
+                  voterPlayerId: selectedVoterId,
+                  voterName: getPlayerNameById(selectedVoterId),
+                  votedForPlayerId: selectedVoteId,
+                  votedAt: new Date().toISOString()
+                }
+              },
+              updatedAt: serverTimestamp()
+            },
+            { merge: true }
+          );
+        });
+
+        await appAlert("Vote Submitted", "Your vote has been submitted.");
+        selectedVoteId = "";
+        selectedVoterId = "";
+        await enterTeam(currentTeamId);
+      } catch (error) {
+        console.error(error);
+        await appAlert("Vote Failed", escapeHtml(error.message));
+      }
+    }
+
+    async function coachLogin() {
+      const result = await appPrompt(
+        "Coach Access",
+        "Enter coach PIN:",
+        "",
+        "Enter coach PIN",
+        "password"
+      );
+      if (!result.confirmed) return;
+
+      const pin = result.value.trim();
+      if (!currentTeamData || pin !== currentTeamData.coachPin) {
+        await appAlert("Incorrect PIN", "The coach PIN is incorrect.");
+        return;
+      }
+
+      coachPanel.style.display = "block";
+      currentTallyType = "round";
+      await refreshCoachPanel();
+    }
+
+    async function adminLogin() {
+      const result = await appPrompt(
+        "Club Admin Access",
+        "Enter Club Admin PIN:",
+        "",
+        "Enter Club Admin PIN",
+        "password"
+      );
+      if (!result.confirmed) return;
+
+      if (result.value.trim() !== CLUB_ADMIN_PIN) {
+        await appAlert("Incorrect PIN", "The Club Admin PIN is incorrect.");
+        return;
+      }
+
+      adminPanel.style.display = "block";
+      adminStatus.textContent = "";
+      await loadTeams();
+      adminTallyScope = "selected";
+      adminTallyMode = "round";
+      adminCollapsedTeams = {};
+      await loadAdminTallies();
+    }
+
+    async function openAuditTrail() {
+      adminPanel.style.display = "none";
+      showOnlyScreen(auditScreen);
+
+      auditBody.innerHTML = "";
+      try {
+        const snap = await getDocs(collection(db, "adminAudit"));
+        const rows = [];
+
+        snap.forEach((docSnap) => {
+          rows.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        rows.sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        });
+
+        if (rows.length === 0) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td colspan="4">No admin audit records yet.</td>`;
+          auditBody.appendChild(tr);
+          return;
+        }
+
+        rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${escapeHtml(formatAuditDate(row.createdAt))}</td>
+            <td>${escapeHtml(row.action || "-")}</td>
+            <td>${escapeHtml(row.teamName || "-")}</td>
+            <td>${escapeHtml(row.details || "-")}</td>
+          `;
+          auditBody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error(error);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="4">Could not load audit trail: ${escapeHtml(error.message)}</td>`;
+        auditBody.appendChild(tr);
+      }
+    }
+
+    async function refreshCoachPanel() {
+      await loadPlayersForCurrentTeam();
+      updateTeamUI();
+      buildVoterButtons();
+      await ensureSeasonDocsForCurrentTeam();
+      await ensureRoundDocsForCurrentTeam(currentTeamData.currentRound);
+      await loadTally(currentTallyType);
+      await loadVoterStatus();
+      loadPlayerManagement();
+    }
+
+    async function loadTally(type) {
+      currentTallyType = type;
+      tallyTypeHeader.textContent = type === "round" ? "Round Votes" : "Season Votes";
+      tallyBody.innerHTML = "";
+
+      const counts = {};
+      allPlayers.forEach((player) => {
+        counts[player.id] = 0;
+      });
+
+      const targetCollection = type === "round"
+        ? collection(db, "teams", currentTeamId, "roundVotes", `round_${currentTeamData.currentRound}`, "playerVotes")
+        : collection(db, "teams", currentTeamId, "seasonVotes");
+
+      const snap = await getDocs(targetCollection);
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        counts[docSnap.id] = data.count || 0;
+      });
+
+      [...allPlayers]
+        .sort((a, b) => {
+          const diff = (counts[b.id] || 0) - (counts[a.id] || 0);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name);
+        })
+        .forEach((player) => {
+          const tr = document.createElement("tr");
+
+          const nameTd = document.createElement("td");
+          nameTd.textContent = player.name;
+
+          const statusTd = document.createElement("td");
+          statusTd.textContent = player.active === false ? "Removed" : "Active";
+          statusTd.className = player.active === false ? "red-text" : "green-text";
+
+          const countTd = document.createElement("td");
+          countTd.textContent = counts[player.id] || 0;
+
+          tr.appendChild(nameTd);
+          tr.appendChild(statusTd);
+          tr.appendChild(countTd);
+          tallyBody.appendChild(tr);
+        });
+    }
+
+    async function loadVoterStatus() {
+      voterStatusBody.innerHTML = "";
+
+      const auditRef = getRoundAuditDocRef(currentTeamId, currentTeamData.currentRound);
+      const auditSnap = await getDoc(auditRef);
+      const votedBy = auditSnap.exists() ? (auditSnap.data().votedBy || {}) : {};
+
+      allPlayers.forEach((player) => {
+        const tr = document.createElement("tr");
+
+        const playerTd = document.createElement("td");
+        playerTd.textContent = player.name;
+
+        const statusTd = document.createElement("td");
+        const votedForTd = document.createElement("td");
+
+        if (player.active === false) {
+          statusTd.textContent = "Removed";
+          statusTd.className = "red-text";
+          votedForTd.textContent = "-";
+        } else if (votedBy[player.id]) {
+          statusTd.textContent = "Voted";
+          statusTd.className = "green-text";
+          votedForTd.textContent = getPlayerNameById(votedBy[player.id].votedForPlayerId) || "-";
+        } else {
+          statusTd.textContent = "Not Voted";
+          statusTd.className = "red-text";
+          votedForTd.textContent = "-";
+        }
+
+        tr.appendChild(playerTd);
+        tr.appendChild(statusTd);
+        tr.appendChild(votedForTd);
+        voterStatusBody.appendChild(tr);
+      });
+    }
+
+    function loadPlayerManagement() {
+      playerManageBody.innerHTML = "";
+
+      allPlayers.forEach((player) => {
+        const tr = document.createElement("tr");
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = player.name;
+
+        const statusTd = document.createElement("td");
+        statusTd.textContent = player.active === false ? "Removed" : "Active";
+        statusTd.className = player.active === false ? "red-text" : "green-text";
+
+        const actionsTd = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "inline-actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "mini-btn";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = async () => {
+          const result = await appPrompt(
+            "Edit Player",
+            "Edit player name:",
+            player.name,
+            "Enter player name",
+            "text"
+          );
+          if (!result.confirmed) return;
+          const trimmed = result.value.trim();
+          if (!trimmed) {
+            await appAlert("Invalid Name", "Name cannot be blank.");
+            return;
+          }
+          await editPlayer(player.id, trimmed);
+        };
+
+        wrap.appendChild(editBtn);
+
+        if (player.active === false) {
+          const restoreBtn = document.createElement("button");
+          restoreBtn.className = "mini-btn mini-green";
+          restoreBtn.textContent = "Restore";
+          restoreBtn.onclick = async () => {
+            await restorePlayer(player.id);
+          };
+          wrap.appendChild(restoreBtn);
+        } else {
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "mini-btn mini-danger";
+          removeBtn.textContent = "Remove";
+          removeBtn.onclick = async () => {
+            await removePlayer(player.id);
+          };
+          wrap.appendChild(removeBtn);
+        }
+
+        actionsTd.appendChild(wrap);
+
+        tr.appendChild(nameTd);
+        tr.appendChild(statusTd);
+        tr.appendChild(actionsTd);
+        playerManageBody.appendChild(tr);
+      });
+    }
+
+    async function editPlayer(playerId, newName) {
+      try {
+        const duplicate = allPlayers.some(
+          (p) => p.id !== playerId && p.name.trim().toLowerCase() === newName.trim().toLowerCase()
+        );
+        if (duplicate) {
+          await appAlert("Duplicate Name", "Another player already has that name.");
+          return;
+        }
+
+        await setDoc(
+          getPlayerDocRef(currentTeamId, playerId),
+          {
+            name: newName.trim(),
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not edit player: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function removePlayer(playerId) {
+      const confirmed = await appConfirm(
+        "Remove Player",
+        `Remove <strong>${escapeHtml(getPlayerNameById(playerId))}</strong> from active voting?`,
+        "Remove"
+      );
+      if (!confirmed) return;
+
+      try {
+        await setDoc(
+          getPlayerDocRef(currentTeamId, playerId),
+          {
+            active: false,
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not remove player: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function restorePlayer(playerId) {
+      try {
+        await setDoc(
+          getPlayerDocRef(currentTeamId, playerId),
+          {
+            active: true,
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+
+        await ensureSeasonDocsForCurrentTeam();
+        await ensureRoundDocsForCurrentTeam(currentTeamData.currentRound);
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not restore player: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function addPlayer() {
+      const result = await appPrompt(
+        "Add Player",
+        "Enter the new player's name:",
+        "",
+        "Enter player name",
+        "text"
+      );
+      if (!result.confirmed) return;
+
+      const trimmed = result.value.trim();
+      if (!trimmed) {
+        await appAlert("Invalid Name", "Player name cannot be blank.");
+        return;
+      }
+
+      const duplicate = allPlayers.some((p) => p.name.trim().toLowerCase() === trimmed.toLowerCase());
+      if (duplicate) {
+        await appAlert("Duplicate Name", "That player name already exists.");
+        return;
+      }
+
+      try {
+        const playerId = makePlayerId(trimmed);
+
+        await setDoc(getPlayerDocRef(currentTeamId, playerId), {
+          name: trimmed,
+          active: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        await setDoc(getSeasonVoteDocRef(currentTeamId, playerId), { count: 0 }, { merge: true });
+        await setDoc(getRoundVoteDocRef(currentTeamId, currentTeamData.currentRound, playerId), { count: 0 }, { merge: true });
+
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not add player: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function previousRound() {
+      if (currentTeamData.currentRound <= 1) return;
+
+      try {
+        currentTeamData.currentRound -= 1;
+        await saveTeamSettings();
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not change round: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function nextRound() {
+      try {
+        currentTeamData.currentRound += 1;
+        currentTeamData.votingOpen = false;
+        await saveTeamSettings();
+        await ensureRoundDocsForCurrentTeam(currentTeamData.currentRound);
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not change round: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function toggleVotingLock() {
+      try {
+        currentTeamData.votingOpen = !currentTeamData.votingOpen;
+        await saveTeamSettings();
+        await refreshCoachPanel();
+      } catch (error) {
+        console.error(error);
+        await appAlert("Error", `Could not update voting lock: ${escapeHtml(error.message)}`);
+      }
+    }
+
+    async function saveTeamSettings() {
+      await setDoc(
+        doc(db, "teams", currentTeamId),
+        {
+          currentRound: currentTeamData.currentRound,
+          votingOpen: currentTeamData.votingOpen,
+          updatedAt: serverTimestamp()
+        },
+        { merge: true }
+      );
+    }
+
+    async function resetCoachPin() {
+      const teamId = adminTeamSelect.value;
+      const newPin = newCoachPinInput.value.trim();
+
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      if (!newPin) {
+        setStatus(adminStatus, "Please enter a new coach PIN.");
+        return;
+      }
+
+      try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        const teamName = teamSnap.exists() ? (teamSnap.data().teamName || teamId) : teamId;
+
+        await setDoc(doc(db, "teams", teamId), {
+          coachPin: newPin,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        try {
+          await logAdminAction("COACH_PIN_RESET", teamId, teamName, "Coach PIN reset by club admin");
+        } catch (auditError) {
+          console.error("Audit log failed:", auditError);
+          setStatus(adminStatus, "Coach PIN updated, but audit log failed. Check Firestore rules for adminAudit.");
+          return;
+        }
+
+        newCoachPinInput.value = "";
+        setStatus(adminStatus, "Coach PIN updated successfully.", false);
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset coach PIN: ${error.message}`);
+      }
+    }
+
+    async function resetRoundByAdmin() {
+      const teamId = adminTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        if (!teamSnap.exists()) {
+          setStatus(adminStatus, "Selected team not found.");
+          return;
+        }
+
+        const teamData = teamSnap.data();
+        const confirmed = await appConfirm(
+          "Reset Current Round",
+          `Reset all votes and voter tracking for the current round in <strong>${escapeHtml(teamData.teamName)}</strong>?`,
+          "Reset Round"
+        );
+        if (!confirmed) return;
+
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const batch = writeBatch(db);
+
+        playersSnap.forEach((playerDoc) => {
+          batch.set(
+            doc(db, "teams", teamId, "roundVotes", `round_${teamData.currentRound}`, "playerVotes", playerDoc.id),
+            { count: 0 },
+            { merge: true }
+          );
+        });
+
+        batch.set(
+          doc(db, "teams", teamId, "roundAudit", `round_${teamData.currentRound}`),
+          { votedBy: {}, updatedAt: serverTimestamp() },
+          { merge: true }
+        );
+
+        await batch.commit();
+
+        try {
+          await logAdminAction("ROUND_RESET", teamId, teamData.teamName, `Round ${teamData.currentRound} reset by club admin`);
+        } catch (auditError) {
+          console.error("Audit log failed:", auditError);
+        }
+
+        setStatus(adminStatus, "Current round reset successfully.", false);
+
+        if (currentTeamId === teamId && currentTeamData) {
+          await enterTeam(teamId);
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset round: ${error.message}`);
+      }
+    }
+
+    async function resetSeasonByAdmin() {
+      const teamId = adminTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team.");
+        return;
+      }
+
+      try {
+        const teamSnap = await getDoc(doc(db, "teams", teamId));
+        if (!teamSnap.exists()) {
+          setStatus(adminStatus, "Selected team not found.");
+          return;
+        }
+
+        const teamData = teamSnap.data();
+        const confirmed = await appConfirm(
+          "Reset Entire Season",
+          `Reset the ENTIRE season for <strong>${escapeHtml(teamData.teamName)}</strong>? This will clear all rounds, all season tallies, all voter tracking, return to Round 1, and lock voting.`,
+          "Reset Season"
+        );
+        if (!confirmed) return;
+
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const players = playersSnap.docs.map(d => d.id);
+
+        for (let round = 1; round <= (teamData.currentRound || 1); round++) {
+          const batch = writeBatch(db);
+
+          players.forEach((playerId) => {
+            batch.set(
+              doc(db, "teams", teamId, "roundVotes", `round_${round}`, "playerVotes", playerId),
+              { count: 0 },
+              { merge: true }
+            );
+          });
+
+          batch.set(
+            doc(db, "teams", teamId, "roundAudit", `round_${round}`),
+            { votedBy: {}, updatedAt: serverTimestamp() },
+            { merge: true }
+          );
+
+          await batch.commit();
+        }
+
+        const seasonBatch = writeBatch(db);
+
+        players.forEach((playerId) => {
+          seasonBatch.set(doc(db, "teams", teamId, "seasonVotes", playerId), { count: 0 }, { merge: true });
+        });
+
+        seasonBatch.set(doc(db, "teams", teamId), {
+          currentRound: 1,
+          votingOpen: false,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        await seasonBatch.commit();
+
+        try {
+          await logAdminAction("SEASON_RESET", teamId, teamData.teamName, "Entire season reset by club admin");
+        } catch (auditError) {
+          console.error("Audit log failed:", auditError);
+        }
+
+        setStatus(adminStatus, "Entire season reset successfully.", false);
+
+        if (currentTeamId === teamId && currentTeamData) {
+          await enterTeam(teamId);
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not reset season: ${error.message}`);
+      }
+    }
+
+    async function removeTeam() {
+      const teamId = adminTeamSelect.value;
+      if (!teamId) {
+        setStatus(adminStatus, "Please select a team to remove.");
+        return;
+      }
+
+      const team = cachedTeams.find(t => t.id === teamId);
+      const teamName = team ? team.teamName : teamId;
+
+      const confirmed = await appConfirm(
+        "Remove Team",
+        `Remove team <strong>${escapeHtml(teamName)}</strong>? This will delete players, tallies, round data and coach settings for that team.`,
+        "Remove Team"
+      );
+      if (!confirmed) return;
+
+      try {
+        const playersSnap = await getDocs(collection(db, "teams", teamId, "players"));
+        const seasonSnap = await getDocs(collection(db, "teams", teamId, "seasonVotes"));
+        const roundAuditSnap = await getDocs(collection(db, "teams", teamId, "roundAudit"));
+        const roundVotesRoundsSnap = await getDocs(collection(db, "teams", teamId, "roundVotes"));
+
+        for (const docSnap of playersSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "players", docSnap.id));
+        }
+
+        for (const docSnap of seasonSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "seasonVotes", docSnap.id));
+        }
+
+        for (const docSnap of roundAuditSnap.docs) {
+          await deleteDoc(doc(db, "teams", teamId, "roundAudit", docSnap.id));
+        }
+
+        for (const roundDoc of roundVotesRoundsSnap.docs) {
+          const playerVotesSnap = await getDocs(collection(db, "teams", teamId, "roundVotes", roundDoc.id, "playerVotes"));
+          for (const playerVoteDoc of playerVotesSnap.docs) {
+            await deleteDoc(doc(db, "teams", teamId, "roundVotes", roundDoc.id, "playerVotes", playerVoteDoc.id));
+          }
+          await deleteDoc(doc(db, "teams", teamId, "roundVotes", roundDoc.id));
+        }
+
+        await deleteDoc(doc(db, "teams", teamId));
+
+        try {
+          await logAdminAction("TEAM_REMOVED", teamId, teamName, "Team removed by club admin");
+        } catch (auditError) {
+          console.error("Audit log failed:", auditError);
+        }
+
+        if (currentTeamId === teamId) {
+          currentTeamId = "";
+          currentTeamData = null;
+          allPlayers = [];
+          activePlayers = [];
+          showHomeScreen();
+        }
+
+        await loadTeams();
+        setStatus(adminStatus, "Team removed successfully.", false);
+      } catch (error) {
+        console.error(error);
+        setStatus(adminStatus, `Could not remove team: ${error.message}`);
+      }
+    }
+
+
+    function getAdminLeaderValue(player) {
+      if (adminTallyMode === "round") return player.roundVotes || 0;
+      return player.seasonVotes || 0;
+    }
+
+    function toggleAdminTeamCollapse(teamId) {
+      adminCollapsedTeams[teamId] = !adminCollapsedTeams[teamId];
+      renderAdminTallies(lastAdminTallies);
+    }
+
+    function renderAdminTallies(teamTallies) {
+      lastAdminTallies = teamTallies || [];
+      adminTalliesBody.innerHTML = "";
+
+      if (!teamTallies || teamTallies.length === 0) {
+        adminTalliesBody.innerHTML = `<tr><td colspan="6">No tally data available.</td></tr>`;
+        return;
+      }
+
+      teamTallies.forEach((team) => {
+        const leaderValue = Math.max(...team.players.map(p => getAdminLeaderValue(p)), 0);
+        const collapsed = !!adminCollapsedTeams[team.teamId];
+
+        const summaryRow = document.createElement("tr");
+        summaryRow.className = "admin-tally-summary-row";
+        summaryRow.innerHTML = `
+          <td colspan="6">
+            <strong>${escapeHtml(team.teamName)}</strong>
+            &nbsp;—&nbsp; Round ${team.currentRound}
+            &nbsp;—&nbsp; ${collapsed ? "Click to expand" : "Click to collapse"}
+          </td>
+        `;
+        summaryRow.onclick = () => toggleAdminTeamCollapse(team.teamId);
+        adminTalliesBody.appendChild(summaryRow);
+
+        team.players.forEach((player) => {
+          const tr = document.createElement("tr");
+          if (collapsed) tr.classList.add("admin-tally-collapsed");
+
+          const isLeader = leaderValue > 0 && getAdminLeaderValue(player) === leaderValue;
+
+          let roundVotesText = String(player.roundVotes || 0);
+          let seasonVotesText = String(player.seasonVotes || 0);
+
+          if (adminTallyMode === "round" && isLeader) {
+            roundVotesText = `<span class="admin-tally-leader">${roundVotesText}</span>`;
+          }
+
+          if ((adminTallyMode === "season" || adminTallyMode === "both") && isLeader) {
+            seasonVotesText = `<span class="admin-tally-leader">${seasonVotesText}</span>`;
+          }
+
+          tr.innerHTML = `
+            <td>${escapeHtml(team.teamName)}</td>
+            <td>${team.currentRound}</td>
+            <td>${escapeHtml(player.name)}</td>
+            <td class="${player.active === false ? "red-text" : "green-text"}">${player.active === false ? "Removed" : "Active"}</td>
+            <td>${adminTallyMode === "season" ? "-" : roundVotesText}</td>
+            <td>${adminTallyMode === "round" ? "-" : seasonVotesText}</td>
+          `;
+          adminTalliesBody.appendChild(tr);
+        });
+      });
+    }
+
+    async function loadAdminTallies() {
+      adminStatus.textContent = "";
+
+      try {
+        let teamsToLoad = [];
+
+        if (adminTallyScope === "selected") {
+          const selectedTeamId = adminTeamSelect.value;
+          if (!selectedTeamId) {
+            adminTalliesBody.innerHTML = `<tr><td colspan="6">Please select a team first.</td></tr>`;
+            return;
+          }
+          teamsToLoad = cachedTeams.filter(t => t.id === selectedTeamId);
+        } else {
+          teamsToLoad = [...cachedTeams];
+        }
+
+        const compiled = [];
+
+        for (const team of teamsToLoad) {
+          const teamRef = doc(db, "teams", team.id);
+          const teamSnap = await getDoc(teamRef);
+          if (!teamSnap.exists()) continue;
+
+          const teamData = teamSnap.data();
+          const currentRound = teamData.currentRound || 1;
+
+          const playersSnap = await getDocs(collection(db, "teams", team.id, "players"));
+          const seasonSnap = await getDocs(collection(db, "teams", team.id, "seasonVotes"));
+          const roundSnap = await getDocs(collection(db, "teams", team.id, "roundVotes", `round_${currentRound}`, "playerVotes"));
+
+          const seasonMap = {};
+          const roundMap = {};
+
+          seasonSnap.forEach((d) => {
+            seasonMap[d.id] = d.data().count || 0;
+          });
+
+          roundSnap.forEach((d) => {
+            roundMap[d.id] = d.data().count || 0;
+          });
+
+          const players = [];
+          playersSnap.forEach((p) => {
+            const data = p.data();
+            players.push({
+              id: p.id,
+              name: data.name || "Unnamed Player",
+              active: data.active !== false,
+              roundVotes: roundMap[p.id] || 0,
+              seasonVotes: seasonMap[p.id] || 0
+            });
+          });
+
+          players.sort((a, b) => {
+            const aValue = adminTallyMode === "round" ? a.roundVotes : a.seasonVotes;
+            const bValue = adminTallyMode === "round" ? b.roundVotes : b.seasonVotes;
+            if (bValue !== aValue) return bValue - aValue;
+            return a.name.localeCompare(b.name);
+          });
+
+          compiled.push({
+            teamId: team.id,
+            teamName: teamData.teamName || team.id,
+            currentRound,
+            players
+          });
+        }
+
+        compiled.sort((a, b) => a.teamName.localeCompare(b.teamName));
+        renderAdminTallies(compiled);
+      } catch (error) {
+        console.error(error);
+        adminTalliesBody.innerHTML = `<tr><td colspan="6">Could not load tallies: ${escapeHtml(error.message)}</td></tr>`;
+      }
+    }
+
+    function exportAdminTalliesCsv() {
+      if (!lastAdminTallies || lastAdminTallies.length === 0) {
+        appAlert("No Data", "Load team tallies before exporting.");
+        return;
+      }
+
+      const lines = [];
+      lines.push(["Team", "Round", "Player", "Status", "Round Votes", "Season Votes"].join(","));
+
+      lastAdminTallies.forEach((team) => {
+        team.players.forEach((player) => {
+          lines.push([
+            `"${String(team.teamName).replace(/"/g, '""')}"`,
+            `"${team.currentRound}"`,
+            `"${String(player.name).replace(/"/g, '""')}"`,
+            `"${player.active === false ? "Removed" : "Active"}"`,
+            `"${player.roundVotes || 0}"`,
+            `"${player.seasonVotes || 0}"`
+          ].join(","));
+        });
+      });
+
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wmjrlfc-admin-tallies.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+
+    async function init() {
+      try {
+        await loadTeams();
+        showHomeScreen();
+      } catch (error) {
+        console.error(error);
+        setStatus(homeStatus, `App failed to load: ${error.message}`);
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
