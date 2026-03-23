@@ -1016,11 +1016,12 @@
       measurementId: "G-XQNWVH76KV"
     };
 
-    const ADMIN_PIN = '1379';
+    // Replace this placeholder before deployment. Leaving a real admin PIN in the repo
+    // would expose privileged access to anyone who can view the page source.
+    const ADMIN_PIN = 'REPLACE_WITH_ADMIN_PIN';
     const BROWSER_ID_KEY = 'wmjrlfc-browser-id';
     const TEAM_COLLECTION = 'teams';
     const ACTIVITY_COLLECTION = 'activity';
-    const VOTE_TOKEN_COLLECTION = 'vote_tokens';
 
     let app = null;
     let db = null;
@@ -1059,6 +1060,32 @@
         .trim()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll('`', '&#96;');
+    }
+
+    function escapeJsString(value) {
+      return String(value ?? '')
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'")
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '\\r')
+        .replaceAll('</', '<\\/');
+    }
+
+    function isAdminPinConfigured() {
+      return ADMIN_PIN && ADMIN_PIN !== 'REPLACE_WITH_ADMIN_PIN';
     }
 
     function initials(name) {
@@ -1227,6 +1254,9 @@
       document.getElementById('adminLoginCard').classList.remove('hidden');
       document.getElementById('adminPinInput').value = '';
       hideMiniBanner('adminLoginBanner');
+      if (!isAdminPinConfigured()) {
+        showMiniBanner('adminLoginBanner', 'Admin access is disabled until the deployer replaces REPLACE_WITH_ADMIN_PIN in this file.', 'info');
+      }
     }
 
     function refreshParentTeamSelect() {
@@ -1339,10 +1369,10 @@
       playerList.innerHTML = team.players.map(player => `
         <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
           <div style="display:grid;gap:10px;flex:1;">
-            <input id="admin-player-name-${player.id}" class="input" type="text" value="${player.name.replace(/\"/g, '&quot;')}">
-            <input id="admin-player-number-${player.id}" class="input" type="text" value="${(player.number || '').replace(/\"/g, '&quot;')}" placeholder="Jersey / Identifier">
+            <input id="admin-player-name-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.name)}">
+            <input id="admin-player-number-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.number || '')}" placeholder="Jersey / Identifier">
           </div>
-          <button class="btn-primary" onclick="adminSavePlayerEdits('${player.id}')">Save</button>
+          <button class="btn-primary" onclick="adminSavePlayerEdits('${escapeJsString(player.id)}')">Save</button>
         </div>
       `).join('');
     }
@@ -1423,12 +1453,12 @@
           <div class="player-head">
             <div class="avatar">${initials(player.name)}</div>
             <div class="player-meta">
-              <strong>${player.name}</strong>
-              <span>${player.number ? `Jersey ${player.number}` : 'Player'}</span>
+              <strong>${escapeHtml(player.name)}</strong>
+              <span>${player.number ? `Jersey ${escapeHtml(player.number)}` : 'Player'}</span>
             </div>
           </div>
           <div class="vote-choices">
-            <button class="vote-choice ${isSelected ? 'selected' : ''}" ${isVoter ? 'disabled' : ''} onclick="${isVoter ? '' : `toggleVote('${player.id}')`}">
+            <button class="vote-choice ${isSelected ? 'selected' : ''}" ${isVoter ? 'disabled' : ''} onclick="${isVoter ? '' : `toggleVote('${escapeJsString(player.id)}')`}">
               ${isVoter ? "You can't vote for yourself" : isSelected ? "Selected as Player's Player" : "Select Player's Player"}
             </button>
           </div>
@@ -1447,12 +1477,12 @@
           <div class="player-head">
             <div class="avatar">${initials(player.name)}</div>
             <div class="player-meta">
-              <strong>${player.name}</strong>
-              <span>${player.number ? `Jersey ${player.number}` : 'Player'}</span>
+              <strong>${escapeHtml(player.name)}</strong>
+              <span>${player.number ? `Jersey ${escapeHtml(player.number)}` : 'Player'}</span>
             </div>
           </div>
           <div class="vote-choices">
-            <button class="vote-choice" onclick="openVoterConfirm('${player.id}')">This is me</button>
+            <button class="vote-choice" onclick="openVoterConfirm('${escapeJsString(player.id)}')">This is me</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1575,11 +1605,11 @@
       const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
       const voterItem = document.createElement('li');
       voterItem.className = 'summary-item';
-      voterItem.innerHTML = `<strong>Voting as:</strong> ${voter ? voter.name : 'Unknown Player'}`;
+      voterItem.textContent = `Voting as: ${voter ? voter.name : 'Unknown Player'}`;
       list.appendChild(voterItem);
       const item = document.createElement('li');
       item.className = 'summary-item';
-      item.innerHTML = `<strong>Player's Player:</strong> ${player ? player.name : 'Unknown Player'}`;
+      item.textContent = `Player's Player: ${player ? player.name : 'Unknown Player'}`;
       list.appendChild(item);
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
@@ -1729,22 +1759,22 @@
       if (!team) return;
 
       document.getElementById('coachStats').innerHTML = `
-        <div class="stat"><div class="stat-label">Team</div><div class="stat-value">${team.name}</div></div>
+        <div class="stat"><div class="stat-label">Team</div><div class="stat-value">${escapeHtml(team.name)}</div></div>
         <div class="stat"><div class="stat-label">Players</div><div class="stat-value">${team.players.length}</div></div>
         <div class="stat"><div class="stat-label">Votes Cast</div><div class="stat-value">${team.votesCast}</div></div>
         <div class="stat"><div class="stat-label">Round Access</div><div class="stat-value">${team.round.status === 'open' ? 'Unlocked' : 'Locked'}</div></div>
       `;
 
       document.getElementById('coachTeamDetails').innerHTML = `
-        <p><strong>Coach:</strong> ${team.coachName}</p>
-        <p><strong>Current Round:</strong> ${team.round.name}</p>
-        <p><strong>Round Note:</strong> ${team.round.note || 'No note set'}</p>
+        <p><strong>Coach:</strong> ${escapeHtml(team.coachName)}</p>
+        <p><strong>Current Round:</strong> ${escapeHtml(team.round.name)}</p>
+        <p><strong>Round Note:</strong> ${escapeHtml(team.round.note || 'No note set')}</p>
       `;
 
       document.getElementById('coachSharingInfo').innerHTML = `
         <div class="muted-box">
           <p><strong>Voting message</strong></p>
-          <p class="tiny">Tell players and families to open this page, select <strong>${team.name}</strong>, and vote during <strong>${team.round.name}</strong>.</p>
+          <p class="tiny">Tell players and families to open this page, select <strong>${escapeHtml(team.name)}</strong>, and vote during <strong>${escapeHtml(team.round.name)}</strong>.</p>
           <p class="tiny">Round access: <strong>${team.round.status === 'open' ? 'Unlocked for voting' : 'Locked'}</strong></p>
         </div>
       `;
@@ -1766,12 +1796,12 @@
       wrap.innerHTML = team.players.map(player => `
         <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
           <div style="display:grid;gap:10px;flex:1;">
-            <input id="edit-name-${player.id}" class="input" type="text" value="${player.name.replace(/\"/g, '&quot;')}">
-            <input id="edit-number-${player.id}" class="input" type="text" value="${(player.number || '').replace(/\"/g, '&quot;')}" placeholder="Jersey / Identifier">
+            <input id="edit-name-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.name)}">
+            <input id="edit-number-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.number || '')}" placeholder="Jersey / Identifier">
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
-            <button class="btn-primary" onclick="savePlayerEdits('${player.id}')">Save</button>
-            <button class="btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+            <button class="btn-primary" onclick="savePlayerEdits('${escapeJsString(player.id)}')">Save</button>
+            <button class="btn-danger" onclick="removePlayer('${escapeJsString(player.id)}')">Remove</button>
           </div>
         </div>
       `).join('');
@@ -1885,7 +1915,7 @@
       const leaderVotes = sorted[0] ? sorted[0].seasonVotes : 0;
       body.innerHTML = sorted.map(player => `
         <tr>
-          <td class="${player.seasonVotes === leaderVotes && leaderVotes > 0 ? 'leader' : ''}">${player.name}</td>
+          <td class="${player.seasonVotes === leaderVotes && leaderVotes > 0 ? 'leader' : ''}">${escapeHtml(player.name)}</td>
           <td>${player.roundVotes}</td>
           <td>${player.seasonVotes}</td>
         </tr>
@@ -1899,6 +1929,10 @@
     }
 
     function adminLogin() {
+      if (!isAdminPinConfigured()) {
+        showMiniBanner('adminLoginBanner', 'Replace REPLACE_WITH_ADMIN_PIN in this file before using the admin portal.', 'error');
+        return;
+      }
       const pin = document.getElementById('adminPinInput').value.trim();
       if (pin !== ADMIN_PIN) {
         showMiniBanner('adminLoginBanner', 'Incorrect admin PIN. Please try again.', 'error');
@@ -1931,12 +1965,12 @@
           const leader = sortedPlayers[0];
           return `
             <tr>
-              <td>${team.name}</td>
-              <td>${team.coachName}</td>
-              <td>${team.round.name}<div class="tiny">${team.round.status} • ${team.round.note || 'No note set'}</div></td>
+              <td>${escapeHtml(team.name)}</td>
+              <td>${escapeHtml(team.coachName)}</td>
+              <td>${escapeHtml(team.round.name)}<div class="tiny">${escapeHtml(team.round.status)} • ${escapeHtml(team.round.note || 'No note set')}</div></td>
               <td>${team.players.length}</td>
               <td>${team.votesCast}</td>
-              <td>${leader ? `${leader.name} (${leader.seasonVotes})` : 'No votes yet'}</td>
+              <td>${leader ? `${escapeHtml(leader.name)} (${leader.seasonVotes})` : 'No votes yet'}</td>
             </tr>
           `;
         }).join('');
@@ -2126,13 +2160,6 @@
           await deleteQuerySnapshot(activitySnapshot);
         } catch (error) {
           console.warn('Activity cleanup skipped:', error);
-        }
-
-        try {
-          const voteTokenSnapshot = await db.collection(VOTE_TOKEN_COLLECTION).where('teamId', '==', team.id).get();
-          await deleteQuerySnapshot(voteTokenSnapshot);
-        } catch (error) {
-          console.warn('Vote token cleanup skipped:', error);
         }
 
         if (coachSessionTeamId === team.id) {
