@@ -1095,6 +1095,7 @@
           note: (team.round && team.round.note) || 'Voting is locked until the coach unlocks the round'
         },
         players: Array.isArray(team.players) ? team.players : [],
+        roundVoterIds: Array.isArray(team.roundVoterIds) ? team.roundVoterIds : [],
         votesCast: Number(team.votesCast || 0),
         createdAt: team.createdAt || timestampNow(),
         updatedAt: team.updatedAt || timestampNow()
@@ -1443,22 +1444,10 @@
       const player = team.players.find(item => item.id === playerId);
       if (!player) return;
 
-      if (cloudReady) {
-        const roundSlug = slugify(team.round.name);
-        const voteTokenId = `${team.id}__${roundSlug}__${player.id}`;
-        try {
-          const voteTokenDoc = await db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId).get();
-          if (voteTokenDoc.exists) {
-            window.alert('You have already voted this round.');
-            return;
-          }
-        } catch (error) {
-          console.warn('Vote status check skipped:', error);
-        }
+      if (team.roundVoterIds.includes(player.id)) {
+        window.alert('You have already voted this round.');
+        return;
       }
-
-      const confirmed = window.confirm(`Please confirm you are voting as ${player.name}.`);
-      if (!confirmed) return;
       parentFlow.voterPlayerId = player.id;
       parentFlow.selectedPlayerId = null;
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
@@ -1530,17 +1519,9 @@
       button.disabled = true;
       button.textContent = 'Submitting…';
 
-      const roundSlug = slugify(team.round.name);
-      const voteTokenId = `${team.id}__${roundSlug}__${parentFlow.voterPlayerId}`;
       const teamRef = db.collection(TEAM_COLLECTION).doc(team.id);
-      const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
       try {
         await db.runTransaction(async transaction => {
-          const voteTokenDoc = await transaction.get(voteTokenRef);
-          if (voteTokenDoc.exists) {
-            throw new Error('That player has already voted for this team in the current round.');
-          }
-
           const teamDoc = await transaction.get(teamRef);
           if (!teamDoc.exists) {
             throw new Error('The selected team no longer exists.');
@@ -1560,6 +1541,9 @@
           if (!voter) {
             throw new Error('The selected voter no longer exists.');
           }
+          if (updatedTeam.roundVoterIds.includes(voter.id)) {
+            throw new Error('That player has already voted for this team in the current round.');
+          }
           if (!player) {
             throw new Error('Please choose a player before submitting the vote.');
           }
@@ -1568,18 +1552,11 @@
           }
           player.roundVotes += 1;
           player.seasonVotes += 1;
+          updatedTeam.roundVoterIds = [...updatedTeam.roundVoterIds, voter.id];
           updatedTeam.votesCast += 1;
           updatedTeam.updatedAt = timestampNow();
 
           transaction.set(teamRef, updatedTeam, { merge: true });
-          transaction.set(voteTokenRef, {
-            id: voteTokenId,
-            teamId: liveTeam.id,
-            roundName: liveTeam.round.name,
-            voterPlayerId: voter.id,
-            voterPlayerName: voter.name,
-            createdAt: timestampNow()
-          });
         });
 
         await createActivity('vote_submitted', `Vote submitted by ${team.players.find(item => item.id === parentFlow.voterPlayerId)?.name || 'player'} for ${team.name} (${team.round.name})`, team.id);
@@ -1637,6 +1614,7 @@
             note: 'Voting is locked until the coach unlocks the round'
           },
           players: [],
+          roundVoterIds: [],
           votesCast: 0,
           createdAt: timestampNow(),
           updatedAt: timestampNow()
@@ -1798,6 +1776,7 @@
           ...player,
           roundVotes: 0
         }));
+        updatedTeam.roundVoterIds = [];
         updatedTeam.votesCast = 0;
       }
       try {
@@ -1903,6 +1882,7 @@
             note: 'Voting is locked until the coach unlocks the round'
           },
           players: [],
+          roundVoterIds: [],
           votesCast: 0,
           createdAt: timestampNow(),
           updatedAt: timestampNow()
@@ -1967,6 +1947,7 @@
           ...player,
           roundVotes: 0
         }));
+        updatedTeam.roundVoterIds = [];
         updatedTeam.votesCast = 0;
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
@@ -1991,6 +1972,7 @@
           roundVotes: 0,
           seasonVotes: 0
         }));
+        updatedTeam.roundVoterIds = [];
         updatedTeam.votesCast = 0;
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
