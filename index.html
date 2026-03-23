@@ -208,6 +208,10 @@
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 
+    .players-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
     .panel,
     .card {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)), var(--panel);
@@ -443,6 +447,32 @@
     }
 
     .vote-choice.selected {
+      background: rgba(244, 180, 0, 0.16);
+      border-color: var(--brand);
+      color: #fff0c4;
+    }
+
+    .player-choice-button {
+      width: 100%;
+      min-height: 70px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 16px;
+      color: var(--text);
+      padding: 14px 16px;
+      text-align: center;
+      font-size: 1rem;
+      line-height: 1.35;
+      white-space: normal;
+    }
+
+    .player-choice-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .player-choice-button.selected {
       background: rgba(244, 180, 0, 0.16);
       border-color: var(--brand);
       color: #fff0c4;
@@ -917,6 +947,14 @@
                 <button class="btn-secondary" onclick="copyJsonExport()">Copy JSON Backup</button>
               </div>
               <textarea id="exportOutput" rows="11" placeholder="Export output appears here"></textarea>
+            </div>
+
+            <div class="card">
+              <h3>Club-wide voting controls</h3>
+              <p class="helper-text">Unlock the current round for every team in the app at once.</p>
+              <div class="button-row">
+                <button class="btn-primary" onclick="adminUnlockVotingForAllTeams()">Unlock Voting for All Teams</button>
+              </div>
             </div>
           </div>
 
@@ -1502,24 +1540,16 @@
       getPlayersSortedByName(team.players).forEach(player => {
         const isSelected = parentFlow.selectedPlayerId === player.id;
         const isVoter = parentFlow.voterPlayerId === player.id;
-
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        card.innerHTML = `
-          <div class="player-head">
-            <div class="avatar">${initials(player.name)}</div>
-            <div class="player-meta">
-              <strong>${escapeHtml(player.name)}</strong>
-              <span>${player.number ? `Jersey ${escapeHtml(player.number)}` : 'Player'}</span>
-            </div>
-          </div>
-          <div class="vote-choices">
-            <button class="vote-choice ${isSelected ? 'selected' : ''}" ${isVoter ? 'disabled' : ''} onclick="${isVoter ? '' : `toggleVote('${escapeJsString(player.id)}')`}">
-              ${escapeHtml(player.name)}
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `player-choice-button${isSelected ? ' selected' : ''}`;
+        button.textContent = player.name;
+        button.disabled = isVoter;
+        button.title = isVoter ? "You can't vote for yourself." : `Vote for ${player.name}`;
+        if (!isVoter) {
+          button.addEventListener('click', () => toggleVote(player.id));
+        }
+        grid.appendChild(button);
       });
     }
 
@@ -1527,21 +1557,13 @@
       const grid = document.getElementById('voterPlayerGrid');
       grid.innerHTML = '';
       getPlayersSortedByName(team.players).forEach(player => {
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        card.innerHTML = `
-          <div class="player-head">
-            <div class="avatar">${initials(player.name)}</div>
-            <div class="player-meta">
-              <strong>${escapeHtml(player.name)}</strong>
-              <span>${player.number ? `Jersey ${escapeHtml(player.number)}` : 'Player'}</span>
-            </div>
-          </div>
-          <div class="vote-choices">
-            <button class="vote-choice" onclick="openVoterConfirm('${escapeJsString(player.id)}')">${escapeHtml(player.name)}</button>
-          </div>
-        `;
-        grid.appendChild(card);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'player-choice-button';
+        button.textContent = player.name;
+        button.title = `Vote as ${player.name}`;
+        button.addEventListener('click', () => openVoterConfirm(player.id));
+        grid.appendChild(button);
       });
     }
 
@@ -2119,6 +2141,37 @@
         showBanner(`Updated details for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to save team details right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminUnlockVotingForAllTeams() {
+      if (!state.teams.length) {
+        showBanner('There are no teams to unlock yet.', 'info');
+        return;
+      }
+
+      const confirmed = window.confirm(`Unlock voting for all ${state.teams.length} teams?`);
+      if (!confirmed) return;
+
+      try {
+        for (let index = 0; index < state.teams.length; index += 400) {
+          const batch = db.batch();
+          state.teams.slice(index, index + 400).forEach(team => {
+            batch.set(db.collection(TEAM_COLLECTION).doc(team.id), {
+              round: {
+                ...team.round,
+                status: 'open'
+              },
+              updatedAt: timestampNow()
+            }, { merge: true });
+          });
+          await batch.commit();
+        }
+
+        await createActivity('rounds_unlocked_for_all_teams_by_admin', `Admin unlocked voting for all ${state.teams.length} teams.`);
+        showBanner(`Voting unlocked for all ${state.teams.length} teams.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to unlock voting for all teams right now: ${error.message}`, 'error');
       }
     }
 
