@@ -1150,6 +1150,7 @@
 
     function refreshParentTeamSelect() {
       const select = document.getElementById('parentTeamSelect');
+      const previousValue = select.value;
       select.innerHTML = '<option value="">-- Select Team --</option>';
       if (!state.teams.length) {
         select.innerHTML = '<option value="">-- No teams available yet --</option>';
@@ -1164,10 +1165,14 @@
           option.textContent = `${team.name} — ${team.round.name}`;
           select.appendChild(option);
         });
+      if (state.teams.some(team => team.id === previousValue)) {
+        select.value = previousValue;
+      }
     }
 
     function refreshCoachTeamSelect() {
       const select = document.getElementById('coachTeamSelect');
+      const previousValue = select.value;
       select.innerHTML = '<option value="">-- Select My Team --</option>';
       if (!state.teams.length) {
         select.innerHTML = '<option value="">-- No teams created yet --</option>';
@@ -1182,6 +1187,9 @@
           option.textContent = `${team.name} — Coach ${team.coachName}`;
           select.appendChild(option);
         });
+      if (state.teams.some(team => team.id === previousValue)) {
+        select.value = previousValue;
+      }
     }
 
     function refreshAllSelectors() {
@@ -1348,7 +1356,11 @@
     }
 
     async function startVoting() {
+      const selectedTeamId = document.getElementById('parentTeamSelect').value;
       await refreshFromCloud(false);
+      if (selectedTeamId) {
+        document.getElementById('parentTeamSelect').value = selectedTeamId;
+      }
       const teamId = document.getElementById('parentTeamSelect').value;
       const team = getTeam(teamId);
       if (!team) {
