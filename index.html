@@ -527,6 +527,32 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .dialog-box {
+      width: min(100%, 440px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      text-align: center;
+    }
+
+    .dialog-box p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
     @media (max-width: 760px) {
       .hero,
       .panel,
@@ -966,6 +992,17 @@
     </div>
   </div>
 
+  <div id="dialogOverlay" class="dialog-overlay hidden">
+    <div class="dialog-box">
+      <h3 id="dialogTitle">Confirm</h3>
+      <p id="dialogMessage"></p>
+      <div class="button-row" style="justify-content:center;">
+        <button id="dialogCancel" class="btn-secondary" onclick="closeDialog()">Cancel</button>
+        <button id="dialogConfirm" class="btn-primary" onclick="handleDialogConfirm()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script>
@@ -1000,6 +1037,8 @@
     let adminLoggedIn = false;
     let browserId = getBrowserId();
     let cloudReady = false;
+    let dialogConfirmHandler = null;
+    let pendingVoterPlayerId = null;
 
     function generateId(prefix) {
       return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
@@ -1073,6 +1112,30 @@
 
     function hideMiniBanner(id) {
       document.getElementById(id).classList.add('hidden');
+    }
+
+    function openDialog({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', hideCancel = false, onConfirm = null }) {
+      document.getElementById('dialogTitle').textContent = title;
+      document.getElementById('dialogMessage').textContent = message;
+      document.getElementById('dialogConfirm').textContent = confirmText;
+      document.getElementById('dialogCancel').textContent = cancelText;
+      document.getElementById('dialogCancel').classList.toggle('hidden', hideCancel);
+      dialogConfirmHandler = onConfirm;
+      document.getElementById('dialogOverlay').classList.remove('hidden');
+    }
+
+    function closeDialog() {
+      document.getElementById('dialogOverlay').classList.add('hidden');
+      dialogConfirmHandler = null;
+      pendingVoterPlayerId = null;
+    }
+
+    async function handleDialogConfirm() {
+      if (dialogConfirmHandler) {
+        await dialogConfirmHandler();
+      } else {
+        closeDialog();
+      }
     }
 
     function getTeam(teamId) {
@@ -1389,7 +1452,7 @@
             </div>
           </div>
           <div class="vote-choices">
-            <button class="vote-choice" onclick="confirmVoterIdentity('${player.id}')">This is me</button>
+            <button class="vote-choice" onclick="openVoterConfirm('${player.id}')">This is me</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1438,16 +1501,38 @@
       setParentStep(1);
     }
 
-    async function confirmVoterIdentity(playerId) {
+    function openVoterConfirm(playerId) {
       const team = getTeam(parentFlow.teamId);
       if (!team) return;
       const player = team.players.find(item => item.id === playerId);
       if (!player) return;
+      pendingVoterPlayerId = player.id;
+      openDialog({
+        title: 'Confirm voter',
+        message: `You are voting as ${player.name}.`,
+        confirmText: 'Continue',
+        cancelText: 'Go back',
+        onConfirm: confirmVoterIdentity
+      });
+    }
+
+    async function confirmVoterIdentity() {
+      const team = getTeam(parentFlow.teamId);
+      if (!team) return;
+      const player = team.players.find(item => item.id === pendingVoterPlayerId);
+      if (!player) return;
 
       if (team.roundVoterIds.includes(player.id)) {
-        window.alert('You have already voted this round.');
+        openDialog({
+          title: 'Already voted',
+          message: 'You have already voted this round.',
+          confirmText: 'OK',
+          hideCancel: true,
+          onConfirm: closeDialog
+        });
         return;
       }
+      closeDialog();
       parentFlow.voterPlayerId = player.id;
       parentFlow.selectedPlayerId = null;
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
