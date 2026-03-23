@@ -567,7 +567,6 @@
             <p>
               Players' Player recognises the teammate who showed the best effort, attitude, teamwork, and sportsmanship in that round. Players complete one vote each round, with parents helping younger children submit their choice through the app when needed.
             </p>
-            <div class="sync-chip" id="syncStatus">Connecting to Firestore…</div>
           </div>
         </div>
       </section>
@@ -602,7 +601,7 @@
 
       <section id="parentSection" class="panel hidden">
         <div class="button-row" style="justify-content: space-between; align-items: center;">
-          <h2 style="margin-bottom: 0;">Parent Voting Flow</h2>
+          <h2 style="margin-bottom: 0;">Player Voting Flow</h2>
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
 
@@ -879,6 +878,52 @@
           </div>
 
           <div class="card" style="margin-top: 18px;">
+            <h3>Manage existing team</h3>
+            <p class="helper-text">Club admin can edit team name, coach name, coach PIN, round details, and reset round or season tallies.</p>
+            <div class="three-col">
+              <div>
+                <label for="adminManageTeamSelect">Select Team</label>
+                <select id="adminManageTeamSelect" onchange="renderAdminTeamManager()"></select>
+              </div>
+              <div>
+                <label for="adminEditTeamName">Team Name</label>
+                <input id="adminEditTeamName" class="input" type="text" placeholder="Team name">
+              </div>
+              <div>
+                <label for="adminEditCoachName">Coach Name</label>
+                <input id="adminEditCoachName" class="input" type="text" placeholder="Coach name">
+              </div>
+              <div>
+                <label for="adminEditCoachPin">Coach PIN</label>
+                <input id="adminEditCoachPin" class="input" type="text" placeholder="Reset coach PIN">
+              </div>
+              <div>
+                <label for="adminEditRoundName">Round Name</label>
+                <input id="adminEditRoundName" class="input" type="text" placeholder="Current round">
+              </div>
+              <div>
+                <label for="adminEditRoundStatus">Round Access</label>
+                <select id="adminEditRoundStatus">
+                  <option value="locked">Locked</option>
+                  <option value="open">Unlocked for voting</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top: 16px;">
+              <label for="adminEditRoundNote">Round Note</label>
+              <input id="adminEditRoundNote" class="input" type="text" placeholder="Round note">
+            </div>
+            <div class="button-row">
+              <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
+              <button class="btn-secondary" onclick="adminResetRound()">Reset Round</button>
+              <button class="btn-danger" onclick="adminResetSeason()">Reset Season</button>
+            </div>
+            <div class="divider"></div>
+            <h4>Edit players</h4>
+            <div id="adminManagePlayerList"></div>
+          </div>
+
+          <div class="card" style="margin-top: 18px;">
             <h3>Club-wide team overview</h3>
             <div class="table-wrap">
               <table>
@@ -977,6 +1022,7 @@
 
     function setSyncStatus(message, type) {
       const chip = document.getElementById('syncStatus');
+      if (!chip) return;
       chip.textContent = message;
       chip.style.background = type === 'error'
         ? 'rgba(255, 122, 122, 0.12)'
@@ -1140,6 +1186,75 @@
     function refreshAllSelectors() {
       refreshParentTeamSelect();
       refreshCoachTeamSelect();
+      refreshAdminManageTeamSelect();
+    }
+
+    function refreshAdminManageTeamSelect() {
+      const select = document.getElementById('adminManageTeamSelect');
+      if (!select) return;
+      const previousValue = select.value;
+      if (!state.teams.length) {
+        select.innerHTML = '<option value="">-- No teams created yet --</option>';
+        renderAdminTeamManager();
+        return;
+      }
+      select.innerHTML = '<option value="">-- Select Team --</option>';
+      state.teams
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(team => {
+          const option = document.createElement('option');
+          option.value = team.id;
+          option.textContent = `${team.name} — ${team.coachName}`;
+          select.appendChild(option);
+        });
+      select.value = state.teams.some(team => team.id === previousValue) ? previousValue : state.teams[0].id;
+      renderAdminTeamManager();
+    }
+
+    function getAdminManagedTeam() {
+      const select = document.getElementById('adminManageTeamSelect');
+      if (!select) return null;
+      return getTeam(select.value);
+    }
+
+    function renderAdminTeamManager() {
+      const team = getAdminManagedTeam();
+      const playerList = document.getElementById('adminManagePlayerList');
+      if (!team) {
+        ['adminEditTeamName', 'adminEditCoachName', 'adminEditCoachPin', 'adminEditRoundName', 'adminEditRoundNote'].forEach(id => {
+          const input = document.getElementById(id);
+          if (input) input.value = '';
+        });
+        const status = document.getElementById('adminEditRoundStatus');
+        if (status) status.value = 'locked';
+        if (playerList) {
+          playerList.innerHTML = '<div class="notice">Create a team first to manage names, coach details, and resets.</div>';
+        }
+        return;
+      }
+
+      document.getElementById('adminEditTeamName').value = team.name;
+      document.getElementById('adminEditCoachName').value = team.coachName;
+      document.getElementById('adminEditCoachPin').value = team.coachPin;
+      document.getElementById('adminEditRoundName').value = team.round.name;
+      document.getElementById('adminEditRoundStatus').value = team.round.status;
+      document.getElementById('adminEditRoundNote').value = team.round.note || '';
+
+      if (!team.players.length) {
+        playerList.innerHTML = '<div class="notice">No players added yet for this team.</div>';
+        return;
+      }
+
+      playerList.innerHTML = team.players.map(player => `
+        <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+          <div style="display:grid;gap:10px;flex:1;">
+            <input id="admin-player-name-${player.id}" class="input" type="text" value="${player.name.replace(/\"/g, '&quot;')}">
+            <input id="admin-player-number-${player.id}" class="input" type="text" value="${(player.number || '').replace(/\"/g, '&quot;')}" placeholder="Jersey / Identifier">
+          </div>
+          <button class="btn-primary" onclick="adminSavePlayerEdits('${player.id}')">Save</button>
+        </div>
+      `).join('');
     }
 
     async function initializeFirebase() {
@@ -1650,6 +1765,7 @@
             </tr>
           `;
         }).join('');
+      renderAdminTeamManager();
     }
 
     async function adminCreateTeam() {
@@ -1689,6 +1805,117 @@
         showBanner(`Admin created ${teamName}.`, 'success');
       } catch (error) {
         showBanner(`Unable to create admin team right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminSaveTeamDetails() {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team to update.', 'error');
+        return;
+      }
+      const updatedTeam = clone(team);
+      const teamName = document.getElementById('adminEditTeamName').value.trim();
+      const coachName = document.getElementById('adminEditCoachName').value.trim();
+      const coachPin = document.getElementById('adminEditCoachPin').value.trim();
+      const roundName = document.getElementById('adminEditRoundName').value.trim();
+      const roundStatus = document.getElementById('adminEditRoundStatus').value;
+      const roundNote = document.getElementById('adminEditRoundNote').value.trim();
+
+      if (!teamName || !coachName || coachPin.length < 4 || !roundName) {
+        showBanner('Please enter a team name, coach name, coach PIN, and round name.', 'error');
+        return;
+      }
+
+      try {
+        updatedTeam.name = teamName;
+        updatedTeam.coachName = coachName;
+        updatedTeam.coachPin = coachPin;
+        updatedTeam.round.name = roundName;
+        updatedTeam.round.status = roundStatus;
+        updatedTeam.round.note = roundNote;
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('team_updated_by_admin', `Admin updated ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner(`Updated details for ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to save team details right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminResetRound() {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team to reset.', 'error');
+        return;
+      }
+      try {
+        const updatedTeam = clone(team);
+        updatedTeam.players = updatedTeam.players.map(player => ({
+          ...player,
+          roundVotes: 0
+        }));
+        updatedTeam.votesCast = 0;
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('round_reset_by_admin', `Admin reset round votes for ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner(`Round votes reset for ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to reset round right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminResetSeason() {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team to reset.', 'error');
+        return;
+      }
+      try {
+        const updatedTeam = clone(team);
+        updatedTeam.players = updatedTeam.players.map(player => ({
+          ...player,
+          roundVotes: 0,
+          seasonVotes: 0
+        }));
+        updatedTeam.votesCast = 0;
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('season_reset_by_admin', `Admin reset season votes for ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner(`Season votes reset for ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to reset season right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminSavePlayerEdits(playerId) {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team first.', 'error');
+        return;
+      }
+      const updatedTeam = clone(team);
+      const player = updatedTeam.players.find(item => item.id === playerId);
+      if (!player) return;
+      const newName = document.getElementById(`admin-player-name-${playerId}`).value.trim();
+      const newNumber = document.getElementById(`admin-player-number-${playerId}`).value.trim();
+      if (!newName) {
+        showBanner('Player name cannot be blank.', 'error');
+        return;
+      }
+      try {
+        player.name = newName;
+        player.number = newNumber;
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('player_updated_by_admin', `Admin updated a player in ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner('Player details updated by admin.', 'success');
+      } catch (error) {
+        showBanner(`Unable to update player right now: ${error.message}`, 'error');
       }
     }
 
@@ -1737,7 +1964,8 @@
       try {
         await initializeFirebase();
       } catch (error) {
-        document.getElementById('syncStatus').classList.add('hidden');
+        const syncStatus = document.getElementById('syncStatus');
+        if (syncStatus) syncStatus.classList.add('hidden');
         refreshAllSelectors();
         goHome();
         console.error('Firestore connection error:', error);
