@@ -1356,11 +1356,6 @@
     }
 
     async function startVoting() {
-      const selectedTeamId = document.getElementById('parentTeamSelect').value;
-      await refreshFromCloud(false);
-      if (selectedTeamId) {
-        document.getElementById('parentTeamSelect').value = selectedTeamId;
-      }
       const teamId = document.getElementById('parentTeamSelect').value;
       const team = getTeam(teamId);
       if (!team) {
