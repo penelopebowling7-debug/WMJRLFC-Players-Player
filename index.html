@@ -562,12 +562,14 @@
 
       .hero-top {
         grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
       }
 
       .logo-frame {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
+        width: 168px;
+        height: 168px;
+        margin: 0 auto 10px;
       }
 
       .vote-choices {
@@ -1017,9 +1019,7 @@
       measurementId: "G-XQNWVH76KV"
     };
 
-    // Replace this placeholder before deployment. Leaving a real admin PIN in the repo
-    // would expose privileged access to anyone who can view the page source.
-    const ADMIN_PIN = 'REPLACE_WITH_ADMIN_PIN';
+    const ADMIN_PIN = '1379';
     const BROWSER_ID_KEY = 'wmjrlfc-browser-id';
     const TEAM_COLLECTION = 'teams';
     const ACTIVITY_COLLECTION = 'activity';
@@ -1088,12 +1088,14 @@
         .replaceAll('</', '<\\/');
     }
 
-    function isAdminPinConfigured() {
-      return ADMIN_PIN && ADMIN_PIN !== 'REPLACE_WITH_ADMIN_PIN';
-    }
-
     function buildVoteTokenId(teamId, roundName, voterPlayerId) {
       return `${teamId}__${slugify(roundName) || 'round'}__${voterPlayerId}`;
+    }
+
+    function getPlayersSortedByName(players) {
+      return (Array.isArray(players) ? players.slice() : []).sort((a, b) => {
+        return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+      });
     }
 
     function initials(name) {
@@ -1262,9 +1264,6 @@
       document.getElementById('adminLoginCard').classList.remove('hidden');
       document.getElementById('adminPinInput').value = '';
       hideMiniBanner('adminLoginBanner');
-      if (!isAdminPinConfigured()) {
-        showMiniBanner('adminLoginBanner', 'Admin access is disabled until the deployer replaces REPLACE_WITH_ADMIN_PIN in this file.', 'info');
-      }
     }
 
     function refreshParentTeamSelect() {
@@ -1374,7 +1373,7 @@
         return;
       }
 
-      playerList.innerHTML = team.players.map(player => `
+      playerList.innerHTML = getPlayersSortedByName(team.players).map(player => `
         <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
           <div style="display:grid;gap:10px;flex:1;">
             <input id="admin-player-name-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.name)}">
@@ -1500,7 +1499,7 @@
     function renderPlayerVoteGrid(team) {
       const grid = document.getElementById('playerVoteGrid');
       grid.innerHTML = '';
-      team.players.forEach(player => {
+      getPlayersSortedByName(team.players).forEach(player => {
         const isSelected = parentFlow.selectedPlayerId === player.id;
         const isVoter = parentFlow.voterPlayerId === player.id;
 
@@ -1527,7 +1526,7 @@
     function renderVoterPlayerGrid(team) {
       const grid = document.getElementById('voterPlayerGrid');
       grid.innerHTML = '';
-      team.players.forEach(player => {
+      getPlayersSortedByName(team.players).forEach(player => {
         const card = document.createElement('div');
         card.className = 'player-card';
         card.innerHTML = `
@@ -1864,7 +1863,7 @@
         wrap.innerHTML = '<div class="notice">No players added yet. Add your first player above to make the team vote-ready.</div>';
         return;
       }
-      wrap.innerHTML = team.players.map(player => `
+      wrap.innerHTML = getPlayersSortedByName(team.players).map(player => `
         <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
           <div style="display:grid;gap:10px;flex:1;">
             <input id="edit-name-${escapeAttribute(player.id)}" class="input" type="text" value="${escapeAttribute(player.name)}">
@@ -2002,10 +2001,6 @@
     }
 
     function adminLogin() {
-      if (!isAdminPinConfigured()) {
-        showMiniBanner('adminLoginBanner', 'Replace REPLACE_WITH_ADMIN_PIN in this file before using the admin portal.', 'error');
-        return;
-      }
       const pin = document.getElementById('adminPinInput').value.trim();
       if (pin !== ADMIN_PIN) {
         showMiniBanner('adminLoginBanner', 'Incorrect admin PIN. Please try again.', 'error');
