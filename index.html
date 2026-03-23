@@ -607,9 +607,10 @@
 
         <div class="steps">
           <div class="step" id="parentStep1">1. Team</div>
-          <div class="step" id="parentStep2">2. Vote</div>
-          <div class="step" id="parentStep3">3. Review</div>
-          <div class="step" id="parentStep4">4. Done</div>
+          <div class="step" id="parentStep2">2. Who are you?</div>
+          <div class="step" id="parentStep3">3. Vote</div>
+          <div class="step" id="parentStep4">4. Review</div>
+          <div class="step" id="parentStep5">5. Done</div>
         </div>
 
         <div id="parentBanner" class="mini-banner info hidden"></div>
@@ -632,25 +633,38 @@
             <h3>How voting works</h3>
             <ul class="simple-list">
               <li>Choose one player only.</li>
-              <li>Each family submits one vote per round in this app.</li>
+              <li>Each player can vote once per round.</li>
               <li>Only unlocked rounds can receive votes.</li>
-              <li>This version records a unique browser vote per team and round using Firestore.</li>
+              <li>Players must identify themselves before voting.</li>
+              <li>Players cannot vote for themselves.</li>
             </ul>
+          </div>
+        </div>
+
+        <div id="parentStageVoter" class="hidden">
+          <div class="card">
+            <h3>Who is voting?</h3>
+            <p class="helper-text">Select the player who is submitting this vote. Each player can vote only once in the round.</p>
+            <div class="players-grid" id="voterPlayerGrid"></div>
+            <div class="button-row">
+              <button class="btn-secondary" onclick="backToTeamSelection()">Back</button>
+            </div>
           </div>
         </div>
 
         <div id="parentStageVote" class="hidden">
           <div class="card">
             <h3 id="voteHeading">Cast your vote</h3>
-            <p class="helper-text">Choose the player who best showed effort, teamwork, attitude, and sportsmanship in this round. You can tap again to unselect and change your choice.</p>
+            <p class="helper-text">Choose the player who best showed effort, teamwork, attitude, and sportsmanship in this round. You cannot vote for yourself.</p>
             <div class="tag-row">
+              <div class="tag" id="voteVoterTag"></div>
               <div class="tag" id="voteTeamTag"></div>
               <div class="tag" id="voteRoundTag"></div>
               <div class="tag" id="voteStatusTag"></div>
             </div>
             <div class="players-grid" id="playerVoteGrid"></div>
             <div class="button-row">
-              <button class="btn-secondary" onclick="backToTeamSelection()">Back</button>
+              <button class="btn-secondary" onclick="backToVoterSelection()">Back</button>
               <button class="btn-primary" onclick="reviewVotes()">Review Votes</button>
             </div>
           </div>
@@ -660,7 +674,7 @@
           <div class="card">
             <h3>Review your selections</h3>
             <ul class="summary-list" id="voteSummaryList"></ul>
-            <div class="notice">Please check your choice before submitting. Once sent, this browser cannot vote again for the same team and round.</div>
+            <div class="notice">Please check your choice before submitting. Once sent, that player cannot vote again for the same round.</div>
             <div class="button-row">
               <button class="btn-secondary" onclick="returnToVoting()">Edit Choices</button>
               <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Votes</button>
@@ -979,6 +993,7 @@
     };
     let parentFlow = {
       teamId: '',
+      voterPlayerId: null,
       selectedPlayerId: null
     };
     let coachSessionTeamId = null;
@@ -1099,7 +1114,7 @@
     }
 
     function setParentStep(step) {
-      [1, 2, 3, 4].forEach(index => {
+      [1, 2, 3, 4, 5].forEach(index => {
         document.getElementById(`parentStep${index}`).classList.toggle('active', index === step);
       });
     }
@@ -1107,11 +1122,13 @@
     function resetParentFlow() {
       parentFlow = {
         teamId: '',
+        voterPlayerId: null,
         selectedPlayerId: null
       };
       document.getElementById('parentTeamSelect').value = '';
       hideMiniBanner('parentBanner');
       document.getElementById('parentStageTeam').classList.remove('hidden');
+      document.getElementById('parentStageVoter').classList.add('hidden');
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       document.getElementById('parentStageDone').classList.add('hidden');
@@ -1334,6 +1351,7 @@
       grid.innerHTML = '';
       team.players.forEach(player => {
         const isSelected = parentFlow.selectedPlayerId === player.id;
+        const isVoter = parentFlow.voterPlayerId === player.id;
 
         const card = document.createElement('div');
         card.className = 'player-card';
@@ -1346,9 +1364,31 @@
             </div>
           </div>
           <div class="vote-choices">
-            <button class="vote-choice ${isSelected ? 'selected' : ''}" onclick="toggleVote('${player.id}')">
-              ${isSelected ? "Selected as Player's Player" : "Select Player's Player"}
+            <button class="vote-choice ${isSelected ? 'selected' : ''}" ${isVoter ? 'disabled' : ''} onclick="${isVoter ? '' : `toggleVote('${player.id}')`}">
+              ${isVoter ? "You can't vote for yourself" : isSelected ? "Selected as Player's Player" : "Select Player's Player"}
             </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderVoterPlayerGrid(team) {
+      const grid = document.getElementById('voterPlayerGrid');
+      grid.innerHTML = '';
+      team.players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <div class="player-head">
+            <div class="avatar">${initials(player.name)}</div>
+            <div class="player-meta">
+              <strong>${player.name}</strong>
+              <span>${player.number ? `Jersey ${player.number}` : 'Player'}</span>
+            </div>
+          </div>
+          <div class="vote-choices">
+            <button class="vote-choice" onclick="confirmVoterIdentity('${player.id}')">This is me</button>
           </div>
         `;
         grid.appendChild(card);
@@ -1371,16 +1411,14 @@
         return;
       }
       parentFlow.teamId = team.id;
+      parentFlow.voterPlayerId = null;
       parentFlow.selectedPlayerId = null;
-      document.getElementById('voteHeading').textContent = `Cast your vote for ${team.name}`;
-      document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
-      document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
-      document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is unlocked';
-      renderPlayerVoteGrid(team);
       document.getElementById('parentStageTeam').classList.add('hidden');
-      document.getElementById('parentStageVote').classList.remove('hidden');
+      document.getElementById('parentStageVoter').classList.remove('hidden');
+      document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       document.getElementById('parentStageDone').classList.add('hidden');
+      renderVoterPlayerGrid(team);
       setParentStep(2);
       showMiniBanner('parentBanner', `Voting is open for ${team.round.name}.`, 'info');
     }
@@ -1393,9 +1431,38 @@
 
     function backToTeamSelection() {
       document.getElementById('parentStageTeam').classList.remove('hidden');
+      document.getElementById('parentStageVoter').classList.add('hidden');
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       setParentStep(1);
+    }
+
+    function confirmVoterIdentity(playerId) {
+      const team = getTeam(parentFlow.teamId);
+      if (!team) return;
+      const player = team.players.find(item => item.id === playerId);
+      if (!player) return;
+      const confirmed = window.confirm(`Please confirm you are voting as ${player.name}.`);
+      if (!confirmed) return;
+      parentFlow.voterPlayerId = player.id;
+      parentFlow.selectedPlayerId = null;
+      document.getElementById('voteHeading').textContent = `Cast your vote for ${team.name}`;
+      document.getElementById('voteVoterTag').textContent = `Voting as: ${player.name}`;
+      document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
+      document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
+      document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is unlocked';
+      renderPlayerVoteGrid(team);
+      document.getElementById('parentStageVoter').classList.add('hidden');
+      document.getElementById('parentStageVote').classList.remove('hidden');
+      document.getElementById('parentStageReview').classList.add('hidden');
+      setParentStep(3);
+    }
+
+    function backToVoterSelection() {
+      document.getElementById('parentStageVoter').classList.remove('hidden');
+      document.getElementById('parentStageVote').classList.add('hidden');
+      document.getElementById('parentStageReview').classList.add('hidden');
+      setParentStep(2);
     }
 
     function reviewVotes() {
@@ -1404,26 +1471,35 @@
         showMiniBanner('parentBanner', 'Please choose a team first.', 'error');
         return;
       }
+      if (!parentFlow.voterPlayerId) {
+        showMiniBanner('parentBanner', 'Please confirm which player is voting first.', 'error');
+        return;
+      }
       if (!parentFlow.selectedPlayerId) {
         showMiniBanner('parentBanner', 'Please choose one player before reviewing your vote.', 'error');
         return;
       }
       const list = document.getElementById('voteSummaryList');
       list.innerHTML = '';
+      const voter = team.players.find(item => item.id === parentFlow.voterPlayerId);
       const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
+      const voterItem = document.createElement('li');
+      voterItem.className = 'summary-item';
+      voterItem.innerHTML = `<strong>Voting as:</strong> ${voter ? voter.name : 'Unknown Player'}`;
+      list.appendChild(voterItem);
       const item = document.createElement('li');
       item.className = 'summary-item';
       item.innerHTML = `<strong>Player's Player:</strong> ${player ? player.name : 'Unknown Player'}`;
       list.appendChild(item);
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
-      setParentStep(3);
+      setParentStep(4);
     }
 
     function returnToVoting() {
       document.getElementById('parentStageVote').classList.remove('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
-      setParentStep(2);
+      setParentStep(3);
     }
 
     async function submitVotes() {
@@ -1439,14 +1515,14 @@
       button.textContent = 'Submitting…';
 
       const roundSlug = slugify(team.round.name);
-      const voteTokenId = `${team.id}__${roundSlug}__${browserId}`;
+      const voteTokenId = `${team.id}__${roundSlug}__${parentFlow.voterPlayerId}`;
       const teamRef = db.collection(TEAM_COLLECTION).doc(team.id);
       const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
       try {
         await db.runTransaction(async transaction => {
           const voteTokenDoc = await transaction.get(voteTokenRef);
           if (voteTokenDoc.exists) {
-            throw new Error('This browser has already voted for this team and round.');
+            throw new Error('That player has already voted for this team in the current round.');
           }
 
           const teamDoc = await transaction.get(teamRef);
@@ -1458,11 +1534,21 @@
           if (liveTeam.round.status !== 'open') {
             throw new Error('Voting has been closed for this team.');
           }
+          if (!parentFlow.voterPlayerId) {
+            throw new Error('Please confirm which player is voting first.');
+          }
 
           const updatedTeam = clone(liveTeam);
+          const voter = updatedTeam.players.find(item => item.id === parentFlow.voterPlayerId);
           const player = updatedTeam.players.find(item => item.id === parentFlow.selectedPlayerId);
+          if (!voter) {
+            throw new Error('The selected voter no longer exists.');
+          }
           if (!player) {
             throw new Error('Please choose a player before submitting the vote.');
+          }
+          if (player.id === voter.id) {
+            throw new Error('Players cannot vote for themselves.');
           }
           player.roundVotes += 1;
           player.seasonVotes += 1;
@@ -1474,16 +1560,17 @@
             id: voteTokenId,
             teamId: liveTeam.id,
             roundName: liveTeam.round.name,
-            browserId,
+            voterPlayerId: voter.id,
+            voterPlayerName: voter.name,
             createdAt: timestampNow()
           });
         });
 
-        await createActivity('vote_submitted', `Vote submitted for ${team.name} (${team.round.name})`, team.id);
+        await createActivity('vote_submitted', `Vote submitted by ${team.players.find(item => item.id === parentFlow.voterPlayerId)?.name || 'player'} for ${team.name} (${team.round.name})`, team.id);
         await refreshFromCloud(false);
         document.getElementById('parentStageReview').classList.add('hidden');
         document.getElementById('parentStageDone').classList.remove('hidden');
-        setParentStep(4);
+        setParentStep(5);
         showMiniBanner('parentBanner', 'Vote submitted successfully.', 'success');
       } catch (error) {
         showMiniBanner('parentBanner', error.message || 'Unable to submit the vote right now.', 'error');
