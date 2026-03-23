@@ -565,7 +565,7 @@
           <div>
             <h1>WMJRLFC Player's Player Voting</h1>
             <p>
-              A club-branded, mobile-friendly voting app that gives parents a simple vote flow, coaches self-service team and player setup, and club admins a clearer overview with live Firestore-backed data.
+              Players' Player recognises the teammate who showed the best effort, attitude, teamwork, and sportsmanship in that round. Parents vote once each round to celebrate the player who best represented those values.
             </p>
             <div class="sync-chip" id="syncStatus">Connecting to Firestore…</div>
           </div>
@@ -583,7 +583,7 @@
       <section id="landingSection" class="grid landing-grid hidden">
         <article class="card">
           <h2>Vote Now</h2>
-          <p>Parents and guardians can choose the team, rank 3 players, and submit a vote in a guided flow with review and confirmation.</p>
+          <p>Parents and guardians can choose the team, select one Player's Player for the round, and submit a single guided vote.</p>
           <div class="button-row">
             <button class="btn-primary" onclick="openParentFlow()">Start Voting</button>
           </div>
@@ -624,7 +624,7 @@
         <div id="parentStageTeam" class="grid two-col">
           <div class="card">
             <h3>Choose your team</h3>
-            <p class="helper-text">Voting follows the round that the coach has opened for the team.</p>
+            <p class="helper-text">Voting is only available once the coach unlocks the round for that team.</p>
             <label for="parentTeamSelect">Team</label>
             <select id="parentTeamSelect"></select>
             <div class="notice">
@@ -638,9 +638,9 @@
           <div class="card">
             <h3>How voting works</h3>
             <ul class="simple-list">
-              <li>Choose 3 different players.</li>
-              <li>Your selections count as 3 points, 2 points, and 1 point.</li>
-              <li>Only open rounds can receive votes.</li>
+              <li>Choose one player only.</li>
+              <li>Each family submits one vote per round in this app.</li>
+              <li>Only unlocked rounds can receive votes.</li>
               <li>This version records a unique browser vote per team and round using Firestore.</li>
             </ul>
           </div>
@@ -649,7 +649,7 @@
         <div id="parentStageVote" class="hidden">
           <div class="card">
             <h3 id="voteHeading">Cast your votes</h3>
-            <p class="helper-text">Assign one score to each of your top 3 players. You can tap again to unselect and change your choice.</p>
+            <p class="helper-text">Choose the player who best showed effort, teamwork, attitude, and sportsmanship in this round. You can tap again to unselect and change your choice.</p>
             <div class="tag-row">
               <div class="tag" id="voteTeamTag"></div>
               <div class="tag" id="voteRoundTag"></div>
@@ -667,7 +667,7 @@
           <div class="card">
             <h3>Review your selections</h3>
             <ul class="summary-list" id="voteSummaryList"></ul>
-            <div class="notice">Please check your choices before submitting. Once sent, this browser cannot vote again for the same team and round.</div>
+            <div class="notice">Please check your choice before submitting. Once sent, this browser cannot vote again for the same team and round.</div>
             <div class="button-row">
               <button class="btn-secondary" onclick="returnToVoting()">Edit Choices</button>
               <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Votes</button>
@@ -762,7 +762,7 @@
           <div id="coachPlayers" class="coach-tab hidden">
             <div class="card">
               <h3>Manage players</h3>
-              <p class="helper-text">Add, remove, and maintain the team roster that appears to parents during voting.</p>
+              <p class="helper-text">Add, edit, remove, and maintain the team roster that appears to parents during voting.</p>
               <div class="two-col">
                 <div>
                   <label for="playerNameInput">Player Name</label>
@@ -790,10 +790,10 @@
                   <input id="roundNameInput" class="input" type="text" placeholder="Round 4 vs Tigers">
                 </div>
                 <div>
-                  <label for="roundStatusSelect">Voting Status</label>
+                  <label for="roundStatusSelect">Round Access</label>
                   <select id="roundStatusSelect">
-                    <option value="open">Open</option>
-                    <option value="closed">Closed</option>
+                    <option value="locked">Locked</option>
+                    <option value="open">Unlocked for voting</option>
                   </select>
                 </div>
                 <div>
@@ -804,7 +804,7 @@
               <div class="button-row">
                 <button class="btn-primary" onclick="saveRoundSettings()">Save Round Settings</button>
               </div>
-              <div class="notice">If you change the round name, round-only tallies reset to 0 for that team so the next round starts clean.</div>
+              <div class="notice">Keep the round locked until you are ready for voting to begin. If you change the round name, round-only tallies reset to 0 for that team so the next round starts clean.</div>
             </div>
           </div>
 
@@ -942,7 +942,7 @@
     };
     let parentFlow = {
       teamId: '',
-      votes: { 3: null, 2: null, 1: null }
+      selectedPlayerId: null
     };
     let coachSessionTeamId = null;
     let adminLoggedIn = false;
@@ -1038,8 +1038,8 @@
         coachPin: team.coachPin || '0000',
         round: {
           name: (team.round && team.round.name) || 'Round 1',
-          status: (team.round && team.round.status) || 'open',
-          note: (team.round && team.round.note) || 'Voting is open'
+          status: (team.round && team.round.status) || 'locked',
+          note: (team.round && team.round.note) || 'Voting is locked until the coach unlocks the round'
         },
         players: Array.isArray(team.players) ? team.players : [],
         votesCast: Number(team.votesCast || 0),
@@ -1069,7 +1069,7 @@
     function resetParentFlow() {
       parentFlow = {
         teamId: '',
-        votes: { 3: null, 2: null, 1: null }
+        selectedPlayerId: null
       };
       document.getElementById('parentTeamSelect').value = '';
       hideMiniBanner('parentBanner');
@@ -1177,7 +1177,7 @@
 
     async function refreshFromCloud(showSuccessBanner = false) {
       if (!cloudReady) {
-        showBanner('Firebase is not ready yet. Please wait a moment and try again.', 'info');
+        showBanner('Firestore is not ready yet. Please wait a moment and try again.', 'info');
         return;
       }
       setSyncStatus('Refreshing live Firestore data…', 'info');
@@ -1209,9 +1209,7 @@
       const grid = document.getElementById('playerVoteGrid');
       grid.innerHTML = '';
       team.players.forEach(player => {
-        const selectedPoints = Object.entries(parentFlow.votes)
-          .filter(([, playerId]) => playerId === player.id)
-          .map(([points]) => Number(points));
+        const isSelected = parentFlow.selectedPlayerId === player.id;
 
         const card = document.createElement('div');
         card.className = 'player-card';
@@ -1224,11 +1222,9 @@
             </div>
           </div>
           <div class="vote-choices">
-            ${[3, 2, 1].map(points => `
-              <button class="vote-choice ${selectedPoints.includes(points) ? 'selected' : ''}" onclick="toggleVote('${player.id}', ${points})">
-                ${points} point${points === 1 ? '' : 's'}
-              </button>
-            `).join('')}
+            <button class="vote-choice ${isSelected ? 'selected' : ''}" onclick="toggleVote('${player.id}')">
+              ${isSelected ? "Selected as Player's Player" : "Select Player's Player"}
+            </button>
           </div>
         `;
         grid.appendChild(card);
@@ -1248,15 +1244,15 @@
         return;
       }
       if (team.round.status !== 'open') {
-        showMiniBanner('parentBanner', `Voting is currently closed for ${team.name}.`, 'error');
+        showMiniBanner('parentBanner', `Voting for ${team.name} is locked until the coach unlocks this round.`, 'error');
         return;
       }
       parentFlow.teamId = team.id;
-      parentFlow.votes = { 3: null, 2: null, 1: null };
+      parentFlow.selectedPlayerId = null;
       document.getElementById('voteHeading').textContent = `Cast your votes for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
-      document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is open';
+      document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is unlocked';
       renderPlayerVoteGrid(team);
       document.getElementById('parentStageTeam').classList.add('hidden');
       document.getElementById('parentStageVote').classList.remove('hidden');
@@ -1266,18 +1262,8 @@
       showMiniBanner('parentBanner', `Voting is open for ${team.round.name}.`, 'info');
     }
 
-    function toggleVote(playerId, points) {
-      const currentHolder = parentFlow.votes[points];
-      if (currentHolder === playerId) {
-        parentFlow.votes[points] = null;
-      } else {
-        Object.keys(parentFlow.votes).forEach(key => {
-          if (parentFlow.votes[key] === playerId) {
-            parentFlow.votes[key] = null;
-          }
-        });
-        parentFlow.votes[points] = playerId;
-      }
+    function toggleVote(playerId) {
+      parentFlow.selectedPlayerId = parentFlow.selectedPlayerId === playerId ? null : playerId;
       const team = getTeam(parentFlow.teamId);
       if (team) renderPlayerVoteGrid(team);
     }
@@ -1295,25 +1281,17 @@
         showMiniBanner('parentBanner', 'Please choose a team first.', 'error');
         return;
       }
-      const missing = [3, 2, 1].filter(points => !parentFlow.votes[points]);
-      if (missing.length) {
-        showMiniBanner('parentBanner', `Please assign ${missing.join(', ')} point selections before reviewing.`, 'error');
-        return;
-      }
-      const uniqueSelections = new Set(Object.values(parentFlow.votes));
-      if (uniqueSelections.size !== 3) {
-        showMiniBanner('parentBanner', 'Please choose 3 different players.', 'error');
+      if (!parentFlow.selectedPlayerId) {
+        showMiniBanner('parentBanner', 'Please choose one player before reviewing your vote.', 'error');
         return;
       }
       const list = document.getElementById('voteSummaryList');
       list.innerHTML = '';
-      [3, 2, 1].forEach(points => {
-        const player = team.players.find(item => item.id === parentFlow.votes[points]);
-        const item = document.createElement('li');
-        item.className = 'summary-item';
-        item.innerHTML = `<strong>${points} point${points === 1 ? '' : 's'}:</strong> ${player ? player.name : 'Unknown Player'}`;
-        list.appendChild(item);
-      });
+      const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
+      const item = document.createElement('li');
+      item.className = 'summary-item';
+      item.innerHTML = `<strong>Player's Player:</strong> ${player ? player.name : 'Unknown Player'}`;
+      list.appendChild(item);
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
       setParentStep(3);
@@ -1361,13 +1339,12 @@
           }
 
           const updatedTeam = clone(liveTeam);
-          [3, 2, 1].forEach(points => {
-            const player = updatedTeam.players.find(item => item.id === parentFlow.votes[points]);
-            if (player) {
-              player.roundVotes += points;
-              player.seasonVotes += points;
-            }
-          });
+          const player = updatedTeam.players.find(item => item.id === parentFlow.selectedPlayerId);
+          if (!player) {
+            throw new Error('Please choose a player before submitting the vote.');
+          }
+          player.roundVotes += 1;
+          player.seasonVotes += 1;
           updatedTeam.votesCast += 1;
           updatedTeam.updatedAt = timestampNow();
 
@@ -1437,8 +1414,8 @@
         coachPin,
         round: {
           name: 'Round 1',
-          status: 'open',
-          note: 'Voting is now open'
+          status: 'locked',
+          note: 'Voting is locked until the coach unlocks the round'
         },
         players: [],
         votesCast: 0,
@@ -1470,7 +1447,7 @@
         <div class="stat"><div class="stat-label">Team</div><div class="stat-value">${team.name}</div></div>
         <div class="stat"><div class="stat-label">Players</div><div class="stat-value">${team.players.length}</div></div>
         <div class="stat"><div class="stat-label">Votes Cast</div><div class="stat-value">${team.votesCast}</div></div>
-        <div class="stat"><div class="stat-label">Round Status</div><div class="stat-value">${team.round.status}</div></div>
+        <div class="stat"><div class="stat-label">Round Access</div><div class="stat-value">${team.round.status === 'open' ? 'Unlocked' : 'Locked'}</div></div>
       `;
 
       document.getElementById('coachTeamDetails').innerHTML = `
@@ -1483,7 +1460,7 @@
         <div class="muted-box">
           <p><strong>Parent voting message</strong></p>
           <p class="tiny">Tell parents to open this page, select <strong>${team.name}</strong>, and vote during <strong>${team.round.name}</strong>.</p>
-          <p class="tiny">Voting status: <strong>${team.round.status}</strong></p>
+          <p class="tiny">Round access: <strong>${team.round.status === 'open' ? 'Unlocked for voting' : 'Locked'}</strong></p>
         </div>
       `;
 
@@ -1503,11 +1480,14 @@
       }
       wrap.innerHTML = team.players.map(player => `
         <div class="list-item" style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
-          <div>
-            <strong>${player.name}</strong>
-            <div class="tiny">${player.number ? `Jersey ${player.number}` : 'No jersey set'}</div>
+          <div style="display:grid;gap:10px;flex:1;">
+            <input id="edit-name-${player.id}" class="input" type="text" value="${player.name.replace(/\"/g, '&quot;')}">
+            <input id="edit-number-${player.id}" class="input" type="text" value="${(player.number || '').replace(/\"/g, '&quot;')}" placeholder="Jersey / Identifier">
           </div>
-          <button class="btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn-primary" onclick="savePlayerEdits('${player.id}')">Save</button>
+            <button class="btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+          </div>
         </div>
       `).join('');
     }
@@ -1548,6 +1528,27 @@
       await createActivity('player_removed', `Removed a player from ${updatedTeam.name}`, updatedTeam.id);
       await refreshFromCloud(false);
       showBanner('Player removed from the team roster.', 'success');
+    }
+
+    async function savePlayerEdits(playerId) {
+      const team = getTeam(coachSessionTeamId);
+      if (!team) return;
+      const updatedTeam = clone(team);
+      const player = updatedTeam.players.find(item => item.id === playerId);
+      if (!player) return;
+      const newName = document.getElementById(`edit-name-${playerId}`).value.trim();
+      const newNumber = document.getElementById(`edit-number-${playerId}`).value.trim();
+      if (!newName) {
+        showBanner('Player name cannot be blank.', 'error');
+        return;
+      }
+      player.name = newName;
+      player.number = newNumber;
+      updatedTeam.updatedAt = timestampNow();
+      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+      await createActivity('player_updated', `Updated a player in ${updatedTeam.name}`, updatedTeam.id);
+      await refreshFromCloud(false);
+      showBanner('Player details updated.', 'success');
     }
 
     async function saveRoundSettings() {
@@ -1658,8 +1659,8 @@
         coachPin,
         round: {
           name: 'Round 1',
-          status: 'open',
-          note: 'Voting is now open'
+          status: 'locked',
+          note: 'Voting is locked until the coach unlocks the round'
         },
         players: [],
         votesCast: 0,
@@ -1720,10 +1721,10 @@
       try {
         await initializeFirebase();
       } catch (error) {
-        setSyncStatus('Unable to connect to Firestore', 'error');
-        showBanner(`Unable to connect to Firestore: ${error.message}`, 'error');
+        document.getElementById('syncStatus').classList.add('hidden');
         refreshAllSelectors();
         goHome();
+        console.error('Firestore connection error:', error);
       }
     }
 
