@@ -6,17 +6,17 @@
   <title>WMJRLFC Player's Player Voting</title>
   <style>
     :root {
-      --bg: #08261d;
-      --bg-deep: #03130e;
-      --panel: #0e3327;
-      --panel-2: #144233;
-      --line: rgba(255, 215, 102, 0.22);
+      --bg: #050505;
+      --bg-deep: #121212;
+      --panel: #171717;
+      --panel-2: #222222;
+      --line: rgba(255, 122, 0, 0.22);
       --text: #f8f7f1;
-      --muted: #d9decf;
-      --brand: #f4b400;
-      --brand-dark: #d79a00;
-      --accent: #38b673;
-      --accent-dark: #278854;
+      --muted: #d9d9d9;
+      --brand: #ff7a00;
+      --brand-dark: #db6600;
+      --accent: #ff9b36;
+      --accent-dark: #ea871f;
       --danger: #ff7a7a;
       --danger-soft: rgba(255, 122, 122, 0.16);
       --info: #7ed0ff;
@@ -39,8 +39,8 @@
       font-family: Arial, Helvetica, sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top right, rgba(244, 180, 0, 0.12), transparent 28%),
-        radial-gradient(circle at top left, rgba(56, 182, 115, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(255, 122, 0, 0.18), transparent 28%),
+        radial-gradient(circle at top left, rgba(255, 122, 0, 0.08), transparent 24%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
       min-height: 100vh;
     }
@@ -61,7 +61,7 @@
     }
 
     .hero {
-      background: linear-gradient(135deg, rgba(244, 180, 0, 0.08), rgba(56, 182, 115, 0.08)), var(--panel);
+      background: linear-gradient(135deg, rgba(255, 122, 0, 0.08), rgba(255, 255, 255, 0.02)), var(--panel);
       border: 1px solid var(--line);
       border-radius: 30px;
       box-shadow: var(--shadow);
@@ -77,11 +77,11 @@
     }
 
     .logo-frame {
-      width: 96px;
-      height: 96px;
+      width: 136px;
+      height: 136px;
       border-radius: 24px;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 215, 102, 0.18);
+      border: 1px solid rgba(255, 122, 0, 0.22);
       display: grid;
       place-items: center;
       padding: 10px;
@@ -101,7 +101,7 @@
       border-radius: 14px;
       display: grid;
       place-items: center;
-      background: linear-gradient(135deg, var(--brand), #ffe084);
+      background: linear-gradient(135deg, var(--brand), #ffbe7f);
       color: #0d1d17;
       font-weight: 800;
       font-size: 1.45rem;
@@ -130,9 +130,9 @@
     .pill {
       padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(244, 180, 0, 0.24);
-      background: rgba(244, 180, 0, 0.12);
-      color: #fff1c1;
+      border: 1px solid rgba(255, 122, 0, 0.24);
+      background: rgba(255, 122, 0, 0.12);
+      color: #ffe2c5;
       font-size: 0.92rem;
     }
 
@@ -565,16 +565,10 @@
           <div>
             <h1>WMJRLFC Player's Player Voting</h1>
             <p>
-              Players' Player recognises the teammate who showed the best effort, attitude, teamwork, and sportsmanship in that round. Parents vote once each round to celebrate the player who best represented those values.
+              Players' Player recognises the teammate who showed the best effort, attitude, teamwork, and sportsmanship in that round. Players complete one vote each round, with parents helping younger children submit their choice through the app when needed.
             </p>
             <div class="sync-chip" id="syncStatus">Connecting to Firestore…</div>
           </div>
-        </div>
-        <div class="pill-row">
-          <span class="pill">Club colours and logo</span>
-          <span class="pill">Firestore data sync</span>
-          <span class="pill">Coach self-service</span>
-          <span class="pill">Admin reporting</span>
         </div>
       </section>
 
@@ -583,7 +577,7 @@
       <section id="landingSection" class="grid landing-grid hidden">
         <article class="card">
           <h2>Vote Now</h2>
-          <p>Parents and guardians can choose the team, select one Player's Player for the round, and submit a single guided vote.</p>
+          <p>Players can choose their Player's Player for the round, with parents helping younger children submit the vote when needed.</p>
           <div class="button-row">
             <button class="btn-primary" onclick="openParentFlow()">Start Voting</button>
           </div>
@@ -648,7 +642,7 @@
 
         <div id="parentStageVote" class="hidden">
           <div class="card">
-            <h3 id="voteHeading">Cast your votes</h3>
+            <h3 id="voteHeading">Cast your vote</h3>
             <p class="helper-text">Choose the player who best showed effort, teamwork, attitude, and sportsmanship in this round. You can tap again to unselect and change your choice.</p>
             <div class="tag-row">
               <div class="tag" id="voteTeamTag"></div>
@@ -909,9 +903,6 @@
         </div>
       </section>
 
-      <p class="footer-note">
-        Paste this file into GitHub Pages as a single HTML page. It uses the club logo file `WMJRLFC-logo.jpg` and stores live team data in Firebase Firestore.
-      </p>
     </div>
   </div>
 
@@ -1168,11 +1159,16 @@
     }
 
     async function loadActivityFromCloud() {
-      const snapshot = await db.collection(ACTIVITY_COLLECTION)
-        .orderBy('createdAt', 'desc')
-        .limit(20)
-        .get();
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      try {
+        const snapshot = await db.collection(ACTIVITY_COLLECTION)
+          .orderBy('createdAt', 'desc')
+          .limit(20)
+          .get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.warn('Activity load skipped:', error);
+        return [];
+      }
     }
 
     async function refreshFromCloud(showSuccessBanner = false) {
@@ -1195,14 +1191,18 @@
     }
 
     async function createActivity(type, message, teamId = '') {
-      const ref = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
-      await ref.set({
-        id: ref.id,
-        type,
-        teamId,
-        message,
-        createdAt: timestampNow()
-      });
+      try {
+        const ref = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
+        await ref.set({
+          id: ref.id,
+          type,
+          teamId,
+          message,
+          createdAt: timestampNow()
+        });
+      } catch (error) {
+        console.warn('Activity write skipped:', error);
+      }
     }
 
     function renderPlayerVoteGrid(team) {
@@ -1249,7 +1249,7 @@
       }
       parentFlow.teamId = team.id;
       parentFlow.selectedPlayerId = null;
-      document.getElementById('voteHeading').textContent = `Cast your votes for ${team.name}`;
+      document.getElementById('voteHeading').textContent = `Cast your vote for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
       document.getElementById('voteStatusTag').textContent = team.round.note || 'Voting is unlocked';
@@ -1319,8 +1319,6 @@
       const voteTokenId = `${team.id}__${roundSlug}__${browserId}`;
       const teamRef = db.collection(TEAM_COLLECTION).doc(team.id);
       const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
-      const activityRef = db.collection(ACTIVITY_COLLECTION).doc(generateId('activity'));
-
       try {
         await db.runTransaction(async transaction => {
           const voteTokenDoc = await transaction.get(voteTokenRef);
@@ -1356,15 +1354,9 @@
             browserId,
             createdAt: timestampNow()
           });
-          transaction.set(activityRef, {
-            id: activityRef.id,
-            type: 'vote_submitted',
-            teamId: liveTeam.id,
-            message: `Vote submitted for ${liveTeam.name} (${liveTeam.round.name})`,
-            createdAt: timestampNow()
-          });
         });
 
+        await createActivity('vote_submitted', `Vote submitted for ${team.name} (${team.round.name})`, team.id);
         await refreshFromCloud(false);
         document.getElementById('parentStageReview').classList.add('hidden');
         document.getElementById('parentStageDone').classList.remove('hidden');
@@ -1407,28 +1399,32 @@
         showBanner('Please enter a coach name, team name, and a PIN with at least 4 characters.', 'error');
         return;
       }
-      const newTeam = ensureTeamDefaults({
-        id: generateId('team'),
-        name: teamName,
-        coachName,
-        coachPin,
-        round: {
-          name: 'Round 1',
-          status: 'locked',
-          note: 'Voting is locked until the coach unlocks the round'
-        },
-        players: [],
-        votesCast: 0,
-        createdAt: timestampNow(),
-        updatedAt: timestampNow()
-      });
-      await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
-      await createActivity('team_created_by_coach', `Coach ${coachName} created ${teamName}`, newTeam.id);
-      document.getElementById('newCoachName').value = '';
-      document.getElementById('newTeamName').value = '';
-      document.getElementById('newCoachPin').value = '';
-      await refreshFromCloud(false);
-      showBanner(`Team created successfully: ${teamName}.`, 'success');
+      try {
+        const newTeam = ensureTeamDefaults({
+          id: generateId('team'),
+          name: teamName,
+          coachName,
+          coachPin,
+          round: {
+            name: 'Round 1',
+            status: 'locked',
+            note: 'Voting is locked until the coach unlocks the round'
+          },
+          players: [],
+          votesCast: 0,
+          createdAt: timestampNow(),
+          updatedAt: timestampNow()
+        });
+        await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
+        await createActivity('team_created_by_coach', `Coach ${coachName} created ${teamName}`, newTeam.id);
+        document.getElementById('newCoachName').value = '';
+        document.getElementById('newTeamName').value = '';
+        document.getElementById('newCoachPin').value = '';
+        await refreshFromCloud(false);
+        showBanner(`Team created successfully: ${teamName}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to create team right now: ${error.message}`, 'error');
+      }
     }
 
     function showCoachTab(tabId, button) {
@@ -1458,8 +1454,8 @@
 
       document.getElementById('coachSharingInfo').innerHTML = `
         <div class="muted-box">
-          <p><strong>Parent voting message</strong></p>
-          <p class="tiny">Tell parents to open this page, select <strong>${team.name}</strong>, and vote during <strong>${team.round.name}</strong>.</p>
+          <p><strong>Voting message</strong></p>
+          <p class="tiny">Tell players and families to open this page, select <strong>${team.name}</strong>, and vote during <strong>${team.round.name}</strong>.</p>
           <p class="tiny">Round access: <strong>${team.round.status === 'open' ? 'Unlocked for voting' : 'Locked'}</strong></p>
         </div>
       `;
@@ -1501,33 +1497,41 @@
         showBanner('Please enter a player name.', 'error');
         return;
       }
-      const updatedTeam = clone(team);
-      updatedTeam.players.push({
-        id: generateId('player'),
-        name,
-        number,
-        seasonVotes: 0,
-        roundVotes: 0
-      });
-      updatedTeam.updatedAt = timestampNow();
-      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-      await createActivity('player_added', `Added ${name} to ${updatedTeam.name}`, updatedTeam.id);
-      document.getElementById('playerNameInput').value = '';
-      document.getElementById('playerNumberInput').value = '';
-      await refreshFromCloud(false);
-      showBanner(`${name} was added to ${updatedTeam.name}.`, 'success');
+      try {
+        const updatedTeam = clone(team);
+        updatedTeam.players.push({
+          id: generateId('player'),
+          name,
+          number,
+          seasonVotes: 0,
+          roundVotes: 0
+        });
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('player_added', `Added ${name} to ${updatedTeam.name}`, updatedTeam.id);
+        document.getElementById('playerNameInput').value = '';
+        document.getElementById('playerNumberInput').value = '';
+        await refreshFromCloud(false);
+        showBanner(`${name} was added to ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to add player right now: ${error.message}`, 'error');
+      }
     }
 
     async function removePlayer(playerId) {
       const team = getTeam(coachSessionTeamId);
       if (!team) return;
-      const updatedTeam = clone(team);
-      updatedTeam.players = updatedTeam.players.filter(player => player.id !== playerId);
-      updatedTeam.updatedAt = timestampNow();
-      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-      await createActivity('player_removed', `Removed a player from ${updatedTeam.name}`, updatedTeam.id);
-      await refreshFromCloud(false);
-      showBanner('Player removed from the team roster.', 'success');
+      try {
+        const updatedTeam = clone(team);
+        updatedTeam.players = updatedTeam.players.filter(player => player.id !== playerId);
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('player_removed', `Removed a player from ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner('Player removed from the team roster.', 'success');
+      } catch (error) {
+        showBanner(`Unable to remove player right now: ${error.message}`, 'error');
+      }
     }
 
     async function savePlayerEdits(playerId) {
@@ -1542,13 +1546,17 @@
         showBanner('Player name cannot be blank.', 'error');
         return;
       }
-      player.name = newName;
-      player.number = newNumber;
-      updatedTeam.updatedAt = timestampNow();
-      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-      await createActivity('player_updated', `Updated a player in ${updatedTeam.name}`, updatedTeam.id);
-      await refreshFromCloud(false);
-      showBanner('Player details updated.', 'success');
+      try {
+        player.name = newName;
+        player.number = newNumber;
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('player_updated', `Updated a player in ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner('Player details updated.', 'success');
+      } catch (error) {
+        showBanner(`Unable to update player right now: ${error.message}`, 'error');
+      }
     }
 
     async function saveRoundSettings() {
@@ -1566,11 +1574,15 @@
         }));
         updatedTeam.votesCast = 0;
       }
-      updatedTeam.updatedAt = timestampNow();
-      await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-      await createActivity('round_updated', `Updated round for ${updatedTeam.name} to ${updatedTeam.round.name}`, updatedTeam.id);
-      await refreshFromCloud(false);
-      showBanner(`Round settings saved for ${updatedTeam.name}.`, 'success');
+      try {
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('round_updated', `Updated round for ${updatedTeam.name} to ${updatedTeam.round.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner(`Round settings saved for ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to save round settings right now: ${error.message}`, 'error');
+      }
     }
 
     function renderCoachResults(team) {
@@ -1652,28 +1664,32 @@
         showBanner('Please enter a coach name, team name, and coach PIN.', 'error');
         return;
       }
-      const newTeam = ensureTeamDefaults({
-        id: generateId('team'),
-        name: teamName,
-        coachName,
-        coachPin,
-        round: {
-          name: 'Round 1',
-          status: 'locked',
-          note: 'Voting is locked until the coach unlocks the round'
-        },
-        players: [],
-        votesCast: 0,
-        createdAt: timestampNow(),
-        updatedAt: timestampNow()
-      });
-      await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
-      await createActivity('team_created_by_admin', `Admin created ${teamName} for ${coachName}`, newTeam.id);
-      document.getElementById('adminCoachName').value = '';
-      document.getElementById('adminTeamName').value = '';
-      document.getElementById('adminCoachPin').value = '';
-      await refreshFromCloud(false);
-      showBanner(`Admin created ${teamName}.`, 'success');
+      try {
+        const newTeam = ensureTeamDefaults({
+          id: generateId('team'),
+          name: teamName,
+          coachName,
+          coachPin,
+          round: {
+            name: 'Round 1',
+            status: 'locked',
+            note: 'Voting is locked until the coach unlocks the round'
+          },
+          players: [],
+          votesCast: 0,
+          createdAt: timestampNow(),
+          updatedAt: timestampNow()
+        });
+        await db.collection(TEAM_COLLECTION).doc(newTeam.id).set(newTeam);
+        await createActivity('team_created_by_admin', `Admin created ${teamName} for ${coachName}`, newTeam.id);
+        document.getElementById('adminCoachName').value = '';
+        document.getElementById('adminTeamName').value = '';
+        document.getElementById('adminCoachPin').value = '';
+        await refreshFromCloud(false);
+        showBanner(`Admin created ${teamName}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to create admin team right now: ${error.message}`, 'error');
+      }
     }
 
     function createCsvSummary() {
