@@ -917,6 +917,7 @@
               <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
               <button class="btn-secondary" onclick="adminResetRound()">Reset Round</button>
               <button class="btn-danger" onclick="adminResetSeason()">Reset Season</button>
+              <button class="btn-danger" onclick="adminDeleteTeam()">Delete Team</button>
             </div>
             <div class="divider"></div>
             <h4>Edit players</h4>
@@ -1916,6 +1917,55 @@
         showBanner('Player details updated by admin.', 'success');
       } catch (error) {
         showBanner(`Unable to update player right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function deleteQuerySnapshot(snapshot) {
+      if (!snapshot || snapshot.empty) return;
+      for (let index = 0; index < snapshot.docs.length; index += 400) {
+        const batch = db.batch();
+        snapshot.docs.slice(index, index + 400).forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+      }
+    }
+
+    async function adminDeleteTeam() {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team to delete.', 'error');
+        return;
+      }
+
+      const confirmed = window.confirm(`Delete ${team.name}? This will remove the team from the live app.`);
+      if (!confirmed) return;
+
+      try {
+        await db.collection(TEAM_COLLECTION).doc(team.id).delete();
+
+        try {
+          const activitySnapshot = await db.collection(ACTIVITY_COLLECTION).where('teamId', '==', team.id).get();
+          await deleteQuerySnapshot(activitySnapshot);
+        } catch (error) {
+          console.warn('Activity cleanup skipped:', error);
+        }
+
+        try {
+          const voteTokenSnapshot = await db.collection(VOTE_TOKEN_COLLECTION).where('teamId', '==', team.id).get();
+          await deleteQuerySnapshot(voteTokenSnapshot);
+        } catch (error) {
+          console.warn('Vote token cleanup skipped:', error);
+        }
+
+        if (coachSessionTeamId === team.id) {
+          coachSessionTeamId = null;
+        }
+
+        await refreshFromCloud(false);
+        showBanner(`${team.name} was deleted.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to delete team right now: ${error.message}`, 'error');
       }
     }
 
