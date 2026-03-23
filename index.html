@@ -1420,7 +1420,7 @@
       document.getElementById('parentStageDone').classList.add('hidden');
       renderVoterPlayerGrid(team);
       setParentStep(2);
-      showMiniBanner('parentBanner', `Voting is open for ${team.round.name}.`, 'info');
+      showMiniBanner('parentBanner', 'First select who is voting.', 'info');
     }
 
     function toggleVote(playerId) {
@@ -1437,16 +1437,32 @@
       setParentStep(1);
     }
 
-    function confirmVoterIdentity(playerId) {
+    async function confirmVoterIdentity(playerId) {
       const team = getTeam(parentFlow.teamId);
       if (!team) return;
       const player = team.players.find(item => item.id === playerId);
       if (!player) return;
+
+      if (cloudReady) {
+        const roundSlug = slugify(team.round.name);
+        const voteTokenId = `${team.id}__${roundSlug}__${player.id}`;
+        try {
+          const voteTokenDoc = await db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId).get();
+          if (voteTokenDoc.exists) {
+            window.alert('You have already voted this round.');
+            return;
+          }
+        } catch (error) {
+          showMiniBanner('parentBanner', 'Unable to check voting status right now. Please try again.', 'error');
+          return;
+        }
+      }
+
       const confirmed = window.confirm(`Please confirm you are voting as ${player.name}.`);
       if (!confirmed) return;
       parentFlow.voterPlayerId = player.id;
       parentFlow.selectedPlayerId = null;
-      document.getElementById('voteHeading').textContent = `Cast your vote for ${team.name}`;
+      document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteVoterTag').textContent = `Voting as: ${player.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${team.round.name}`;
@@ -1456,6 +1472,7 @@
       document.getElementById('parentStageVote').classList.remove('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       setParentStep(3);
+      showMiniBanner('parentBanner', `Now select the Player's Player for ${team.round.name}.`, 'info');
     }
 
     function backToVoterSelection() {
