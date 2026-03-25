@@ -1724,9 +1724,6 @@
         showMiniBanner('parentBanner', `Voting for ${team.name} is currently locked for all rounds.`, 'error');
         return;
       }
-      if (effectiveRound.id !== selectedRound.id) {
-        showMiniBanner('parentBanner', `${selectedRound.name} is locked. Switched to ${effectiveRound.name} (unlocked).`, 'info');
-      }
       parentFlow.teamId = team.id;
       parentFlow.roundId = effectiveRound.id;
       parentFlow.voterPlayerId = null;
@@ -1739,7 +1736,7 @@
       renderVoterPlayerGrid(team);
       setParentStep(2);
       refreshParentRoundSelect(effectiveRound.id);
-      showMiniBanner('parentBanner', `First select who is voting for ${effectiveRound.name}.`, 'info');
+      hideMiniBanner('parentBanner');
     }
 
     function toggleVote(playerId) {
@@ -1832,8 +1829,7 @@
       document.getElementById('parentStageVote').classList.remove('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       setParentStep(3);
-      const selectedRound = getTeamRound(team, parentFlow.roundId) || team.round;
-      showMiniBanner('parentBanner', `Now select the Player's Player for ${selectedRound.name}.`, 'info');
+      hideMiniBanner('parentBanner');
     }
 
     function backToVoterSelection() {
