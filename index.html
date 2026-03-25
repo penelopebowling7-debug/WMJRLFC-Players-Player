@@ -972,7 +972,10 @@
             <div class="card">
               <h3>Club-wide voting controls</h3>
               <p class="helper-text">Unlock the current round for every team in the app at once.</p>
+              <label for="adminGlobalRoundSelect">Round to unlock for all teams</label>
+              <select id="adminGlobalRoundSelect"></select>
               <div class="button-row">
+                <button class="btn-secondary" onclick="adminUnlockSelectedRoundForAllTeams()">Unlock Selected Round For All Teams</button>
                 <button class="btn-primary" onclick="adminUnlockVotingForAllTeams()">Unlock Voting for All Teams</button>
               </div>
             </div>
@@ -1016,7 +1019,6 @@
             </div>
             <div class="button-row">
               <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
-              <button class="btn-secondary" onclick="adminUnlockSelectedRoundForAllTeams()">Unlock Selected Round For All Teams</button>
               <button class="btn-secondary" onclick="adminResetRound()">Reset Round</button>
               <button class="btn-danger" onclick="adminResetSeason()">Reset Season</button>
               <button class="btn-danger" onclick="adminDeleteTeam()">Delete Team</button>
@@ -2304,7 +2306,35 @@
             </tr>
           `;
         }).join('');
+      refreshAdminGlobalRoundSelect();
       renderAdminTeamManager();
+    }
+
+    function refreshAdminGlobalRoundSelect() {
+      const select = document.getElementById('adminGlobalRoundSelect');
+      if (!select) return;
+      const previousValue = select.value;
+      const roundNames = new Set();
+      state.teams.forEach(team => {
+        (team.rounds || []).forEach(round => {
+          if (round && round.name) roundNames.add(round.name);
+        });
+      });
+      const sortedRoundNames = Array.from(roundNames).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+      select.innerHTML = '';
+      if (!sortedRoundNames.length) {
+        select.innerHTML = '<option value="">-- No rounds available --</option>';
+        return;
+      }
+      sortedRoundNames.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      if (sortedRoundNames.includes(previousValue)) {
+        select.value = previousValue;
+      }
     }
 
     async function adminCreateTeam() {
@@ -2420,9 +2450,9 @@
     }
 
     async function adminUnlockSelectedRoundForAllTeams() {
-      const roundName = document.getElementById('adminEditRoundName').value.trim();
+      const roundName = document.getElementById('adminGlobalRoundSelect').value.trim();
       if (!roundName) {
-        showBanner('Enter a round name first (for example Round 7, Grand Final, or Gala Day).', 'error');
+        showBanner('Please select a round to unlock for all teams.', 'error');
         return;
       }
       if (!state.teams.length) {
