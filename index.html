@@ -1428,9 +1428,11 @@
         option.textContent = `${round.name} (${round.status === 'open' ? 'Unlocked' : 'Locked'})`;
         roundSelect.appendChild(option);
       });
-      const resolvedRoundId = preferredRoundId || team.currentRoundId || team.rounds[0].id;
+      const firstOpenRound = team.rounds.find(round => round.status === 'open');
+      const resolvedRoundId = preferredRoundId || (firstOpenRound && firstOpenRound.id) || team.currentRoundId || team.rounds[0].id;
       if (team.rounds.some(round => round.id === resolvedRoundId)) {
         roundSelect.value = resolvedRoundId;
+        parentFlow.roundId = resolvedRoundId;
       }
     }
 
@@ -1444,7 +1446,8 @@
         option.textContent = `${round.name} (${round.status === 'open' ? 'Unlocked' : 'Locked'})`;
         select.appendChild(option);
       });
-      const chosenRoundId = preferredRoundId || parentFlow.roundId || team.currentRoundId || (team.rounds[0] && team.rounds[0].id) || '';
+      const firstOpenRound = team.rounds.find(round => round.status === 'open');
+      const chosenRoundId = preferredRoundId || parentFlow.roundId || (firstOpenRound && firstOpenRound.id) || team.currentRoundId || (team.rounds[0] && team.rounds[0].id) || '';
       if (chosenRoundId && team.rounds.some(round => round.id === chosenRoundId)) {
         select.value = chosenRoundId;
         parentFlow.roundId = chosenRoundId;
@@ -1715,12 +1718,17 @@
         showMiniBanner('parentBanner', 'This team needs at least 3 players in the roster before voting can open.', 'error');
         return;
       }
-      if (selectedRound.status !== 'open') {
-        showMiniBanner('parentBanner', `Voting for ${team.name} is locked for ${selectedRound.name}.`, 'error');
+      const firstOpenRound = team.rounds.find(round => round.status === 'open');
+      const effectiveRound = selectedRound.status === 'open' ? selectedRound : firstOpenRound;
+      if (!effectiveRound) {
+        showMiniBanner('parentBanner', `Voting for ${team.name} is currently locked for all rounds.`, 'error');
         return;
       }
+      if (effectiveRound.id !== selectedRound.id) {
+        showMiniBanner('parentBanner', `${selectedRound.name} is locked. Switched to ${effectiveRound.name} (unlocked).`, 'info');
+      }
       parentFlow.teamId = team.id;
-      parentFlow.roundId = selectedRound.id;
+      parentFlow.roundId = effectiveRound.id;
       parentFlow.voterPlayerId = null;
       parentFlow.selectedPlayerId = null;
       document.getElementById('parentStageTeam').classList.add('hidden');
@@ -1730,11 +1738,12 @@
       document.getElementById('parentStageDone').classList.add('hidden');
       renderVoterPlayerGrid(team);
       setParentStep(2);
-      showMiniBanner('parentBanner', `First select who is voting for ${selectedRound.name}.`, 'info');
+      refreshParentRoundSelect(effectiveRound.id);
+      showMiniBanner('parentBanner', `First select who is voting for ${effectiveRound.name}.`, 'info');
     }
 
     function toggleVote(playerId) {
-      parentFlow.selectedPlayerId = parentFlow.selectedPlayerId === playerId ? null : playerId;
+      parentFlow.selectedPlayerId = playerId;
       const team = getTeam(parentFlow.teamId);
       if (team) renderPlayerVoteGrid(team);
     }
@@ -1770,6 +1779,11 @@
         if (!team || !team.rounds || !team.rounds.length) return fallbackRoundId;
         const latestIndex = team.rounds.findIndex(round => round.name === latest.roundName);
         if (latestIndex < 0) return fallbackRoundId;
+        for (let index = latestIndex + 1; index < team.rounds.length; index += 1) {
+          if (team.rounds[index].status === 'open') {
+            return team.rounds[index].id;
+          }
+        }
         return team.rounds[Math.min(latestIndex + 1, team.rounds.length - 1)].id;
       } catch (error) {
         console.warn('Round suggestion skipped:', error);
@@ -1873,6 +1887,22 @@
       }
       const team = getTeam(parentFlow.teamId);
       if (!team) return;
+      if (!parentFlow.voterPlayerId) {
+        showMiniBanner('parentBanner', 'Please select who is voting first.', 'error');
+        return;
+      }
+      if (!parentFlow.selectedPlayerId) {
+        showMiniBanner('parentBanner', 'Please select a player to vote for before submitting.', 'error');
+        return;
+      }
+      if (!parentFlow.roundId) {
+        const voteRoundSelect = document.getElementById('voteRoundSelect');
+        parentFlow.roundId = voteRoundSelect ? voteRoundSelect.value : '';
+      }
+      if (!parentFlow.roundId) {
+        showMiniBanner('parentBanner', 'Please select a voting round before submitting.', 'error');
+        return;
+      }
 
       const button = document.getElementById('submitVoteButton');
       button.disabled = true;
