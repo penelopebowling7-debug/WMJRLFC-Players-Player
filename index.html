@@ -737,7 +737,7 @@
           <div class="card">
             <h3>Review your selections</h3>
             <ul class="summary-list" id="voteSummaryList"></ul>
-            <div class="notice">Please check your choice before submitting. Once sent, that player cannot vote again for the same round.</div>
+            <div id="reviewNotice" class="notice">Please check your choice before submitting. Once sent, that player cannot vote again for the same round.</div>
             <div class="button-row">
               <button class="btn-secondary" onclick="returnToVoting()">Edit Choices</button>
               <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Votes</button>
@@ -1751,7 +1751,7 @@
     function updateVoteRoundTags(team) {
       const selectedRound = getTeamRound(team, parentFlow.roundId) || team.round;
       if (!selectedRound) return;
-      document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
+      document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name} — ${selectedRound.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}`;
       document.getElementById('voteStatusTag').textContent = selectedRound.note || 'Voting note not set';
@@ -1857,10 +1857,19 @@
         showMiniBanner('parentBanner', 'Please choose one player before reviewing your vote.', 'error');
         return;
       }
+      const selectedRound = getTeamRound(team, parentFlow.roundId);
+      if (!selectedRound) {
+        showMiniBanner('parentBanner', 'Please select a valid round before reviewing your vote.', 'error');
+        return;
+      }
       const list = document.getElementById('voteSummaryList');
       list.innerHTML = '';
       const voter = team.players.find(item => item.id === parentFlow.voterPlayerId);
       const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
+      const roundItem = document.createElement('li');
+      roundItem.className = 'summary-item';
+      roundItem.textContent = `Round: ${selectedRound.name}`;
+      list.appendChild(roundItem);
       const voterItem = document.createElement('li');
       voterItem.className = 'summary-item';
       voterItem.textContent = `Voting as: ${voter ? voter.name : 'Unknown Player'}`;
@@ -1869,6 +1878,10 @@
       item.className = 'summary-item';
       item.textContent = `Player's Player: ${player ? player.name : 'Unknown Player'}`;
       list.appendChild(item);
+      const reviewNotice = document.getElementById('reviewNotice');
+      if (reviewNotice) {
+        reviewNotice.textContent = `Please check your choice for ${selectedRound.name} before submitting. Once sent, that player cannot vote again for this round.`;
+      }
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
       setParentStep(4);
