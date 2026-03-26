@@ -1748,7 +1748,7 @@
     function updateVoteRoundTags(team) {
       const selectedRound = getTeamRound(team, parentFlow.roundId) || team.round;
       if (!selectedRound) return;
-      document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name} — ${selectedRound.name}`;
+      document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}`;
       document.getElementById('voteStatusTag').textContent = selectedRound.note || 'Voting note not set';
