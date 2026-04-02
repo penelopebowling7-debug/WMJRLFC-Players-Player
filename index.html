@@ -1104,6 +1104,7 @@
       voterPlayerId: null,
       selectedPlayerId: null
     };
+    let parentReviewSnapshot = null;
     let coachSessionTeamId = null;
     let adminLoggedIn = false;
     let browserId = getBrowserId();
@@ -1341,6 +1342,7 @@
         voterPlayerId: null,
         selectedPlayerId: null
       };
+      parentReviewSnapshot = null;
       document.getElementById('parentTeamSelect').value = '';
       document.getElementById('parentRoundSelect').innerHTML = '<option value="">-- Select Round --</option>';
       hideMiniBanner('parentBanner');
@@ -1783,6 +1785,7 @@
     }
 
     function backToTeamSelection() {
+      parentReviewSnapshot = null;
       document.getElementById('parentStageTeam').classList.remove('hidden');
       document.getElementById('parentStageVoter').classList.add('hidden');
       document.getElementById('parentStageVote').classList.add('hidden');
@@ -1827,6 +1830,7 @@
     }
 
     function backToVoterSelection() {
+      parentReviewSnapshot = null;
       document.getElementById('parentStageVoter').classList.remove('hidden');
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
@@ -1872,12 +1876,19 @@
       if (reviewNotice) {
         reviewNotice.textContent = `Please check your choice for ${selectedRound.name} before submitting. Once sent, that player cannot vote again for this round.`;
       }
+      parentReviewSnapshot = {
+        teamId: parentFlow.teamId,
+        roundId: parentFlow.roundId,
+        voterPlayerId: parentFlow.voterPlayerId,
+        selectedPlayerId: parentFlow.selectedPlayerId
+      };
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
       setParentStep(4);
     }
 
     function returnToVoting() {
+      parentReviewSnapshot = null;
       document.getElementById('parentStageVote').classList.remove('hidden');
       document.getElementById('parentStageReview').classList.add('hidden');
       setParentStep(3);
@@ -1888,8 +1899,18 @@
         showMiniBanner('parentBanner', 'Firestore is still connecting. Please try again in a moment.', 'error');
         return;
       }
-      const team = getTeam(parentFlow.teamId);
+      const effectiveTeamId = parentFlow.teamId || (parentReviewSnapshot && parentReviewSnapshot.teamId) || '';
+      const team = getTeam(effectiveTeamId);
       if (!team) return;
+      if (!parentFlow.voterPlayerId && parentReviewSnapshot && parentReviewSnapshot.voterPlayerId) {
+        parentFlow.voterPlayerId = parentReviewSnapshot.voterPlayerId;
+      }
+      if (!parentFlow.selectedPlayerId && parentReviewSnapshot && parentReviewSnapshot.selectedPlayerId) {
+        parentFlow.selectedPlayerId = parentReviewSnapshot.selectedPlayerId;
+      }
+      if (!parentFlow.roundId && parentReviewSnapshot && parentReviewSnapshot.roundId) {
+        parentFlow.roundId = parentReviewSnapshot.roundId;
+      }
       if (!parentFlow.voterPlayerId) {
         showMiniBanner('parentBanner', 'Please select who is voting first.', 'error');
         return;
