@@ -1894,6 +1894,27 @@
       setParentStep(3);
     }
 
+    function recoverSubmitStateFromReview(team) {
+      if (!team) return;
+      const voteRoundSelect = document.getElementById('voteRoundSelect');
+      if (!parentFlow.roundId && voteRoundSelect && voteRoundSelect.value) {
+        parentFlow.roundId = voteRoundSelect.value;
+      }
+      const summaryItems = Array.from(document.querySelectorAll('#voteSummaryList .summary-item')).map(item => item.textContent || '');
+      const voterLine = summaryItems.find(text => text.startsWith('Voting as:'));
+      const playerLine = summaryItems.find(text => text.startsWith("Player's Player:"));
+      if (!parentFlow.voterPlayerId && voterLine) {
+        const voterName = voterLine.replace('Voting as:', '').trim();
+        const voter = team.players.find(item => item.name === voterName);
+        if (voter) parentFlow.voterPlayerId = voter.id;
+      }
+      if (!parentFlow.selectedPlayerId && playerLine) {
+        const selectedName = playerLine.replace("Player's Player:", '').trim();
+        const selected = team.players.find(item => item.name === selectedName);
+        if (selected) parentFlow.selectedPlayerId = selected.id;
+      }
+    }
+
     async function submitVotes() {
       if (!cloudReady) {
         showMiniBanner('parentBanner', 'Firestore is still connecting. Please try again in a moment.', 'error');
@@ -1911,6 +1932,7 @@
       if (!parentFlow.roundId && parentReviewSnapshot && parentReviewSnapshot.roundId) {
         parentFlow.roundId = parentReviewSnapshot.roundId;
       }
+      recoverSubmitStateFromReview(team);
       if (!parentFlow.voterPlayerId) {
         showMiniBanner('parentBanner', 'Please select who is voting first.', 'error');
         return;
