@@ -671,7 +671,7 @@
         <div id="parentStageTeam" class="grid two-col">
           <div class="card">
             <h3>Choose your team</h3>
-            <p class="helper-text">Voting is only available once the coach unlocks the round for that team.</p>
+            <p class="helper-text">Select your team and round, then continue to vote.</p>
             <label for="parentTeamSelect">Team</label>
             <select id="parentTeamSelect" onchange="refreshParentRoundSelect()"></select>
             <label for="parentRoundSelect" style="margin-top:12px;">Round</label>
@@ -689,7 +689,6 @@
             <ul class="simple-list">
               <li>Choose one player only.</li>
               <li>Each player can vote once per round.</li>
-              <li>Only unlocked rounds can receive votes.</li>
               <li>Players must identify themselves before voting.</li>
               <li>Players cannot vote for themselves.</li>
             </ul>
@@ -858,20 +857,12 @@
                   <input id="roundNameInput" class="input" type="text" placeholder="Round 4 vs Tigers">
                 </div>
                 <div>
-                  <label for="roundStatusSelect">Round Access</label>
-                  <select id="roundStatusSelect">
-                    <option value="locked">Locked</option>
-                    <option value="open">Unlocked for voting</option>
-                  </select>
-                </div>
-                <div>
                   <label for="roundCloseNote">Close Time / Note</label>
                   <input id="roundCloseNote" class="input" type="text" placeholder="Closes Sunday 6pm">
                 </div>
               </div>
               <div class="button-row">
                 <button class="btn-primary" onclick="saveRoundSettings()">Save Round Settings</button>
-                <button class="btn-secondary" onclick="coachUnlockAllRounds()">Unlock All Rounds</button>
               </div>
               <div class="divider"></div>
               <h4>Add a new named round</h4>
@@ -884,7 +875,7 @@
                   <button class="btn-primary" onclick="coachAddRound()">Add Round</button>
                 </div>
               </div>
-              <div class="notice">Keep the round locked until you are ready for voting to begin. If you change the round name, round-only tallies reset to 0 for that team so the next round starts clean.</div>
+              <div class="notice">If you change the round name, round-only tallies reset to 0 for that team so the next round starts clean.</div>
             </div>
           </div>
 
@@ -964,14 +955,8 @@
             </div>
 
             <div class="card">
-              <h3>Club-wide voting controls</h3>
-              <p class="helper-text">Unlock the current round for every team in the app at once.</p>
-              <label for="adminGlobalRoundSelect">Round to unlock for all teams</label>
-              <select id="adminGlobalRoundSelect"></select>
-              <div class="button-row">
-                <button class="btn-secondary" onclick="adminUnlockSelectedRoundForAllTeams()">Unlock Selected Round For All Teams</button>
-                <button class="btn-primary" onclick="adminUnlockVotingForAllTeams()">Unlock Voting for All Teams</button>
-              </div>
+              <h3>Club-wide rounds</h3>
+              <p class="helper-text">Rounds are available for voting across the app. Use team management below to rename or add rounds.</p>
             </div>
           </div>
 
@@ -998,13 +983,6 @@
               <div>
                 <label for="adminEditRoundName">Round Name</label>
                 <input id="adminEditRoundName" class="input" type="text" placeholder="Current round">
-              </div>
-              <div>
-                <label for="adminEditRoundStatus">Round Access</label>
-                <select id="adminEditRoundStatus">
-                  <option value="locked">Locked</option>
-                  <option value="open">Unlocked for voting</option>
-                </select>
               </div>
             </div>
             <div style="margin-top: 16px;">
@@ -1171,8 +1149,8 @@
       return {
         id: `round_${index}`,
         name: `Round ${index}`,
-        status: 'locked',
-        note: 'Voting is locked until the coach unlocks the round'
+        status: 'open',
+        note: ''
       };
     }
 
@@ -1180,7 +1158,7 @@
       const list = Array.isArray(rounds) ? rounds.map(round => ({
         id: round.id || generateId('round'),
         name: String(round.name || 'Untitled Round').trim(),
-        status: round.status === 'open' ? 'open' : 'locked',
+        status: 'open',
         note: String(round.note || '')
       })) : [];
       for (let index = 1; index <= STANDARD_ROUND_COUNT; index += 1) {
@@ -1198,7 +1176,7 @@
           list.push({
             id: fallbackRound.id || generateId('round'),
             name: fallbackRound.name,
-            status: fallbackRound.status === 'open' ? 'open' : 'locked',
+            status: 'open',
             note: fallbackRound.note || ''
           });
         }
@@ -1421,11 +1399,10 @@
       team.rounds.forEach(round => {
         const option = document.createElement('option');
         option.value = round.id;
-        option.textContent = `${round.name} (${round.status === 'open' ? 'Unlocked' : 'Locked'})`;
+        option.textContent = round.name;
         roundSelect.appendChild(option);
       });
-      const firstOpenRound = team.rounds.find(round => round.status === 'open');
-      const resolvedRoundId = preferredRoundId || (firstOpenRound && firstOpenRound.id) || team.currentRoundId || team.rounds[0].id;
+      const resolvedRoundId = preferredRoundId || team.currentRoundId || team.rounds[0].id;
       if (team.rounds.some(round => round.id === resolvedRoundId)) {
         roundSelect.value = resolvedRoundId;
         parentFlow.roundId = resolvedRoundId;
@@ -1439,11 +1416,10 @@
       team.rounds.forEach(round => {
         const option = document.createElement('option');
         option.value = round.id;
-        option.textContent = `${round.name} (${round.status === 'open' ? 'Unlocked' : 'Locked'})`;
+        option.textContent = round.name;
         select.appendChild(option);
       });
-      const firstOpenRound = team.rounds.find(round => round.status === 'open');
-      const chosenRoundId = preferredRoundId || parentFlow.roundId || (firstOpenRound && firstOpenRound.id) || team.currentRoundId || (team.rounds[0] && team.rounds[0].id) || '';
+      const chosenRoundId = preferredRoundId || parentFlow.roundId || team.currentRoundId || (team.rounds[0] && team.rounds[0].id) || '';
       if (chosenRoundId && team.rounds.some(round => round.id === chosenRoundId)) {
         select.value = chosenRoundId;
         parentFlow.roundId = chosenRoundId;
@@ -1516,8 +1492,6 @@
           const input = document.getElementById(id);
           if (input) input.value = '';
         });
-        const status = document.getElementById('adminEditRoundStatus');
-        if (status) status.value = 'locked';
         if (playerList) {
           playerList.innerHTML = '<div class="notice">Create a team first to manage names, coach details, and resets.</div>';
         }
@@ -1529,7 +1503,6 @@
       document.getElementById('adminEditCoachPin').value = team.coachPin;
       const currentRound = getTeamRound(team, team.currentRoundId) || team.round;
       document.getElementById('adminEditRoundName').value = currentRound.name;
-      document.getElementById('adminEditRoundStatus').value = currentRound.status;
       document.getElementById('adminEditRoundNote').value = currentRound.note || '';
 
       if (!team.players.length) {
@@ -1714,12 +1687,7 @@
         showMiniBanner('parentBanner', 'This team needs at least 3 players in the roster before voting can open.', 'error');
         return;
       }
-      const firstOpenRound = team.rounds.find(round => round.status === 'open');
-      const effectiveRound = selectedRound.status === 'open' ? selectedRound : firstOpenRound;
-      if (!effectiveRound) {
-        showMiniBanner('parentBanner', `Voting for ${team.name} is currently locked for all rounds.`, 'error');
-        return;
-      }
+      const effectiveRound = selectedRound;
       parentFlow.teamId = team.id;
       parentFlow.roundId = effectiveRound.id;
       parentFlow.voterPlayerId = null;
@@ -1967,9 +1935,6 @@
           if (!selectedRound) {
             throw new Error('The selected round no longer exists for this team.');
           }
-          if (selectedRound.status !== 'open') {
-            throw new Error(`Voting is closed for ${selectedRound.name}.`);
-          }
           if (!parentFlow.voterPlayerId) {
             throw new Error('Please confirm which player is voting first.');
           }
@@ -2096,7 +2061,7 @@
         <div class="stat"><div class="stat-label">Team</div><div class="stat-value">${escapeHtml(team.name)}</div></div>
         <div class="stat"><div class="stat-label">Players</div><div class="stat-value">${team.players.length}</div></div>
         <div class="stat"><div class="stat-label">Votes Cast</div><div class="stat-value">${team.votesCast}</div></div>
-        <div class="stat"><div class="stat-label">Round Access</div><div class="stat-value">${team.round.status === 'open' ? 'Unlocked' : 'Locked'}</div></div>
+        <div class="stat"><div class="stat-label">Round Access</div><div class="stat-value">Open</div></div>
       `;
 
       document.getElementById('coachTeamDetails').innerHTML = `
@@ -2109,7 +2074,7 @@
         <div class="muted-box">
           <p><strong>Voting message</strong></p>
           <p class="tiny">Tell players and families to open this page, select <strong>${escapeHtml(team.name)}</strong>, and vote during <strong>${escapeHtml(team.round.name)}</strong>.</p>
-          <p class="tiny">Round access: <strong>${team.round.status === 'open' ? 'Unlocked for voting' : 'Locked'}</strong></p>
+          <p class="tiny">Round access: <strong>Open for voting</strong></p>
         </div>
       `;
 
@@ -2118,12 +2083,11 @@
       team.rounds.forEach(round => {
         const option = document.createElement('option');
         option.value = round.id;
-        option.textContent = `${round.name} (${round.status === 'open' ? 'Unlocked' : 'Locked'})`;
+        option.textContent = round.name;
         coachRoundSelect.appendChild(option);
       });
       coachRoundSelect.value = team.currentRoundId;
       document.getElementById('roundNameInput').value = team.round.name;
-      document.getElementById('roundStatusSelect').value = team.round.status;
       document.getElementById('roundCloseNote').value = team.round.note || '';
 
       renderCoachPlayers(team);
@@ -2233,7 +2197,7 @@
       }
       const previousRoundName = round.name;
       round.name = document.getElementById('roundNameInput').value.trim() || 'Current Round';
-      round.status = document.getElementById('roundStatusSelect').value;
+      round.status = 'open';
       round.note = document.getElementById('roundCloseNote').value.trim();
       updatedTeam.currentRoundId = round.id;
       updatedTeam.round = round;
@@ -2265,23 +2229,7 @@
       const selectedRound = getTeamRound(team, roundId);
       if (!selectedRound) return;
       document.getElementById('roundNameInput').value = selectedRound.name;
-      document.getElementById('roundStatusSelect').value = selectedRound.status;
       document.getElementById('roundCloseNote').value = selectedRound.note || '';
-    }
-
-    async function coachUnlockAllRounds() {
-      const team = getTeam(coachSessionTeamId);
-      if (!team) return;
-      try {
-        const updatedTeam = clone(team);
-        updatedTeam.rounds = updatedTeam.rounds.map(round => ({ ...round, status: 'open' }));
-        updatedTeam.updatedAt = timestampNow();
-        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-        await createActivity('rounds_unlocked_by_coach', `Coach unlocked all rounds for ${updatedTeam.name}`, updatedTeam.id);
-        showBanner(`All rounds unlocked for ${updatedTeam.name}.`, 'success');
-      } catch (error) {
-        showBanner(`Unable to unlock all rounds right now: ${error.message}`, 'error');
-      }
     }
 
     async function coachAddRound() {
@@ -2301,7 +2249,7 @@
         const newRound = {
           id: generateId('round'),
           name,
-          status: 'locked',
+          status: 'open',
           note: ''
         };
         updatedTeam.rounds.push(newRound);
@@ -2375,42 +2323,14 @@
             <tr>
               <td>${escapeHtml(team.name)}</td>
               <td>${escapeHtml(team.coachName)}</td>
-              <td>${escapeHtml(team.round.name)}<div class="tiny">${escapeHtml(team.round.status)} • ${escapeHtml(team.round.note || 'No note set')}</div></td>
+              <td>${escapeHtml(team.round.name)}<div class="tiny">${escapeHtml(team.round.note || 'No note set')}</div></td>
               <td>${team.players.length}</td>
               <td>${team.votesCast}</td>
               <td>${leader ? `${escapeHtml(leader.name)} (${leader.seasonVotes})` : 'No votes yet'}</td>
             </tr>
           `;
         }).join('');
-      refreshAdminGlobalRoundSelect();
       renderAdminTeamManager();
-    }
-
-    function refreshAdminGlobalRoundSelect() {
-      const select = document.getElementById('adminGlobalRoundSelect');
-      if (!select) return;
-      const previousValue = select.value;
-      const roundNames = new Set();
-      state.teams.forEach(team => {
-        (team.rounds || []).forEach(round => {
-          if (round && round.name) roundNames.add(round.name);
-        });
-      });
-      const sortedRoundNames = Array.from(roundNames).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-      select.innerHTML = '';
-      if (!sortedRoundNames.length) {
-        select.innerHTML = '<option value="">-- No rounds available --</option>';
-        return;
-      }
-      sortedRoundNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        select.appendChild(option);
-      });
-      if (sortedRoundNames.includes(previousValue)) {
-        select.value = previousValue;
-      }
     }
 
     async function adminCreateTeam() {
@@ -2464,7 +2384,6 @@
       const coachName = document.getElementById('adminEditCoachName').value.trim();
       const coachPin = document.getElementById('adminEditCoachPin').value.trim();
       const roundName = document.getElementById('adminEditRoundName').value.trim();
-      const roundStatus = document.getElementById('adminEditRoundStatus').value;
       const roundNote = document.getElementById('adminEditRoundNote').value.trim();
 
       if (!teamName || !coachName || coachPin.length < 4 || !roundName) {
@@ -2478,7 +2397,7 @@
         updatedTeam.coachPin = coachPin;
         const activeRound = updatedTeam.rounds.find(round => round.id === updatedTeam.currentRoundId) || updatedTeam.rounds[0];
         activeRound.name = roundName;
-        activeRound.status = roundStatus;
+        activeRound.status = 'open';
         activeRound.note = roundNote;
         updatedTeam.round = activeRound;
         updatedTeam.updatedAt = timestampNow();
@@ -2488,85 +2407,6 @@
         showBanner(`Updated details for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to save team details right now: ${error.message}`, 'error');
-      }
-    }
-
-    async function adminUnlockVotingForAllTeams() {
-      if (!state.teams.length) {
-        showBanner('There are no teams to unlock yet.', 'info');
-        return;
-      }
-
-      const confirmed = window.confirm(`Unlock voting for all ${state.teams.length} teams?`);
-      if (!confirmed) return;
-
-      try {
-        for (let index = 0; index < state.teams.length; index += 400) {
-          const batch = db.batch();
-          state.teams.slice(index, index + 400).forEach(team => {
-            const activeRound = getTeamRound(team, team.currentRoundId) || team.rounds[0];
-            batch.set(db.collection(TEAM_COLLECTION).doc(team.id), {
-              currentRoundId: activeRound.id,
-              rounds: team.rounds.map(round => round.id === activeRound.id ? { ...round, status: 'open' } : round),
-              round: {
-                ...activeRound,
-                status: 'open'
-              },
-              updatedAt: timestampNow()
-            }, { merge: true });
-          });
-          await batch.commit();
-        }
-
-        await createActivity('rounds_unlocked_for_all_teams_by_admin', `Admin unlocked voting for all ${state.teams.length} teams.`);
-        showBanner(`Voting unlocked for all ${state.teams.length} teams.`, 'success');
-      } catch (error) {
-        showBanner(`Unable to unlock voting for all teams right now: ${error.message}`, 'error');
-      }
-    }
-
-    async function adminUnlockSelectedRoundForAllTeams() {
-      const roundName = document.getElementById('adminGlobalRoundSelect').value.trim();
-      if (!roundName) {
-        showBanner('Please select a round to unlock for all teams.', 'error');
-        return;
-      }
-      if (!state.teams.length) {
-        showBanner('There are no teams to unlock yet.', 'info');
-        return;
-      }
-      const confirmed = window.confirm(`Unlock "${roundName}" for all ${state.teams.length} teams?`);
-      if (!confirmed) return;
-      try {
-        for (let index = 0; index < state.teams.length; index += 400) {
-          const batch = db.batch();
-          state.teams.slice(index, index + 400).forEach(team => {
-            const existingRound = team.rounds.find(round => round.name.toLowerCase() === roundName.toLowerCase());
-            const targetRound = existingRound || {
-              id: generateId('round'),
-              name: roundName,
-              status: 'open',
-              note: ''
-            };
-            const rounds = existingRound
-              ? team.rounds.map(round => round.id === existingRound.id ? { ...round, status: 'open' } : round)
-              : [...team.rounds, targetRound];
-            batch.set(db.collection(TEAM_COLLECTION).doc(team.id), {
-              rounds,
-              currentRoundId: targetRound.id,
-              round: {
-                ...targetRound,
-                status: 'open'
-              },
-              updatedAt: timestampNow()
-            }, { merge: true });
-          });
-          await batch.commit();
-        }
-        await createActivity('selected_round_unlocked_for_all_teams_by_admin', `Admin unlocked ${roundName} for all ${state.teams.length} teams.`);
-        showBanner(`Unlocked ${roundName} for all teams.`, 'success');
-      } catch (error) {
-        showBanner(`Unable to unlock that round for all teams right now: ${error.message}`, 'error');
       }
     }
 
@@ -2590,7 +2430,7 @@
         const newRound = {
           id: generateId('round'),
           name,
-          status: 'locked',
+          status: 'open',
           note: ''
         };
         updatedTeam.rounds.push(newRound);
