@@ -1323,6 +1323,13 @@
       parentReviewSnapshot = null;
       document.getElementById('parentTeamSelect').value = '';
       document.getElementById('parentRoundSelect').innerHTML = '<option value="">-- Select Round --</option>';
+      const submitButton = document.getElementById('submitVoteButton');
+      if (submitButton) {
+        submitButton.dataset.teamId = '';
+        submitButton.dataset.roundId = '';
+        submitButton.dataset.voterPlayerId = '';
+        submitButton.dataset.selectedPlayerId = '';
+      }
       hideMiniBanner('parentBanner');
       document.getElementById('parentStageTeam').classList.remove('hidden');
       document.getElementById('parentStageVoter').classList.add('hidden');
@@ -1850,6 +1857,13 @@
         voterPlayerId: parentFlow.voterPlayerId,
         selectedPlayerId: parentFlow.selectedPlayerId
       };
+      const submitButton = document.getElementById('submitVoteButton');
+      if (submitButton) {
+        submitButton.dataset.teamId = parentFlow.teamId || '';
+        submitButton.dataset.roundId = parentFlow.roundId || '';
+        submitButton.dataset.voterPlayerId = parentFlow.voterPlayerId || '';
+        submitButton.dataset.selectedPlayerId = parentFlow.selectedPlayerId || '';
+      }
       document.getElementById('parentStageVote').classList.add('hidden');
       document.getElementById('parentStageReview').classList.remove('hidden');
       setParentStep(4);
@@ -1864,6 +1878,20 @@
 
     function recoverSubmitStateFromReview(team) {
       if (!team) return;
+      const submitButton = document.getElementById('submitVoteButton');
+      const dataset = submitButton ? submitButton.dataset : {};
+      if (!parentFlow.teamId && dataset.teamId) {
+        parentFlow.teamId = dataset.teamId;
+      }
+      if (!parentFlow.roundId && dataset.roundId) {
+        parentFlow.roundId = dataset.roundId;
+      }
+      if (!parentFlow.voterPlayerId && dataset.voterPlayerId) {
+        parentFlow.voterPlayerId = dataset.voterPlayerId;
+      }
+      if (!parentFlow.selectedPlayerId && dataset.selectedPlayerId) {
+        parentFlow.selectedPlayerId = dataset.selectedPlayerId;
+      }
       const voteRoundSelect = document.getElementById('voteRoundSelect');
       if (!parentFlow.roundId && voteRoundSelect && voteRoundSelect.value) {
         parentFlow.roundId = voteRoundSelect.value;
@@ -1902,11 +1930,11 @@
       }
       recoverSubmitStateFromReview(team);
       if (!parentFlow.voterPlayerId) {
-        showMiniBanner('parentBanner', 'Please select who is voting first.', 'error');
+        showMiniBanner('parentBanner', 'Missing voter selection. Please return to review and confirm who is voting.', 'error');
         return;
       }
       if (!parentFlow.selectedPlayerId) {
-        showMiniBanner('parentBanner', 'Please select a player to vote for before submitting.', 'error');
+        showMiniBanner('parentBanner', 'Missing player vote selection. Please return to review and pick a player.', 'error');
         return;
       }
       if (!parentFlow.roundId) {
@@ -1914,7 +1942,7 @@
         parentFlow.roundId = voteRoundSelect ? voteRoundSelect.value : '';
       }
       if (!parentFlow.roundId) {
-        showMiniBanner('parentBanner', 'Please select a voting round before submitting.', 'error');
+        showMiniBanner('parentBanner', 'Missing round selection. Please return to review and choose a round.', 'error');
         return;
       }
 
