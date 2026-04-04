@@ -1897,8 +1897,14 @@
         parentFlow.roundId = voteRoundSelect.value;
       }
       const summaryItems = Array.from(document.querySelectorAll('#voteSummaryList .summary-item')).map(item => item.textContent || '');
+      const roundLine = summaryItems.find(text => text.startsWith('Round:'));
       const voterLine = summaryItems.find(text => text.startsWith('Voting as:'));
       const playerLine = summaryItems.find(text => text.startsWith("Player's Player:"));
+      if (!parentFlow.roundId && roundLine) {
+        const roundName = roundLine.replace('Round:', '').trim();
+        const round = (team.rounds || []).find(item => item.name === roundName);
+        if (round) parentFlow.roundId = round.id;
+      }
       if (!parentFlow.voterPlayerId && voterLine) {
         const voterName = voterLine.replace('Voting as:', '').trim();
         const voter = team.players.find(item => item.name === voterName);
@@ -1918,7 +1924,10 @@
       }
       const effectiveTeamId = parentFlow.teamId || (parentReviewSnapshot && parentReviewSnapshot.teamId) || '';
       const team = getTeam(effectiveTeamId);
-      if (!team) return;
+      if (!team) {
+        showMiniBanner('parentBanner', 'Could not find the selected team. Please restart voting and try again.', 'error');
+        return;
+      }
       if (!parentFlow.voterPlayerId && parentReviewSnapshot && parentReviewSnapshot.voterPlayerId) {
         parentFlow.voterPlayerId = parentReviewSnapshot.voterPlayerId;
       }
@@ -1959,23 +1968,38 @@
           }
 
           const liveTeam = ensureTeamDefaults({ id: teamDoc.id, ...teamDoc.data() });
-          const selectedRound = getTeamRound(liveTeam, parentFlow.roundId);
-          if (!selectedRound) {
-            throw new Error('The selected round no longer exists for this team.');
-          }
+          const selectedRound = getTeamRound(liveTeam, parentFlow.roundId)
+            || getTeamRound(liveTeam, liveTeam.currentRoundId)
+            || (liveTeam.rounds && liveTeam.rounds[0]);
+          if (!selectedRound) throw new Error('No round is available for this team.');
           if (!parentFlow.voterPlayerId) {
             throw new Error('Please confirm which player is voting first.');
           }
 
           const updatedTeam = clone(liveTeam);
-          const voter = updatedTeam.players.find(item => item.id === parentFlow.voterPlayerId);
-          const player = updatedTeam.players.find(item => item.id === parentFlow.selectedPlayerId);
-          const voteTokenId = buildVoteTokenId(updatedTeam.id, selectedRound.name, parentFlow.voterPlayerId);
-          const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
-          const voteTokenDoc = await transaction.get(voteTokenRef);
+          let voter = updatedTeam.players.find(item => item.id === parentFlow.voterPlayerId);
+          let player = updatedTeam.players.find(item => item.id === parentFlow.selectedPlayerId);
+          const summaryItems = Array.from(document.querySelectorAll('#voteSummaryList .summary-item')).map(item => item.textContent || '');
+          if (!voter) {
+            const voterLine = summaryItems.find(text => text.startsWith('Voting as:'));
+            if (voterLine) {
+              const voterName = voterLine.replace('Voting as:', '').trim();
+              voter = updatedTeam.players.find(item => item.name === voterName) || null;
+            }
+          }
+          if (!player) {
+            const playerLine = summaryItems.find(text => text.startsWith("Player's Player:"));
+            if (playerLine) {
+              const playerName = playerLine.replace("Player's Player:", '').trim();
+              player = updatedTeam.players.find(item => item.name === playerName) || null;
+            }
+          }
           if (!voter) {
             throw new Error('The selected voter no longer exists.');
           }
+          const voteTokenId = buildVoteTokenId(updatedTeam.id, selectedRound.name, voter.id);
+          const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
+          const voteTokenDoc = await transaction.get(voteTokenRef);
           if (voteTokenDoc.exists) {
             throw new Error('That player has already voted for this team in the current round.');
           }
