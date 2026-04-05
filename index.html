@@ -1861,7 +1861,12 @@
         voterPlayerId: parentFlow.voterPlayerId,
         selectedPlayerId: parentFlow.selectedPlayerId
       };
-      pendingVoteSubmission = { ...parentReviewSnapshot };
+      pendingVoteSubmission = {
+        ...parentReviewSnapshot,
+        roundName: selectedRound.name,
+        voterName: voter ? voter.name : '',
+        selectedPlayerName: player ? player.name : ''
+      };
       const submitButton = document.getElementById('submitVoteButton');
       if (submitButton) {
         submitButton.dataset.teamId = parentFlow.teamId || '';
@@ -1971,15 +1976,22 @@
       if (!parentFlow.roundId && submitState.roundId) {
         parentFlow.roundId = submitState.roundId;
       }
+      if (!parentFlow.roundId && submitState.roundName) {
+        const roundByName = (team.rounds || []).find(item => item.name === submitState.roundName);
+        if (roundByName) parentFlow.roundId = roundByName.id;
+      }
+      if (!parentFlow.voterPlayerId && submitState.voterName) {
+        const voterByName = team.players.find(item => item.name === submitState.voterName);
+        if (voterByName) parentFlow.voterPlayerId = voterByName.id;
+      }
+      if (!parentFlow.selectedPlayerId && submitState.selectedPlayerName) {
+        const selectedByName = team.players.find(item => item.name === submitState.selectedPlayerName);
+        if (selectedByName) parentFlow.selectedPlayerId = selectedByName.id;
+      }
       recoverSubmitStateFromReview(team);
       recoverSubmitStateFromVoteUI(team);
-      const missingFields = [];
-      if (!parentFlow.voterPlayerId) missingFields.push('who is voting');
-      if (!parentFlow.selectedPlayerId) missingFields.push('who they are voting for');
-      if (!parentFlow.roundId) missingFields.push('round');
-      if (missingFields.length) {
-        showMiniBanner('parentBanner', `Missing information: ${missingFields.join(', ')}.`, 'error');
-        return;
+      if (!parentFlow.roundId) {
+        parentFlow.roundId = team.currentRoundId || ((team.rounds && team.rounds[0]) ? team.rounds[0].id : '');
       }
 
       const button = document.getElementById('submitVoteButton');
@@ -2062,7 +2074,8 @@
         setParentStep(5);
         showMiniBanner('parentBanner', 'Vote submitted successfully.', 'success');
       } catch (error) {
-        showMiniBanner('parentBanner', error.message || 'Unable to submit the vote right now.', 'error');
+        const details = error && error.code ? `${error.message} (${error.code})` : (error.message || 'Unable to submit the vote right now.');
+        showMiniBanner('parentBanner', details, 'error');
       } finally {
         button.disabled = false;
         button.textContent = 'Submit Votes';
