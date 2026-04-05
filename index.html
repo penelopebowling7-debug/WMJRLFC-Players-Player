@@ -1634,12 +1634,8 @@
     }
 
     async function deleteTeamVoteTokens(teamId) {
-      try {
-        const snapshot = await db.collection(VOTE_TOKEN_COLLECTION).where('teamId', '==', teamId).get();
-        await deleteQuerySnapshot(snapshot);
-      } catch (error) {
-        console.warn('Vote token cleanup skipped:', error);
-      }
+      void teamId;
+      return;
     }
 
     function renderPlayerVoteGrid(team) {
@@ -1736,29 +1732,13 @@
     }
 
     async function suggestRoundAfterLastVote(teamId, voterPlayerId, fallbackRoundId) {
-      try {
-        const snapshot = await db.collection(VOTE_TOKEN_COLLECTION)
-          .where('teamId', '==', teamId)
-          .where('voterPlayerId', '==', voterPlayerId)
-          .orderBy('createdAt', 'desc')
-          .limit(1)
-          .get();
-        if (snapshot.empty) return fallbackRoundId;
-        const latest = snapshot.docs[0].data();
-        const team = getTeam(teamId);
-        if (!team || !team.rounds || !team.rounds.length) return fallbackRoundId;
-        const latestIndex = team.rounds.findIndex(round => round.name === latest.roundName);
-        if (latestIndex < 0) return fallbackRoundId;
-        for (let index = latestIndex + 1; index < team.rounds.length; index += 1) {
-          if (team.rounds[index].status === 'open') {
-            return team.rounds[index].id;
-          }
-        }
-        return team.rounds[Math.min(latestIndex + 1, team.rounds.length - 1)].id;
-      } catch (error) {
-        console.warn('Round suggestion skipped:', error);
-        return fallbackRoundId;
-      }
+      const team = getTeam(teamId);
+      if (!team || !team.rounds || !team.rounds.length) return fallbackRoundId;
+      if (!fallbackRoundId) return team.currentRoundId || team.rounds[0].id;
+      const index = team.rounds.findIndex(round => round.id === fallbackRoundId);
+      if (index < 0) return team.currentRoundId || team.rounds[0].id;
+      const nextRound = team.rounds[index + 1];
+      return nextRound ? nextRound.id : fallbackRoundId;
     }
 
     function backToTeamSelection() {
@@ -2037,9 +2017,10 @@
             throw new Error('The selected voter no longer exists.');
           }
           const voteTokenId = buildVoteTokenId(updatedTeam.id, selectedRound.name, voter.id);
-          const voteTokenRef = db.collection(VOTE_TOKEN_COLLECTION).doc(voteTokenId);
-          const voteTokenDoc = await transaction.get(voteTokenRef);
-          if (voteTokenDoc.exists) {
+          const roundVoteKey = voteTokenId;
+          const roundVoterIds = Array.isArray(updatedTeam.roundVoterIds) ? updatedTeam.roundVoterIds : [];
+          const hasAlreadyVoted = roundVoterIds.includes(roundVoteKey) || roundVoterIds.includes(voter.id);
+          if (hasAlreadyVoted) {
             throw new Error('That player has already voted for this team in the current round.');
           }
           if (!player) {
@@ -2051,18 +2032,10 @@
           player.roundVotes += 1;
           player.seasonVotes += 1;
           updatedTeam.votesCast += 1;
+          updatedTeam.roundVoterIds = Array.from(new Set([...(updatedTeam.roundVoterIds || []), roundVoteKey]));
           updatedTeam.updatedAt = timestampNow();
 
           transaction.set(teamRef, updatedTeam, { merge: true });
-          transaction.set(voteTokenRef, {
-            id: voteTokenId,
-            teamId: updatedTeam.id,
-            roundName: selectedRound.name,
-            voterPlayerId: voter.id,
-            selectedPlayerId: player.id,
-            browserId,
-            createdAt: timestampNow()
-          });
         });
 
         const selectedRound = getTeamRound(team, parentFlow.roundId) || team.round;
