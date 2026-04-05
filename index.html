@@ -373,6 +373,10 @@
       min-width: 110px;
     }
 
+    .coach-tabs {
+      margin-top: 4px;
+    }
+
     .stat {
       background: var(--panel-2);
       border: 1px solid var(--line);
@@ -609,6 +613,22 @@
       table {
         min-width: 560px;
       }
+
+      .coach-tabs {
+        position: sticky;
+        top: 8px;
+        z-index: 6;
+        background: rgba(8, 11, 17, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 10px;
+        margin-bottom: 14px;
+      }
+
+      .coach-tabs .tab-btn {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0;
+      }
     }
   </style>
 </head>
@@ -623,9 +643,6 @@
           </div>
           <div>
             <h1>WMJRLFC Player's Player Voting</h1>
-            <p>
-              Players' Player recognises the teammate who showed the best effort, attitude, teamwork, and sportsmanship in that round. Players complete one vote each round, with parents helping younger children submit their choice through the app when needed.
-            </p>
           </div>
         </div>
       </section>
@@ -798,7 +815,7 @@
         </div>
 
         <div id="coachDashboard" class="hidden">
-          <div class="tabs">
+          <div class="tabs coach-tabs">
             <button class="tab-btn btn-secondary active" data-coach-tab="coachOverview" onclick="showCoachTab('coachOverview', this)">Overview</button>
             <button class="tab-btn btn-secondary" data-coach-tab="coachPlayers" onclick="showCoachTab('coachPlayers', this)">Players</button>
             <button class="tab-btn btn-secondary" data-coach-tab="coachRound" onclick="showCoachTab('coachRound', this)">Round</button>
