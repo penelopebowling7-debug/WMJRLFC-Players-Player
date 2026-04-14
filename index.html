@@ -1415,7 +1415,7 @@
         .forEach(team => {
           const option = document.createElement('option');
           option.value = team.id;
-          option.textContent = `${team.name} — ${team.round.name}`;
+          option.textContent = team.name;
           select.appendChild(option);
         });
       if (state.teams.some(team => team.id === previousValue)) {
