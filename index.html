@@ -644,7 +644,7 @@
           <div>
             <h1>WMJRLFC Player's Player Voting</h1>
             <p>
-              Each game, players select one teammate who they believe showed great sportsmanship, team-first behaviour, and their best effort. Parents can use this web app to support their child submit one vote each round. 
+              Each game, players select one teammate who they believe showed great sportsmanship, team-first behaviour, and their best effort. This app helps parents support their children to submit one vote each round. By using this app, you agree to the storage of player names for club reward and recognition purposes.
             </p>
           </div>
         </div>
@@ -761,7 +761,7 @@
         <div id="parentStageDone" class="hidden">
           <div class="card">
             <h3>Thanks — your vote has been recorded.</h3>
-            <p class="helper-text">Congratulations your vote has been counted. The team tally has been updated. Coaches and admins will see the updated data when they refresh their dashboard.</p>
+            <p class="helper-text">The team tally has been updated in Firestore. Coaches and admins will see the updated data when they refresh their dashboard.</p>
             <div class="button-row">
               <button class="btn-primary" onclick="resetParentFlow()">Vote for Another Team</button>
               <button class="btn-secondary" onclick="goHome()">Finish</button>
@@ -877,8 +877,8 @@
                   <input id="roundNameInput" class="input" type="text" placeholder="Round 4 vs Tigers">
                 </div>
                 <div>
-                  <label for="roundCloseNote">Close Time / Note</label>
-                  <input id="roundCloseNote" class="input" type="text" placeholder="Closes Sunday 6pm">
+                  <label for="roundCloseNote">Opposition Team</label>
+                  <input id="roundCloseNote" class="input" type="text" placeholder="e.g. Tigers">
                 </div>
               </div>
               <div class="button-row">
@@ -1015,8 +1015,8 @@
               </div>
             </div>
             <div style="margin-top: 16px;">
-              <label for="adminEditRoundNote">Round Note</label>
-              <input id="adminEditRoundNote" class="input" type="text" placeholder="Round note">
+              <label for="adminEditRoundNote">Opposition Team</label>
+              <input id="adminEditRoundNote" class="input" type="text" placeholder="e.g. Tigers">
             </div>
             <div class="button-row">
               <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
@@ -1749,7 +1749,7 @@
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}`;
-      document.getElementById('voteStatusTag').textContent = selectedRound.note || 'Voting note not set';
+      document.getElementById('voteStatusTag').textContent = selectedRound.note || 'Opposition team not set';
     }
 
     function handleVoteRoundChange() {
@@ -2163,7 +2163,7 @@
       document.getElementById('coachTeamDetails').innerHTML = `
         <p><strong>Coach:</strong> ${escapeHtml(team.coachName)}</p>
         <p><strong>Current Round:</strong> ${escapeHtml(team.round.name)}</p>
-        <p><strong>Round Note:</strong> ${escapeHtml(team.round.note || 'No note set')}</p>
+        <p><strong>Opposition Team:</strong> ${escapeHtml(team.round.note || 'Not set')}</p>
       `;
 
       document.getElementById('coachSharingInfo').innerHTML = `
@@ -2475,7 +2475,7 @@
             <tr>
               <td>${escapeHtml(team.name)}</td>
               <td>${escapeHtml(team.coachName)}</td>
-              <td>${escapeHtml(team.round.name)}<div class="tiny">${escapeHtml(team.round.note || 'No note set')}</div></td>
+              <td>${escapeHtml(team.round.name)}<div class="tiny">${escapeHtml(team.round.note || 'Opposition not set')}</div></td>
               <td>${team.players.length}</td>
               <td>${team.votesCast}</td>
               <td>${leader ? `${escapeHtml(leader.name)} (${leader.seasonVotes})` : 'No votes yet'}</td>
