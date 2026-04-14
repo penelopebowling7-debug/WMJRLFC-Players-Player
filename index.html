@@ -914,6 +914,15 @@
                   <tbody id="coachResultsBody"></tbody>
                 </table>
               </div>
+              <div class="divider"></div>
+              <h4>Players not yet voted</h4>
+              <div class="two-col">
+                <div>
+                  <label for="coachNonVoterRoundSelect">Select Round</label>
+                  <select id="coachNonVoterRoundSelect" onchange="onCoachNonVoterRoundChanged()"></select>
+                </div>
+              </div>
+              <div id="coachNonVoterList" class="notice" style="margin-top:12px;">Select a round to view remaining voters.</div>
             </div>
           </div>
         </div>
@@ -2174,11 +2183,67 @@
         coachRoundSelect.appendChild(option);
       });
       coachRoundSelect.value = team.currentRoundId;
+
+      const coachNonVoterRoundSelect = document.getElementById('coachNonVoterRoundSelect');
+      coachNonVoterRoundSelect.innerHTML = '';
+      team.rounds.forEach(round => {
+        const option = document.createElement('option');
+        option.value = round.id;
+        option.textContent = round.name;
+        coachNonVoterRoundSelect.appendChild(option);
+      });
+      coachNonVoterRoundSelect.value = team.currentRoundId;
       document.getElementById('roundNameInput').value = team.round.name;
       document.getElementById('roundCloseNote').value = team.round.note || '';
 
       renderCoachPlayers(team);
       renderCoachResults(team);
+      renderCoachNonVoters(team, coachNonVoterRoundSelect.value);
+    }
+
+    function hasPlayerVotedInRound(team, round, player) {
+      const roundVoterIds = Array.isArray(team.roundVoterIds) ? team.roundVoterIds : [];
+      const keyedToken = buildVoteTokenId(team.id, round.name, player.id);
+      if (roundVoterIds.includes(keyedToken)) return true;
+      const isCurrentRound = (team.currentRoundId || '') === round.id;
+      if (isCurrentRound && roundVoterIds.includes(player.id)) return true;
+      return false;
+    }
+
+    function renderCoachNonVoters(team, roundId) {
+      const wrap = document.getElementById('coachNonVoterList');
+      if (!wrap) return;
+      const selectedRound = getTeamRound(team, roundId) || getTeamRound(team, team.currentRoundId) || team.round;
+      if (!selectedRound) {
+        wrap.className = 'notice';
+        wrap.textContent = 'No round available.';
+        return;
+      }
+      if (!team.players.length) {
+        wrap.className = 'notice';
+        wrap.textContent = 'No players added yet.';
+        return;
+      }
+      const nonVoters = getPlayersSortedByName(team.players).filter(player => !hasPlayerVotedInRound(team, selectedRound, player));
+      if (!nonVoters.length) {
+        wrap.className = 'mini-banner success';
+        wrap.textContent = `All players have voted for ${selectedRound.name}.`;
+        return;
+      }
+      wrap.className = 'notice';
+      wrap.innerHTML = `
+        <strong>${nonVoters.length} player(s) still to vote for ${escapeHtml(selectedRound.name)}:</strong>
+        <ul class="simple-list" style="margin-top:8px;">
+          ${nonVoters.map(player => `<li>${escapeHtml(player.name)}</li>`).join('')}
+        </ul>
+      `;
+    }
+
+    function onCoachNonVoterRoundChanged() {
+      const team = getTeam(coachSessionTeamId);
+      if (!team) return;
+      const roundId = document.getElementById('coachNonVoterRoundSelect').value;
+      renderCoachNonVoters(team, roundId);
     }
 
     function renderCoachPlayers(team) {
