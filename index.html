@@ -193,14 +193,16 @@
     }
 
     .landing-action-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      display: flex;
       gap: 10px;
+      flex-wrap: nowrap;
     }
 
     .landing-action-row button {
-      width: 100%;
-      min-height: 48px;
+      flex: 1 1 0;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 12px;
     }
 
     .two-col,
@@ -651,7 +653,8 @@
       }
 
       .landing-action-row {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
       }
     }
   </style>
@@ -676,7 +679,7 @@
       <section id="landingSection" class="grid landing-grid hidden">
         <article class="card landing-actions">
           <div class="landing-action-row">
-            <button class="btn-primary" onclick="openParentFlow()">Vote Now</button>
+            <button class="btn-primary" onclick="openParentFlow()">Vote</button>
             <button class="btn-accent" onclick="openCoachPortal()">Coach</button>
             <button class="btn-secondary" onclick="openAdminPortal()">Admin</button>
           </div>
