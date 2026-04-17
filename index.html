@@ -188,6 +188,21 @@
       grid-column: 1 / -1;
     }
 
+    .landing-actions {
+      grid-column: 1 / -1;
+    }
+
+    .landing-action-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .landing-action-row button {
+      width: 100%;
+      min-height: 48px;
+    }
+
     .two-col,
     .three-col,
     .stats-grid,
@@ -634,6 +649,10 @@
         flex: 1 1 calc(50% - 8px);
         min-width: 0;
       }
+
+      .landing-action-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
   </style>
 </head>
@@ -655,20 +674,10 @@
       <section id="globalBanner" class="status-banner info hidden"></section>
 
       <section id="landingSection" class="grid landing-grid hidden">
-        <article class="card">
-          <div class="button-row">
+        <article class="card landing-actions">
+          <div class="landing-action-row">
             <button class="btn-primary" onclick="openParentFlow()">Vote Now</button>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="button-row">
             <button class="btn-accent" onclick="openCoachPortal()">Coach</button>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="button-row">
             <button class="btn-secondary" onclick="openAdminPortal()">Admin</button>
           </div>
         </article>
@@ -676,7 +685,7 @@
         <article class="card landing-intro">
           <h3>About Players' Player Voting</h3>
           <div class="notice">
-            Players' Player Vote is about encouraging and celebrating sportsmanship, teamwork, and effort on the field. After each game, kids choose one teammate who gave it their best! This app enables the club to collect those votes and helps parents support their child in submitting their selection each round. By using this app, you agree to the storage of player names for club reward and recognition purposes.
+            Each game, players select one teammate who they believe showed great sportsmanship, team-first behaviour, and their best effort. This app helps parents support their children to submit one vote each round. By using this app, you agree to the storage of player names for club reward and recognition purposes.
           </div>
         </article>
       </section>
