@@ -71,9 +71,10 @@
 
     .hero-top {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 18px;
-      align-items: center;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      justify-items: center;
+      text-align: center;
     }
 
     .logo-frame {
@@ -181,6 +182,10 @@
     .landing-grid {
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       margin-bottom: 24px;
+    }
+
+    .landing-intro {
+      grid-column: 1 / -1;
     }
 
     .two-col,
@@ -643,9 +648,6 @@
           </div>
           <div>
             <h1>WMJRLFC Player's Player Voting</h1>
-            <p>
-              Each game, players select one teammate who they believe showed great sportsmanship, team-first behaviour, and their best effort. This app helps parents support their children to submit one vote each round. By using this app, you agree to the storage of player names for club reward and recognition purposes.
-            </p>
           </div>
         </div>
       </section>
@@ -668,6 +670,13 @@
         <article class="card">
           <div class="button-row">
             <button class="btn-secondary" onclick="openAdminPortal()">Admin</button>
+          </div>
+        </article>
+
+        <article class="card landing-intro">
+          <h3>About Players' Player Voting</h3>
+          <div class="notice">
+            Each game, players select one teammate who they believe showed great sportsmanship, team-first behaviour, and their best effort. This app helps parents support their children to submit one vote each round. By using this app, you agree to the storage of player names for club reward and recognition purposes.
           </div>
         </article>
       </section>
