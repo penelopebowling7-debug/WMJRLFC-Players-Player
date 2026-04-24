@@ -709,7 +709,7 @@
 
         <div id="parentBanner" class="mini-banner info hidden"></div>
 
-        <div id="parentStageTeam" class="grid two-col">
+        <div id="parentStageTeam">
           <div class="card">
             <h3>Choose your team</h3>
             <p class="helper-text">Select your team and round, then continue to vote.</p>
@@ -717,22 +717,15 @@
             <select id="parentTeamSelect" onchange="refreshParentRoundSelect()"></select>
             <label for="parentRoundSelect" style="margin-top:12px;">Round</label>
             <select id="parentRoundSelect" onchange="parentFlow.roundId=this.value"></select>
-            <div class="notice">
-              By proceeding, you confirm parent or guardian consent to use player names for Player's Player voting, team recognition, and club reporting.
-            </div>
+            <p class="helper-text" style="margin-top:12px;">
+              1. Choose one player only.<br>
+              2. Each player can vote once per round.<br>
+              3. Players must identify themselves before voting.<br>
+              4. Players cannot vote for themselves.
+            </p>
             <div class="button-row">
               <button class="btn-primary" onclick="startVoting()">Continue to Voting</button>
             </div>
-          </div>
-
-          <div class="card">
-            <h3>How voting works</h3>
-            <ul class="simple-list">
-              <li>Choose one player only.</li>
-              <li>Each player can vote once per round.</li>
-              <li>Players must identify themselves before voting.</li>
-              <li>Players cannot vote for themselves.</li>
-            </ul>
           </div>
         </div>
 
