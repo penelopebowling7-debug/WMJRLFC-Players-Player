@@ -928,7 +928,6 @@
                   <thead>
                     <tr>
                       <th>Player</th>
-                      <th>Round Votes</th>
                       <th>Season Votes</th>
                     </tr>
                   </thead>
@@ -2441,7 +2440,7 @@
     function renderCoachResults(team) {
       const body = document.getElementById('coachResultsBody');
       if (!team.players.length) {
-        body.innerHTML = '<tr><td colspan="3">No players added yet.</td></tr>';
+        body.innerHTML = '<tr><td colspan="2">No players added yet.</td></tr>';
         return;
       }
       const sorted = team.players.slice().sort((a, b) => b.seasonVotes - a.seasonVotes);
@@ -2449,7 +2448,6 @@
       body.innerHTML = sorted.map(player => `
         <tr>
           <td class="${player.seasonVotes === leaderVotes && leaderVotes > 0 ? 'leader' : ''}">${escapeHtml(player.name)}</td>
-          <td>${player.roundVotes}</td>
           <td>${player.seasonVotes}</td>
         </tr>
       `).join('');
