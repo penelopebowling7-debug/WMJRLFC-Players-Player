@@ -703,8 +703,7 @@
           <div class="step" id="parentStep1">1. Team</div>
           <div class="step" id="parentStep2">2. Who are you?</div>
           <div class="step" id="parentStep3">3. Vote</div>
-          <div class="step" id="parentStep4">4. Review</div>
-          <div class="step" id="parentStep5">5. Done</div>
+          <div class="step" id="parentStep4">4. Done</div>
         </div>
 
         <div id="parentBanner" class="mini-banner info hidden"></div>
@@ -755,22 +754,12 @@
             <div class="players-grid" id="playerVoteGrid"></div>
             <div class="button-row">
               <button class="btn-secondary" onclick="backToVoterSelection()">Back</button>
-              <button class="btn-primary" onclick="reviewVotes()">Review Votes</button>
+              <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Vote</button>
             </div>
           </div>
         </div>
 
-        <div id="parentStageReview" class="hidden">
-          <div class="card">
-            <h3>Review your selections</h3>
-            <ul class="summary-list" id="voteSummaryList"></ul>
-            <div id="reviewNotice" class="notice">Please check your choice before submitting. Once sent, that player cannot vote again for the same round.</div>
-            <div class="button-row">
-              <button class="btn-secondary" onclick="returnToVoting()">Edit Choices</button>
-              <button class="btn-primary" id="submitVoteButton" onclick="submitVotes()">Submit Votes</button>
-            </div>
-          </div>
-        </div>
+        <div id="parentStageReview" class="hidden"></div>
 
         <div id="parentStageDone" class="hidden">
           <div class="card">
@@ -1351,7 +1340,7 @@
     }
 
     function setParentStep(step) {
-      [1, 2, 3, 4, 5].forEach(index => {
+      [1, 2, 3, 4].forEach(index => {
         document.getElementById(`parentStep${index}`).classList.toggle('active', index === step);
       });
     }
@@ -1838,77 +1827,6 @@
       setParentStep(2);
     }
 
-    function reviewVotes() {
-      const team = getTeam(parentFlow.teamId);
-      if (!team) {
-        showMiniBanner('parentBanner', 'Please choose a team first.', 'error');
-        return;
-      }
-      if (!parentFlow.voterPlayerId) {
-        showMiniBanner('parentBanner', 'Please confirm which player is voting first.', 'error');
-        return;
-      }
-      if (!parentFlow.selectedPlayerId) {
-        showMiniBanner('parentBanner', 'Please choose one player before reviewing your vote.', 'error');
-        return;
-      }
-      const selectedRound = getTeamRound(team, parentFlow.roundId);
-      if (!selectedRound) {
-        showMiniBanner('parentBanner', 'Please select a valid round before reviewing your vote.', 'error');
-        return;
-      }
-      const list = document.getElementById('voteSummaryList');
-      list.innerHTML = '';
-      const voter = team.players.find(item => item.id === parentFlow.voterPlayerId);
-      const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
-      const roundItem = document.createElement('li');
-      roundItem.className = 'summary-item';
-      roundItem.textContent = `Round: ${selectedRound.name}`;
-      list.appendChild(roundItem);
-      const voterItem = document.createElement('li');
-      voterItem.className = 'summary-item';
-      voterItem.textContent = `Voting as: ${voter ? voter.name : 'Unknown Player'}`;
-      list.appendChild(voterItem);
-      const item = document.createElement('li');
-      item.className = 'summary-item';
-      item.textContent = `Player's Player: ${player ? player.name : 'Unknown Player'}`;
-      list.appendChild(item);
-      const reviewNotice = document.getElementById('reviewNotice');
-      if (reviewNotice) {
-        reviewNotice.textContent = `Please check your choice for ${selectedRound.name} before submitting. Once sent, that player cannot vote again for this round.`;
-      }
-      parentReviewSnapshot = {
-        teamId: parentFlow.teamId,
-        roundId: parentFlow.roundId,
-        voterPlayerId: parentFlow.voterPlayerId,
-        selectedPlayerId: parentFlow.selectedPlayerId
-      };
-      pendingVoteSubmission = {
-        ...parentReviewSnapshot,
-        roundName: selectedRound.name,
-        voterName: voter ? voter.name : '',
-        selectedPlayerName: player ? player.name : ''
-      };
-      const submitButton = document.getElementById('submitVoteButton');
-      if (submitButton) {
-        submitButton.dataset.teamId = parentFlow.teamId || '';
-        submitButton.dataset.roundId = parentFlow.roundId || '';
-        submitButton.dataset.voterPlayerId = parentFlow.voterPlayerId || '';
-        submitButton.dataset.selectedPlayerId = parentFlow.selectedPlayerId || '';
-      }
-      document.getElementById('parentStageVote').classList.add('hidden');
-      document.getElementById('parentStageReview').classList.remove('hidden');
-      setParentStep(4);
-    }
-
-    function returnToVoting() {
-      parentReviewSnapshot = null;
-      pendingVoteSubmission = null;
-      document.getElementById('parentStageVote').classList.remove('hidden');
-      document.getElementById('parentStageReview').classList.add('hidden');
-      setParentStep(3);
-    }
-
     function recoverSubmitStateFromReview(team) {
       if (!team) return;
       const submitButton = document.getElementById('submitVoteButton');
@@ -1985,6 +1903,20 @@
       if (!team) {
         showMiniBanner('parentBanner', 'Could not find the selected team. Please restart voting and try again.', 'error');
         return;
+      }
+      if (!pendingVoteSubmission) {
+        const selectedRound = getTeamRound(team, parentFlow.roundId) || getTeamRound(team, team.currentRoundId) || team.round;
+        const voter = team.players.find(item => item.id === parentFlow.voterPlayerId);
+        const player = team.players.find(item => item.id === parentFlow.selectedPlayerId);
+        pendingVoteSubmission = {
+          teamId: team.id,
+          roundId: selectedRound ? selectedRound.id : '',
+          voterPlayerId: voter ? voter.id : parentFlow.voterPlayerId,
+          selectedPlayerId: player ? player.id : parentFlow.selectedPlayerId,
+          roundName: selectedRound ? selectedRound.name : '',
+          voterName: voter ? voter.name : '',
+          selectedPlayerName: player ? player.name : ''
+        };
       }
       if (!parentFlow.teamId && effectiveTeamId) {
         parentFlow.teamId = effectiveTeamId;
@@ -2086,14 +2018,14 @@
         document.getElementById('parentStageDone').classList.remove('hidden');
         pendingVoteSubmission = null;
         parentReviewSnapshot = null;
-        setParentStep(5);
+        setParentStep(4);
         showMiniBanner('parentBanner', 'Vote submitted successfully.', 'success');
       } catch (error) {
         const details = error && error.code ? `${error.message} (${error.code})` : (error.message || 'Unable to submit the vote right now.');
         showMiniBanner('parentBanner', details, 'error');
       } finally {
         button.disabled = false;
-        button.textContent = 'Submit Votes';
+        button.textContent = 'Submit Vote';
       }
     }
 
