@@ -742,7 +742,6 @@
               <div class="tag" id="voteVoterTag"></div>
               <div class="tag" id="voteTeamTag"></div>
               <div class="tag" id="voteRoundTag"></div>
-              <div class="tag" id="voteStatusTag"></div>
             </div>
             <div class="players-grid" id="playerVoteGrid"></div>
             <div class="button-row">
@@ -1747,7 +1746,6 @@
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
       document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}`;
-      document.getElementById('voteStatusTag').textContent = selectedRound.note || 'Opposition team not set';
     }
 
     function handleVoteRoundChange() {
