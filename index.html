@@ -1009,11 +1009,16 @@
               </div>
             </div>
             <div style="margin-top: 16px;">
+              <label for="adminEditRoundSelect">Select Round to Edit</label>
+              <select id="adminEditRoundSelect" onchange="adminOnRoundSelectionChanged()"></select>
+            </div>
+            <div style="margin-top: 16px;">
               <label for="adminEditRoundNote">Opposition Team</label>
               <input id="adminEditRoundNote" class="input" type="text" placeholder="e.g. Tigers">
             </div>
             <div class="button-row">
               <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
+              <button class="btn-danger" onclick="adminDeleteRound()">Delete Selected Round</button>
               <button class="btn-secondary" onclick="adminResetRound()">Reset Round</button>
               <button class="btn-danger" onclick="adminResetSeason()">Reset Season</button>
               <button class="btn-danger" onclick="adminDeleteTeam()">Delete Team</button>
@@ -1522,11 +1527,15 @@
     function renderAdminTeamManager() {
       const team = getAdminManagedTeam();
       const playerList = document.getElementById('adminManagePlayerList');
+      const roundSelect = document.getElementById('adminEditRoundSelect');
       if (!team) {
         ['adminEditTeamName', 'adminEditCoachName', 'adminEditCoachPin', 'adminEditRoundName', 'adminEditRoundNote'].forEach(id => {
           const input = document.getElementById(id);
           if (input) input.value = '';
         });
+        if (roundSelect) {
+          roundSelect.innerHTML = '<option value="">-- No rounds available --</option>';
+        }
         if (playerList) {
           playerList.innerHTML = '<div class="notice">Create a team first to manage names, coach details, and resets.</div>';
         }
@@ -1537,6 +1546,16 @@
       document.getElementById('adminEditCoachName').value = team.coachName;
       document.getElementById('adminEditCoachPin').value = team.coachPin;
       const currentRound = getTeamRound(team, team.currentRoundId) || team.round;
+      if (roundSelect) {
+        roundSelect.innerHTML = '';
+        (team.rounds || []).forEach(round => {
+          const option = document.createElement('option');
+          option.value = round.id;
+          option.textContent = round.name;
+          roundSelect.appendChild(option);
+        });
+        roundSelect.value = currentRound.id;
+      }
       document.getElementById('adminEditRoundName').value = currentRound.name;
       document.getElementById('adminEditRoundNote').value = currentRound.note || '';
 
@@ -1554,6 +1573,16 @@
           <button class="btn-primary" onclick="adminSavePlayerEdits('${escapeJsString(player.id)}')">Save</button>
         </div>
       `).join('');
+    }
+
+    function adminOnRoundSelectionChanged() {
+      const team = getAdminManagedTeam();
+      if (!team) return;
+      const roundId = document.getElementById('adminEditRoundSelect').value;
+      const selectedRound = getTeamRound(team, roundId);
+      if (!selectedRound) return;
+      document.getElementById('adminEditRoundName').value = selectedRound.name;
+      document.getElementById('adminEditRoundNote').value = selectedRound.note || '';
     }
 
     async function initializeFirebase() {
@@ -2473,6 +2502,7 @@
       const teamName = document.getElementById('adminEditTeamName').value.trim();
       const coachName = document.getElementById('adminEditCoachName').value.trim();
       const coachPin = document.getElementById('adminEditCoachPin').value.trim();
+      const selectedRoundId = document.getElementById('adminEditRoundSelect').value || updatedTeam.currentRoundId;
       const roundName = document.getElementById('adminEditRoundName').value.trim();
       const roundNote = document.getElementById('adminEditRoundNote').value.trim();
 
@@ -2485,11 +2515,15 @@
         updatedTeam.name = teamName;
         updatedTeam.coachName = coachName;
         updatedTeam.coachPin = coachPin;
-        const activeRound = updatedTeam.rounds.find(round => round.id === updatedTeam.currentRoundId) || updatedTeam.rounds[0];
-        activeRound.name = roundName;
-        activeRound.status = 'open';
-        activeRound.note = roundNote;
-        updatedTeam.round = activeRound;
+        const selectedRound = updatedTeam.rounds.find(round => round.id === selectedRoundId) || updatedTeam.rounds[0];
+        selectedRound.name = roundName;
+        selectedRound.status = 'open';
+        selectedRound.note = roundNote;
+        if (selectedRound.id === updatedTeam.currentRoundId) {
+          updatedTeam.round = selectedRound;
+        } else {
+          updatedTeam.round = getTeamRound(updatedTeam, updatedTeam.currentRoundId) || updatedTeam.rounds[0];
+        }
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
         await createActivity('team_updated_by_admin', `Admin updated ${updatedTeam.name}`, updatedTeam.id);
@@ -2533,6 +2567,42 @@
         showBanner(`Added round ${name} for ${updatedTeam.name}.`, 'success');
       } catch (error) {
         showBanner(`Unable to add round right now: ${error.message}`, 'error');
+      }
+    }
+
+    async function adminDeleteRound() {
+      const team = getAdminManagedTeam();
+      if (!team) {
+        showBanner('Please select a team first.', 'error');
+        return;
+      }
+      if (!team.rounds || team.rounds.length <= 1) {
+        showBanner('At least one round must remain for each team.', 'error');
+        return;
+      }
+      const selectedRoundId = document.getElementById('adminEditRoundSelect').value || team.currentRoundId;
+      const selectedRound = getTeamRound(team, selectedRoundId);
+      if (!selectedRound) {
+        showBanner('Please select a valid round to delete.', 'error');
+        return;
+      }
+      if (!window.confirm(`Delete ${selectedRound.name} from ${team.name}?`)) {
+        return;
+      }
+      try {
+        const updatedTeam = clone(team);
+        updatedTeam.rounds = updatedTeam.rounds.filter(round => round.id !== selectedRound.id);
+        if (updatedTeam.currentRoundId === selectedRound.id) {
+          updatedTeam.currentRoundId = updatedTeam.rounds[0].id;
+        }
+        updatedTeam.round = getTeamRound(updatedTeam, updatedTeam.currentRoundId) || updatedTeam.rounds[0];
+        updatedTeam.updatedAt = timestampNow();
+        await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
+        await createActivity('round_deleted_by_admin', `Admin deleted round ${selectedRound.name} for ${updatedTeam.name}`, updatedTeam.id);
+        await refreshFromCloud(false);
+        showBanner(`Deleted ${selectedRound.name} for ${updatedTeam.name}.`, 'success');
+      } catch (error) {
+        showBanner(`Unable to delete round right now: ${error.message}`, 'error');
       }
     }
 
