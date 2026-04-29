@@ -699,13 +699,6 @@
           <button class="btn-secondary" onclick="goHome()">Back to Home</button>
         </div>
 
-        <div class="steps">
-          <div class="step" id="parentStep1">1. Team</div>
-          <div class="step" id="parentStep2">2. Who are you?</div>
-          <div class="step" id="parentStep3">3. Vote</div>
-          <div class="step" id="parentStep4">4. Done</div>
-        </div>
-
         <div id="parentBanner" class="mini-banner info hidden"></div>
 
         <div id="parentStageTeam">
@@ -1341,7 +1334,10 @@
 
     function setParentStep(step) {
       [1, 2, 3, 4].forEach(index => {
-        document.getElementById(`parentStep${index}`).classList.toggle('active', index === step);
+        const stepNode = document.getElementById(`parentStep${index}`);
+        if (stepNode) {
+          stepNode.classList.toggle('active', index === step);
+        }
       });
     }
 
