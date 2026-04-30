@@ -869,7 +869,7 @@
                 </div>
                 <div>
                   <label for="roundNameInput">Round Name</label>
-                  <input id="roundNameInput" class="input" type="text" placeholder="Round 4 vs Tigers">
+                  <input id="roundNameInput" class="input" type="text" placeholder="Round name" readonly>
                 </div>
                 <div>
                   <label for="roundCloseNote">Opposition Team</label>
@@ -1180,6 +1180,13 @@
       return (Array.isArray(players) ? players.slice() : []).sort((a, b) => {
         return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
       });
+    }
+
+    function normalizeOppositionText(value) {
+      const text = String(value || '').trim();
+      if (!text) return '';
+      if (text.toLowerCase().includes('voting is locked until the coach unlocks the round')) return '';
+      return text;
     }
 
     function createStandardRound(index) {
@@ -1569,7 +1576,7 @@
         roundSelect.value = currentRound.id;
       }
       document.getElementById('adminEditRoundName').value = currentRound.name;
-      document.getElementById('adminEditRoundNote').value = currentRound.note || '';
+      document.getElementById('adminEditRoundNote').value = normalizeOppositionText(currentRound.note);
       document.getElementById('adminEditRoundVenue').value = currentRound.venue || '';
 
       if (!team.players.length) {
@@ -1595,7 +1602,7 @@
       const selectedRound = getTeamRound(team, roundId);
       if (!selectedRound) return;
       document.getElementById('adminEditRoundName').value = selectedRound.name;
-      document.getElementById('adminEditRoundNote').value = selectedRound.note || '';
+      document.getElementById('adminEditRoundNote').value = normalizeOppositionText(selectedRound.note);
       document.getElementById('adminEditRoundVenue').value = selectedRound.venue || '';
     }
 
@@ -1788,7 +1795,8 @@
       if (!selectedRound) return;
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
-      const oppositionText = selectedRound.note ? ` vs ${selectedRound.note}` : '';
+      const opposition = normalizeOppositionText(selectedRound.note);
+      const oppositionText = opposition ? ` vs ${opposition}` : '';
       const venueText = selectedRound.venue ? ` (${selectedRound.venue})` : '';
       document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}${oppositionText}${venueText}`;
     }
@@ -2178,7 +2186,7 @@
       });
       coachNonVoterRoundSelect.value = team.currentRoundId;
       document.getElementById('roundNameInput').value = team.round.name;
-      document.getElementById('roundCloseNote').value = team.round.note || '';
+      document.getElementById('roundCloseNote').value = normalizeOppositionText(team.round.note);
       document.getElementById('roundVenueInput').value = team.round.venue || '';
 
       renderCoachPlayers(team);
@@ -2332,27 +2340,15 @@
         showBanner('Please select a valid round.', 'error');
         return;
       }
-      const previousRoundName = round.name;
-      round.name = document.getElementById('roundNameInput').value.trim() || 'Current Round';
+      round.name = round.name || 'Current Round';
       round.status = 'open';
-      round.note = document.getElementById('roundCloseNote').value.trim();
+      round.note = normalizeOppositionText(document.getElementById('roundCloseNote').value);
       round.venue = document.getElementById('roundVenueInput').value.trim();
       updatedTeam.currentRoundId = round.id;
       updatedTeam.round = round;
-      if (round.name !== previousRoundName) {
-        updatedTeam.players = updatedTeam.players.map(player => ({
-          ...player,
-          roundVotes: 0
-        }));
-        updatedTeam.roundVoterIds = [];
-        updatedTeam.votesCast = 0;
-      }
       try {
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
-        if (round.name !== previousRoundName) {
-          await deleteTeamVoteTokens(updatedTeam.id);
-        }
         await createActivity('round_updated', `Updated round for ${updatedTeam.name} to ${round.name}`, updatedTeam.id);
         showBanner(`Round settings saved for ${updatedTeam.name}.`, 'success');
       } catch (error) {
@@ -2367,7 +2363,7 @@
       const selectedRound = getTeamRound(team, roundId);
       if (!selectedRound) return;
       document.getElementById('roundNameInput').value = selectedRound.name;
-      document.getElementById('roundCloseNote').value = selectedRound.note || '';
+      document.getElementById('roundCloseNote').value = normalizeOppositionText(selectedRound.note);
       document.getElementById('roundVenueInput').value = selectedRound.venue || '';
     }
 
@@ -2523,7 +2519,7 @@
       const coachPin = document.getElementById('adminEditCoachPin').value.trim();
       const selectedRoundId = document.getElementById('adminEditRoundSelect').value || updatedTeam.currentRoundId;
       const roundName = document.getElementById('adminEditRoundName').value.trim();
-      const roundNote = document.getElementById('adminEditRoundNote').value.trim();
+      const roundNote = normalizeOppositionText(document.getElementById('adminEditRoundNote').value);
       const roundVenue = document.getElementById('adminEditRoundVenue').value.trim();
 
       if (!teamName || !coachName || coachPin.length < 4 || !roundName) {
