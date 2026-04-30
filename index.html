@@ -875,6 +875,10 @@
                   <label for="roundCloseNote">Opposition Team</label>
                   <input id="roundCloseNote" class="input" type="text" placeholder="e.g. Tigers">
                 </div>
+                <div>
+                  <label for="roundVenueInput">Home / Away</label>
+                  <input id="roundVenueInput" class="input" type="text" placeholder="Home or Away">
+                </div>
               </div>
               <div class="button-row">
                 <button class="btn-primary" onclick="saveRoundSettings()">Save Round Settings</button>
@@ -1015,6 +1019,10 @@
             <div style="margin-top: 16px;">
               <label for="adminEditRoundNote">Opposition Team</label>
               <input id="adminEditRoundNote" class="input" type="text" placeholder="e.g. Tigers">
+            </div>
+            <div style="margin-top: 16px;">
+              <label for="adminEditRoundVenue">Home / Away</label>
+              <input id="adminEditRoundVenue" class="input" type="text" placeholder="Home or Away">
             </div>
             <div class="button-row">
               <button class="btn-primary" onclick="adminSaveTeamDetails()">Save Team Details</button>
@@ -1179,7 +1187,8 @@
         id: `round_${index}`,
         name: `Round ${index}`,
         status: 'open',
-        note: ''
+        note: '',
+        venue: ''
       };
     }
 
@@ -1188,7 +1197,8 @@
         id: round.id || generateId('round'),
         name: String(round.name || 'Untitled Round').trim(),
         status: 'open',
-        note: String(round.note || '')
+        note: String(round.note || ''),
+        venue: String(round.venue || '')
       })) : [];
       for (let index = 1; index <= STANDARD_ROUND_COUNT; index += 1) {
         const defaultName = `Round ${index}`;
@@ -1201,12 +1211,14 @@
         if (existing) {
           existing.status = fallbackRound.status === 'open' ? 'open' : existing.status;
           existing.note = fallbackRound.note || existing.note;
+          existing.venue = fallbackRound.venue || existing.venue;
         } else {
           list.push({
             id: fallbackRound.id || generateId('round'),
             name: fallbackRound.name,
             status: 'open',
-            note: fallbackRound.note || ''
+            note: fallbackRound.note || '',
+            venue: fallbackRound.venue || ''
           });
         }
       }
@@ -1529,7 +1541,7 @@
       const playerList = document.getElementById('adminManagePlayerList');
       const roundSelect = document.getElementById('adminEditRoundSelect');
       if (!team) {
-        ['adminEditTeamName', 'adminEditCoachName', 'adminEditCoachPin', 'adminEditRoundName', 'adminEditRoundNote'].forEach(id => {
+        ['adminEditTeamName', 'adminEditCoachName', 'adminEditCoachPin', 'adminEditRoundName', 'adminEditRoundNote', 'adminEditRoundVenue'].forEach(id => {
           const input = document.getElementById(id);
           if (input) input.value = '';
         });
@@ -1558,6 +1570,7 @@
       }
       document.getElementById('adminEditRoundName').value = currentRound.name;
       document.getElementById('adminEditRoundNote').value = currentRound.note || '';
+      document.getElementById('adminEditRoundVenue').value = currentRound.venue || '';
 
       if (!team.players.length) {
         playerList.innerHTML = '<div class="notice">No players added yet for this team.</div>';
@@ -1583,6 +1596,7 @@
       if (!selectedRound) return;
       document.getElementById('adminEditRoundName').value = selectedRound.name;
       document.getElementById('adminEditRoundNote').value = selectedRound.note || '';
+      document.getElementById('adminEditRoundVenue').value = selectedRound.venue || '';
     }
 
     async function initializeFirebase() {
@@ -1774,7 +1788,9 @@
       if (!selectedRound) return;
       document.getElementById('voteHeading').textContent = `Select Player's Player for ${team.name}`;
       document.getElementById('voteTeamTag').textContent = `Team: ${team.name}`;
-      document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}`;
+      const oppositionText = selectedRound.note ? ` vs ${selectedRound.note}` : '';
+      const venueText = selectedRound.venue ? ` (${selectedRound.venue})` : '';
+      document.getElementById('voteRoundTag').textContent = `Round: ${selectedRound.name}${oppositionText}${venueText}`;
     }
 
     function handleVoteRoundChange() {
@@ -2163,6 +2179,7 @@
       coachNonVoterRoundSelect.value = team.currentRoundId;
       document.getElementById('roundNameInput').value = team.round.name;
       document.getElementById('roundCloseNote').value = team.round.note || '';
+      document.getElementById('roundVenueInput').value = team.round.venue || '';
 
       renderCoachPlayers(team);
       renderCoachResults(team);
@@ -2319,6 +2336,7 @@
       round.name = document.getElementById('roundNameInput').value.trim() || 'Current Round';
       round.status = 'open';
       round.note = document.getElementById('roundCloseNote').value.trim();
+      round.venue = document.getElementById('roundVenueInput').value.trim();
       updatedTeam.currentRoundId = round.id;
       updatedTeam.round = round;
       if (round.name !== previousRoundName) {
@@ -2350,6 +2368,7 @@
       if (!selectedRound) return;
       document.getElementById('roundNameInput').value = selectedRound.name;
       document.getElementById('roundCloseNote').value = selectedRound.note || '';
+      document.getElementById('roundVenueInput').value = selectedRound.venue || '';
     }
 
     async function coachAddRound() {
@@ -2505,6 +2524,7 @@
       const selectedRoundId = document.getElementById('adminEditRoundSelect').value || updatedTeam.currentRoundId;
       const roundName = document.getElementById('adminEditRoundName').value.trim();
       const roundNote = document.getElementById('adminEditRoundNote').value.trim();
+      const roundVenue = document.getElementById('adminEditRoundVenue').value.trim();
 
       if (!teamName || !coachName || coachPin.length < 4 || !roundName) {
         showBanner('Please enter a team name, coach name, coach PIN, and round name.', 'error');
@@ -2519,6 +2539,7 @@
         selectedRound.name = roundName;
         selectedRound.status = 'open';
         selectedRound.note = roundNote;
+        selectedRound.venue = roundVenue;
         if (selectedRound.id === updatedTeam.currentRoundId) {
           updatedTeam.round = selectedRound;
         } else {
@@ -2551,12 +2572,13 @@
       }
       try {
         const updatedTeam = clone(team);
-        const newRound = {
-          id: generateId('round'),
-          name,
-          status: 'open',
-          note: ''
-        };
+          const newRound = {
+            id: generateId('round'),
+            name,
+            status: 'open',
+            note: '',
+            venue: ''
+          };
         updatedTeam.rounds.push(newRound);
         updatedTeam.currentRoundId = newRound.id;
         updatedTeam.round = newRound;
@@ -2620,6 +2642,12 @@
         }));
         updatedTeam.roundVoterIds = [];
         updatedTeam.votesCast = 0;
+        const firstStandardRound = (updatedTeam.rounds || []).find(round => String(round.name || '').toLowerCase() === 'round 1')
+          || (updatedTeam.rounds && updatedTeam.rounds[0]);
+        if (firstStandardRound) {
+          updatedTeam.currentRoundId = firstStandardRound.id;
+          updatedTeam.round = firstStandardRound;
+        }
         updatedTeam.updatedAt = timestampNow();
         await db.collection(TEAM_COLLECTION).doc(updatedTeam.id).set(updatedTeam, { merge: true });
         await deleteTeamVoteTokens(updatedTeam.id);
