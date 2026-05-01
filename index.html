@@ -1810,13 +1810,12 @@
     }
 
     async function suggestRoundAfterLastVote(teamId, voterPlayerId, fallbackRoundId) {
+      void voterPlayerId;
       const team = getTeam(teamId);
       if (!team || !team.rounds || !team.rounds.length) return fallbackRoundId;
       if (!fallbackRoundId) return team.currentRoundId || team.rounds[0].id;
-      const index = team.rounds.findIndex(round => round.id === fallbackRoundId);
-      if (index < 0) return team.currentRoundId || team.rounds[0].id;
-      const nextRound = team.rounds[index + 1];
-      return nextRound ? nextRound.id : fallbackRoundId;
+      if (team.rounds.some(round => round.id === fallbackRoundId)) return fallbackRoundId;
+      return team.currentRoundId || team.rounds[0].id;
     }
 
     function backToTeamSelection() {
